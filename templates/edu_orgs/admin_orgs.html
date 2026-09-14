@@ -1,0 +1,138 @@
+{% import "edu_orgs/_shared.html" as shared %}
+<!DOCTYPE html>
+<html lang="uz"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edu Tashkilotlari — Admin</title>
+</head><body>
+{% include "edu_orgs/_shared.html" %}
+<div class="container" data-autorefresh="15">
+  <div class="top-nav">
+    <div class="brand">SHATS CYBER <span>EDU ADMIN</span></div>
+    <form method="POST" action="{{ url_for('edu_orgs.edu_admin_logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn secondary">Chiqish</button></form>
+  </div>
+
+  {{ shared.flashes() }}
+
+  <div class="card">
+    <h1>Tizim holati</h1>
+    <p style="color:#a1a1c0;font-size:13px;">Bu bo'lim server loglarini qidirmasdan, muhim xizmatlar sozlanganmi
+      yo'qmi — bir qarashda ko'rish uchun.</p>
+    <div class="grid-2">
+      <div class="card" style="background:#1a1a2a;">
+        <p style="margin:0;">📧 Email (SMTP)
+          {% if system_status.smtp %}<span class="badge">Sozlangan</span>{% else %}<span class="badge locked">Sozlanmagan</span>{% endif %}
+        </p>
+        {% if not system_status.smtp %}
+          <p style="color:#a1a1c0;font-size:12px;margin:6px 0 0 0;">
+            .env faylida SMTP_HOST, SMTP_USER, SMTP_PASSWORD to'ldirilmagan — tasdiqlash kodlari
+            emailga bormaydi (server konsoliga chiqadi). Gmail uchun: SMTP_HOST=smtp.gmail.com,
+            parol o'rniga "App Password" kerak.
+          </p>
+        {% endif %}
+      </div>
+      <div class="card" style="background:#1a1a2a;">
+        <p style="margin:0;">🤖 AI (Gemini/Anthropic)
+          {% if system_status.ai_any %}<span class="badge">Sozlangan</span>{% else %}<span class="badge locked">Sozlanmagan (demo rejim)</span>{% endif %}
+        </p>
+        <p style="color:#a1a1c0;font-size:12px;margin:6px 0 0 0;">
+          Gemini: {{ 'bor' if system_status.gemini else "yo'q" }} &middot;
+          Anthropic (zaxira): {{ 'bor' if system_status.anthropic else "yo'q" }}
+          {% if not system_status.ai_any %}
+            <br>Hech qaysi kalit sozlanmagan — AI yordamchi hozircha faqat demo (tayyor namuna) javob beradi.
+          {% endif %}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h1>Barcha Edu tashkilotlari</h1>
+    <p>Edu G'azna jamg'armasi balansi: <b>{{ fund_balance }} CODE</b></p>
+    <div class="table-wrap">
+<table>
+      <tr><th>ID</th><th>Nomi</th><th>Turi</th><th>@username</th><th>Ulanish kodi</th><th>Tarif</th><th>Holat</th>
+          <th>O'qituvchi</th><th>O'quvchi</th><th>Coin</th><th>Chiqarish</th></tr>
+      {% for o in orgs %}
+      <tr>
+        <td><b>{{ o['org_number'] }}</b></td>
+        <td>{{ o['name'] }}</td><td>{{ o['org_type'] }}</td><td>@{{ o['username'] }}</td>
+        <td>{{ o['connect_code'] or '—' }}</td>
+        <td>{{ o['tarif_code'] or '-' }}</td>
+        <td>{% if o['is_active'] %}<span class="badge">Faol</span>{% else %}<span class="badge warn">Faol emas</span>{% endif %}</td>
+        <td>{{ o['teacher_count'] }}</td><td>{{ o['student_count'] }}</td><td>{{ o['coin_balance'] }}</td>
+        <td>
+          <form method="POST" action="{{ url_for('edu_orgs.admin_issue_coins', org_id=o['id']) }}" style="display:flex;gap:6px;"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="number" name="amount" placeholder="10" style="width:70px;margin:0;">
+            <button type="submit" class="btn secondary" style="padding:6px 10px;">Chiqarish</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+</div>
+  </div>
+
+  <div class="card">
+    <h1>Tarif narxlari (CODE)</h1>
+    <p style="color:#a1a1c0;">Bu yerda o'zgartirilgan narx darhol kuchga kiradi va tashkilotlar
+      "Tarif" sahifasida sotib olganda yangi narx bo'yicha coin yechiladi. Allaqachon
+      faollashtirilgan (sotib olingan) tariflarga ta'sir qilmaydi.</p>
+    <div class="table-wrap">
+<table>
+      <tr><th>Tarif</th><th>Turi</th><th>Joriy narx (CODE / oy)</th><th>Yangilash</th></tr>
+      {% for t in tariffs %}
+      <tr>
+        <td>{{ t['display_name'] }}</td>
+        <td>{{ t['org_type'] }}</td>
+        <td><b>{{ t['price_coins'] }} CODE</b></td>
+        <td>
+          <form method="POST" action="{{ url_for('edu_orgs.admin_update_tariff_price', tarif_code=t['code']) }}" style="display:flex;gap:6px;">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+            <input type="number" name="price_coins" value="{{ t['price_coins'] }}" min="0" style="width:90px;margin:0;">
+            <button type="submit" class="btn secondary" style="padding:6px 10px;">Saqlash</button>
+          </form>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+</div>
+  </div>
+
+  <div class="card">
+    <h1>Faollashtirish kalitlari (9 xonali)</h1>
+    <p style="color:#a1a1c0;">Coin talab qilmasdan tarifni ochish uchun bir martalik kalit
+      chiqaring. Tashkilot bu kalitni "Tarif" sahifasida kiritib, tarifni bepul (Edu G'azna
+      hisobidan) faollashtiradi.</p>
+
+    <form method="POST" action="{{ url_for('edu_orgs.admin_generate_key') }}" style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;max-width:520px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <div>
+        <label>Tarif</label>
+        <select name="tarif_code" required>
+          {% for t in tariffs %}<option value="{{ t['code'] }}">{{ t['display_name'] }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label>Necha oyga</label>
+        <input type="number" name="months" value="1" min="1" style="width:70px;">
+      </div>
+      <button type="submit" class="btn">Kalit yaratish</button>
+    </form>
+
+    <div class="table-wrap">
+<table style="margin-top:16px;">
+      <tr><th>Kalit</th><th>Tarif</th><th>Oy</th><th>Holat</th><th>Kim ishlatdi</th></tr>
+      {% for k in keys %}
+      <tr>
+        <td><code>{{ k['key_code'] }}</code></td>
+        <td>{{ k['tarif_code'] }}</td>
+        <td>{{ k['months'] }}</td>
+        <td>{% if k['is_used'] %}<span class="badge warn">Ishlatilgan</span>{% else %}<span class="badge">Bo'sh</span>{% endif %}</td>
+        <td>{{ k['used_by_org_name'] or '—' }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+</div>
+  </div>
+</div>
+</body></html>

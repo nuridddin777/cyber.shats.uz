@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+{% block title %}{{ room.name }} — Virtual Olam{% endblock %}
+{% block extra_head %}
+<style>
+.vw-room-wrap{position:relative;width:100%;height:calc(100vh - 60px);overflow:hidden;background:#050a18}
+#vw-canvas{width:100%;height:100%;display:block}
+.vw-hud{position:absolute;top:0;left:0;right:0;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;background:linear-gradient(180deg,rgba(5,10,24,0.85),transparent);z-index:10;pointer-events:none}
+.vw-hud>*{pointer-events:auto}
+.vw-room-name{font-size:16px;font-weight:700;color:#e8f4ff;display:flex;align-items:center;gap:8px}
+.vw-users-badge{font-size:12px;background:rgba(0,200,83,0.15);color:#00c853;border:1px solid rgba(0,200,83,0.25);border-radius:6px;padding:2px 8px}
+.vw-chat-panel{position:absolute;bottom:0;left:0;width:360px;max-height:50%;display:flex;flex-direction:column;background:rgba(5,10,24,0.85);border-top:1px solid rgba(30,144,255,0.15);border-right:1px solid rgba(30,144,255,0.1);border-radius:0 12px 0 0;z-index:10}
+.vw-chat-messages{flex:1;overflow-y:auto;padding:10px 14px;max-height:260px}
+.vw-chat-msg{margin-bottom:8px;font-size:13px}
+.vw-chat-msg .name{color:#7ec8f8;font-weight:600;font-size:12px}
+.vw-chat-msg .text{color:#c8d8e8;margin-top:2px}
+.vw-chat-input{display:flex;gap:8px;padding:8px 12px;border-top:1px solid rgba(30,144,255,0.1)}
+.vw-chat-input input{flex:1;background:rgba(10,22,45,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:6px;color:#e8f4ff;padding:8px 12px;font-size:13px}
+.vw-chat-input input:focus{outline:none;border-color:rgba(30,144,255,0.5)}
+.vw-chat-input button{background:rgba(30,144,255,0.2);border:1px solid rgba(30,144,255,0.3);border-radius:6px;color:#7ec8f8;padding:8px 14px;cursor:pointer;font-size:13px}
+.vw-minimap{position:absolute;bottom:16px;right:16px;width:160px;height:160px;background:rgba(5,10,24,0.8);border:1px solid rgba(30,144,255,0.2);border-radius:12px;z-index:10}
+.vw-users-panel{position:absolute;top:50px;right:16px;width:200px;background:rgba(5,10,24,0.85);border:1px solid rgba(30,144,255,0.15);border-radius:12px;z-index:10;padding:10px;max-height:300px;overflow-y:auto}
+.vw-user-item{display:flex;align-items:center;gap:8px;padding:6px;border-radius:6px;font-size:12px;color:#c8d8e8;cursor:pointer}
+.vw-user-item:hover{background:rgba(30,144,255,0.1)}
+.vw-user-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.vw-controls{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:10}
+.vw-ctrl-btn{width:44px;height:44px;border-radius:8px;background:rgba(10,22,45,0.8);border:1px solid rgba(30,144,255,0.2);color:#7ec8f8;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.vw-ctrl-btn:hover{background:rgba(30,144,255,0.15);border-color:rgba(30,144,255,0.4)}
+@media(max-width:768px){.vw-chat-panel{width:100%;border-radius:0}.vw-users-panel{display:none}.vw-minimap{display:none}}
+</style>
+{% endblock %}
+{% block content %}
+<div class="vw-room-wrap">
+  <!-- 3D Canvas -->
+  <canvas id="vw-canvas"></canvas>
+
+  <!-- HUD -->
+  <div class="vw-hud">
+    <div>
+      <div class="vw-room-name">
+        <a href="{{ url_for('virtual.world_home') }}" style="color:#5a7a9a;text-decoration:none;font-size:20px;">←</a>
+        {{ room.name }}
+        <span class="vw-users-badge" id="userCount">{{ room_users|length + 1 }} onlayn</span>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;">
+      <div style="font-size:13px;color:#c8d8e8;">
+        🪙 <span id="coinDisplay">{{ avatar.coins }}</span> &nbsp;
+        ⭐ Lv.{{ avatar.level }}
+      </div>
+      <a href="{{ url_for('virtual.avatar_page') }}" class="cs-btn cs-btn-outline" style="font-size:12px;padding:6px 10px;">🎭</a>
+    </div>
+  </div>
+
+  <!-- Users Panel -->
+  <div class="vw-users-panel">
+    <div style="font-size:12px;color:#7ec8f8;font-weight:600;margin-bottom:8px;">👥 Foydalanuvchilar</div>
+    <div id="usersList">
+      <div class="vw-user-item">
+        <div class="vw-user-dot" style="background:{{ avatar.outfit_color }};"></div>
+        <span style="color:#ffc107;font-weight:600;">{{ avatar.nickname }} (siz)</span>
+      </div>
+      {% for u in room_users %}
+      <div class="vw-user-item" onclick="focusUser({{ u.user_id }})">
+        <div class="vw-user-dot" style="background:{{ u.outfit_color or '#1e90ff' }};"></div>
+        <span>{{ u.nickname or u.ism }}</span>
+        <span style="color:#5a7a9a;margin-left:auto;">Lv.{{ u.level }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <!-- Chat -->
+  <div class="vw-chat-panel">
+    <div class="vw-chat-messages" id="chatMessages">
+      {% for m in messages %}
+      <div class="vw-chat-msg">
+        <span class="name" style="color:{{ m.outfit_color or '#7ec8f8' }};">{{ m.nickname or m.ism }}:</span>
+        <span class="text">{{ m.message }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="vw-chat-input">
+      <input type="text" id="chatInput" placeholder="Xabar yozing..." maxlength="500" autocomplete="off"
+        onkeydown="if(event.key==='Enter')sendChat()">
+      <button onclick="sendChat()">Yuborish</button>
+    </div>
+  </div>
+
+  <!-- Movement Controls (mobile) -->
+  <div class="vw-controls">
+    <button class="vw-ctrl-btn" onmousedown="moveStart('left')" onmouseup="moveStop()" ontouchstart="moveStart('left')" ontouchend="moveStop()">◀</button>
+    <button class="vw-ctrl-btn" onmousedown="moveStart('forward')" onmouseup="moveStop()" ontouchstart="moveStart('forward')" ontouchend="moveStop()">▲</button>
+    <button class="vw-ctrl-btn" onmousedown="moveStart('backward')" onmouseup="moveStop()" ontouchstart="moveStart('backward')" ontouchend="moveStop()">▼</button>
+    <button class="vw-ctrl-btn" onmousedown="moveStart('right')" onmouseup="moveStop()" ontouchstart="moveStart('right')" ontouchend="moveStop()">▶</button>
+  </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+const ROOM_ID = {{ room.id }};
+const ROOM_BG = '{{ room.bg_color }}';
+const ROOM_FLOOR = '{{ room.floor_color }}';
+const MY_COLOR = '{{ avatar.outfit_color or "#1E90FF" }}';
+const MY_NICKNAME = '{{ avatar.nickname }}';
+let lastMsgId = {{ messages[-1].id if messages else 0 }};
+
+// ==================== THREE.JS 3D SCENE ====================
+const canvas = document.getElementById('vw-canvas');
+const scene = new THREE.Scene();
+scene.background = new THREE.Color(ROOM_BG);
+scene.fog = new THREE.Fog(ROOM_BG, 30, 80);
+
+const camera = new THREE.PerspectiveCamera(60, canvas.clientWidth / canvas.clientHeight, 0.1, 200);
+camera.position.set(0, 8, 15);
+camera.lookAt(0, 0, 0);
+
+const renderer = new THREE.WebGLRenderer({canvas, antialias: true});
+renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.shadowMap.enabled = true;
+
+// Lighting
+const ambient = new THREE.AmbientLight(0x334466, 0.6);
+scene.add(ambient);
+const dirLight = new THREE.DirectionalLight(0x8888ff, 0.8);
+dirLight.position.set(10, 20, 10);
+dirLight.castShadow = true;
+scene.add(dirLight);
+const pointLight = new THREE.PointLight(0x1e90ff, 1, 30);
+pointLight.position.set(0, 6, 0);
+scene.add(pointLight);
+
+// Floor (grid)
+const floorGeo = new THREE.PlaneGeometry(60, 60);
+const floorMat = new THREE.MeshStandardMaterial({color: ROOM_FLOOR, roughness: 0.9});
+const floor = new THREE.Mesh(floorGeo, floorMat);
+floor.rotation.x = -Math.PI / 2;
+floor.receiveShadow = true;
+scene.add(floor);
+
+// Grid helper
+const grid = new THREE.GridHelper(60, 30, 0x1e90ff, 0x0a1628);
+grid.position.y = 0.01;
+grid.material.opacity = 0.15;
+grid.material.transparent = true;
+scene.add(grid);
+
+// Dekorativ bloklari (xona uchun interaktiv obyektlar)
+function createBlock(x, z, color, h, label) {
+    const geo = new THREE.BoxGeometry(2, h, 2);
+    const mat = new THREE.MeshStandardMaterial({color, emissive: color, emissiveIntensity: 0.15});
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(x, h/2, z);
+    mesh.castShadow = true;
+    mesh.userData.label = label;
+    scene.add(mesh);
+    return mesh;
+}
+
+// Xona dekorlari
+createBlock(-8, -8, 0x1e90ff, 3, 'Terminal');
+createBlock(8, -8, 0x00c853, 2.5, 'Kitob javoni');
+createBlock(-8, 8, 0xff6600, 4, 'Server rack');
+createBlock(8, 8, 0xff00ff, 2, 'Hologramma');
+createBlock(0, -12, 0xffd700, 1.5, 'Info stend');
+
+// Dekorativ particles
+const pGeo = new THREE.BufferGeometry();
+const pCount = 200;
+const pPositions = new Float32Array(pCount * 3);
+for (let i = 0; i < pCount * 3; i += 3) {
+    pPositions[i] = (Math.random() - 0.5) * 50;
+    pPositions[i+1] = Math.random() * 15 + 1;
+    pPositions[i+2] = (Math.random() - 0.5) * 50;
+}
+pGeo.setAttribute('position', new THREE.BufferAttribute(pPositions, 3));
+const pMat = new THREE.PointsMaterial({color: 0x1e90ff, size: 0.15, transparent: true, opacity: 0.5});
+const particles = new THREE.Points(pGeo, pMat);
+scene.add(particles);
+
+// ==================== PLAYER AVATAR ====================
+const playerGeo = new THREE.CylinderGeometry(0.4, 0.4, 1.6, 8);
+const playerMat = new THREE.MeshStandardMaterial({color: MY_COLOR, emissive: MY_COLOR, emissiveIntensity: 0.3});
+const player = new THREE.Mesh(playerGeo, playerMat);
+player.position.set(0, 0.8, 0);
+player.castShadow = true;
+scene.add(player);
+
+// Player head
+const headGeo = new THREE.SphereGeometry(0.35, 8, 8);
+const headMat = new THREE.MeshStandardMaterial({color: 0xFFB74D});
+const head = new THREE.Mesh(headGeo, headMat);
+head.position.y = 1.15;
+player.add(head);
+
+// Nickname label (sprite)
+function makeLabel(text, color) {
+    const c2 = document.createElement('canvas');
+    c2.width = 256; c2.height = 64;
+    const ctx = c2.getContext('2d');
+    ctx.font = 'bold 24px sans-serif';
+    ctx.fillStyle = color || '#e8f4ff';
+    ctx.textAlign = 'center';
+    ctx.fillText(text, 128, 40);
+    const tex = new THREE.CanvasTexture(c2);
+    const spriteMat = new THREE.SpriteMaterial({map: tex, transparent: true});
+    const sprite = new THREE.Sprite(spriteMat);
+    sprite.scale.set(2, 0.5, 1);
+    return sprite;
+}
+
+const myLabel = makeLabel(MY_NICKNAME, '#ffc107');
+myLabel.position.y = 1.8;
+player.add(myLabel);
+
+// ==================== OTHER PLAYERS ====================
+const otherPlayers = {};
+
+function addOtherPlayer(uid, data) {
+    if (otherPlayers[uid]) return;
+    const geo = new THREE.CylinderGeometry(0.35, 0.35, 1.4, 8);
+    const color = data.outfit_color || '#1e90ff';
+    const mat = new THREE.MeshStandardMaterial({color, emissive: color, emissiveIntensity: 0.2});
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.position.set(data.position_x || Math.random()*10-5, 0.7, data.position_z || Math.random()*10-5);
+    mesh.castShadow = true;
+    const h = new THREE.Mesh(new THREE.SphereGeometry(0.3, 8, 8), new THREE.MeshStandardMaterial({color: data.skin_color || 0xFFB74D}));
+    h.position.y = 1;
+    mesh.add(h);
+    const label = makeLabel(data.nickname || data.ism || 'User', color);
+    label.position.y = 1.6;
+    mesh.add(label);
+    scene.add(mesh);
+    otherPlayers[uid] = mesh;
+}
+
+// ==================== CONTROLS ====================
+let moveDir = null;
+let moveInterval = null;
+const speed = 0.15;
+const keys = {};
+
+function moveStart(dir) { moveDir = dir; }
+function moveStop() { moveDir = null; }
+
+document.addEventListener('keydown', e => { keys[e.key] = true; });
+document.addEventListener('keyup', e => { keys[e.key] = false; });
+
+function updateMovement() {
+    let dx = 0, dz = 0;
+    if (keys['w'] || keys['ArrowUp'] || moveDir === 'forward') dz -= speed;
+    if (keys['s'] || keys['ArrowDown'] || moveDir === 'backward') dz += speed;
+    if (keys['a'] || keys['ArrowLeft'] || moveDir === 'left') dx -= speed;
+    if (keys['d'] || keys['ArrowRight'] || moveDir === 'right') dx += speed;
+    if (dx || dz) {
+        player.position.x = Math.max(-28, Math.min(28, player.position.x + dx));
+        player.position.z = Math.max(-28, Math.min(28, player.position.z + dz));
+        camera.position.x = player.position.x;
+        camera.position.z = player.position.z + 15;
+        camera.lookAt(player.position.x, 2, player.position.z);
+    }
+}
+
+// ==================== ANIMATE ====================
+function animate() {
+    requestAnimationFrame(animate);
+    updateMovement();
+    // Rotate particles
+    particles.rotation.y += 0.0003;
+    // Pulse point light
+    pointLight.intensity = 0.8 + Math.sin(Date.now() * 0.002) * 0.3;
+    renderer.render(scene, camera);
+}
+animate();
+
+// Resize
+window.addEventListener('resize', () => {
+    camera.aspect = canvas.clientWidth / canvas.clientHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(canvas.clientWidth, canvas.clientHeight);
+});
+
+// ==================== CHAT ====================
+function sendChat() {
+    const inp = document.getElementById('chatInput');
+    const msg = inp.value.trim();
+    if (!msg) return;
+    inp.value = '';
+    fetch('/virtual/api/chat/send', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `room_id=${ROOM_ID}&message=${encodeURIComponent(msg)}`
+    });
+}
+
+function pollChat() {
+    fetch(`/virtual/api/chat/messages/${ROOM_ID}?after=${lastMsgId}`)
+    .then(r => r.json())
+    .then(d => {
+        if (d.ok && d.messages.length) {
+            const container = document.getElementById('chatMessages');
+            d.messages.forEach(m => {
+                lastMsgId = Math.max(lastMsgId, m.id);
+                const div = document.createElement('div');
+                div.className = 'vw-chat-msg';
+                div.innerHTML = `<span class="name" style="color:${m.outfit_color||'#7ec8f8'}">${m.nickname||m.ism}:</span> <span class="text">${m.message}</span>`;
+                container.appendChild(div);
+            });
+            container.scrollTop = container.scrollHeight;
+        }
+    }).catch(()=>{});
+}
+
+// Poll users
+function pollUsers() {
+    fetch(`/virtual/api/room/${ROOM_ID}/users`)
+    .then(r => r.json())
+    .then(d => {
+        if (!d.ok) return;
+        const seen = new Set();
+        d.users.forEach(u => {
+            seen.add(u.user_id);
+            if (u.user_id == {{ user.id }}) return;
+            if (!otherPlayers[u.user_id]) {
+                addOtherPlayer(u.user_id, u);
+            } else {
+                // Smooth move
+                const m = otherPlayers[u.user_id];
+                m.position.x += (u.position_x - m.position.x) * 0.1;
+                m.position.z += (u.position_z - m.position.z) * 0.1;
+            }
+        });
+        document.getElementById('userCount').textContent = d.users.length + ' onlayn';
+    }).catch(()=>{});
+}
+
+// Send position
+function sendPosition() {
+    fetch('/virtual/api/avatar/move', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `x=${player.position.x.toFixed(2)}&y=0&z=${player.position.z.toFixed(2)}`
+    }).catch(()=>{});
+}
+
+setInterval(pollChat, 3000);
+setInterval(pollUsers, 4000);
+setInterval(sendPosition, 5000);
+
+// Scroll chat to bottom
+document.getElementById('chatMessages').scrollTop = 99999;
+
+function focusUser(uid) {
+    const m = otherPlayers[uid];
+    if (m) {
+        camera.position.set(m.position.x, 8, m.position.z + 10);
+        camera.lookAt(m.position);
+    }
+}
+</script>
+{% endblock %}

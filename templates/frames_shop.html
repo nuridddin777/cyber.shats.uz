@@ -1,0 +1,99 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Profil ramkalari — CYBER SHATS{% endblock %}
+{% block app_content %}
+<h1 style="font-size:19px; margin-bottom:8px;">🖼️ Profil ramkalari</h1>
+<p class="muted" style="font-size:12.5px; margin-bottom:20px;">
+    Profilingizdagi rasm atrofiga chiroyli ramka qo'ying — CODE evaziga sotib oling yoki tarifingizga mos eksklyuziv ramkani faollashtiring.
+</p>
+
+<div style="display:flex; gap:14px; margin-bottom:24px; flex-wrap:wrap;">
+    <div class="cs-chip solid">⚡ {{ "{:,}".format(balance|int) }} CODE</div>
+    {% if active_frame %}
+    <form method="post" action="{{ url_for('shop.frames_set_active') }}">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="frame_key" value="">
+        <button type="submit" class="cs-btn cs-btn-sm">Ramkasiz qoldirish</button>
+    </form>
+    {% endif %}
+</div>
+
+{% if tier_frames %}
+<h3 style="font-size:13px; margin-bottom:14px;">👑 Tarif-eksklyuziv ramkalar</h3>
+<div class="frame-grid" style="margin-bottom:28px;">
+    {% for f in tier_frames %}
+    <div class="cs-card" style="padding:20px; text-align:center; {{ 'opacity:.4;' if f.tier_required != my_plan }}">
+        <div class="frame-preview {{ f.animation_class or '' }}" style="{{ f.css_style }}">
+            <div class="frame-preview-avatar">✦</div>
+        </div>
+        <div style="font-weight:700; font-size:12.5px; margin:12px 0 6px;">{{ f.label }}</div>
+        {% if f.tier_required == my_plan %}
+        {% if active_frame == f.frame_key %}
+        <span class="cs-chip solid" style="font-size:10px;">{{ icon('check',10) }} Faol</span>
+        {% else %}
+        <form method="post" action="{{ url_for('shop.frames_set_active') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="frame_key" value="{{ f.frame_key }}">
+            <button type="submit" class="cs-btn cs-btn-primary" style="font-size:11px; width:100%;">Faollashtirish</button>
+        </form>
+        {% endif %}
+        {% else %}
+        <span class="muted" style="font-size:10px;">{{ f.tier_required|upper }} tarifida ochiladi</span>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<h3 style="font-size:13px; margin-bottom:14px;">🛒 Sotib olinadigan ramkalar</h3>
+<div class="frame-grid">
+    {% for f in purchasable %}
+    <div class="cs-card" style="padding:20px; text-align:center;">
+        <div class="frame-preview {{ f.animation_class or '' }}" style="{{ f.css_style }}">
+            <div class="frame-preview-avatar">✦</div>
+        </div>
+        <div style="font-weight:700; font-size:12.5px; margin:12px 0 6px;">{{ f.label }}</div>
+        {% if f.frame_key in owned_keys %}
+            {% if active_frame == f.frame_key %}
+            <span class="cs-chip solid" style="font-size:10px;">{{ icon('check',10) }} Faol</span>
+            {% else %}
+            <form method="post" action="{{ url_for('shop.frames_set_active') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <input type="hidden" name="frame_key" value="{{ f.frame_key }}">
+                <button type="submit" class="cs-btn cs-btn-primary" style="font-size:11px; width:100%;">Faollashtirish</button>
+            </form>
+            {% endif %}
+        {% else %}
+        <form method="post" action="{{ url_for('shop.frames_buy') }}">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <input type="hidden" name="frame_key" value="{{ f.frame_key }}">
+            <button type="submit" class="cs-btn cs-btn-primary" style="font-size:11px; width:100%;">⚡ {{ f.price_code }} CODE</button>
+        </form>
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<style>
+.frame-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(140px,1fr)); gap:16px; }
+.frame-preview{
+    width:76px; height:76px; border-radius:50%; margin:0 auto;
+    display:flex; align-items:center; justify-content:center; box-sizing:border-box;
+}
+.frame-preview-avatar{
+    width:100%; height:100%; border-radius:50%; background:var(--cs-bg-input);
+    display:flex; align-items:center; justify-content:center; font-size:22px; color:var(--cs-text-muted);
+}
+@keyframes frame-pulse-kf { 0%,100%{ filter:brightness(1); } 50%{ filter:brightness(1.35); } }
+.frame-pulse{ animation:frame-pulse-kf 1.6s ease-in-out infinite; }
+@keyframes frame-spin-kf { from{ transform:rotate(0deg);} to{ transform:rotate(360deg);} }
+.frame-spin-slow{ animation:frame-spin-kf 6s linear infinite; }
+@keyframes frame-shimmer-kf { 0%,100%{ box-shadow:0 0 10px rgba(191,149,63,.4);} 50%{ box-shadow:0 0 22px rgba(191,149,63,.9);} }
+.frame-shimmer{ animation:frame-shimmer-kf 1.8s ease-in-out infinite; }
+@keyframes frame-glitch-kf { 0%,100%{ transform:translateX(0);} 25%{ transform:translateX(-1.5px);} 75%{ transform:translateX(1.5px);} }
+.frame-glitch{ animation:frame-glitch-kf .3s steps(2) infinite; }
+@keyframes frame-rainbow-kf { 0%{ background-position:0% 50%;} 100%{ background-position:200% 50%;} }
+.frame-rainbow-flow{ animation:frame-rainbow-kf 3s linear infinite; }
+@media (prefers-reduced-motion: reduce){ .frame-pulse,.frame-spin-slow,.frame-shimmer,.frame-glitch,.frame-rainbow-flow{ animation:none !important; } }
+</style>
+{% endblock %}

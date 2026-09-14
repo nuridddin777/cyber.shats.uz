@@ -1,0 +1,62 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}{{ topic.title }} — EDU{% endblock %}
+{% block app_content %}
+<div style="margin-bottom:16px;">
+  <a href="{{ url_for('edu.student_dashboard') }}" style="color:#5a7a9a;font-size:13px;">← Mavzularga qaytish</a>
+</div>
+<div style="background:rgba(10,22,45,0.8);border:1px solid rgba(30,144,255,0.15);border-radius:14px;padding:24px;margin-bottom:20px;">
+  <h2 style="color:#e8f4ff;font-size:20px;margin:0 0 12px;">{{ topic.title }}</h2>
+  {% if topic.video_url %}
+  <div style="margin-bottom:16px;"><iframe width="100%" height="300" src="{{ topic.video_url }}" frameborder="0" allowfullscreen style="border-radius:8px;"></iframe></div>
+  {% endif %}
+  <div style="color:#c8d8e8;font-size:14px;line-height:1.8;white-space:pre-wrap;word-break:break-word;">{{ topic.content }}</div>
+</div>
+
+{% if labs %}
+<h3 style="color:#e8f4ff;font-size:16px;margin-bottom:12px;">🔬 Lab ishlari</h3>
+{% for lab in labs %}
+<div style="background:rgba(10,22,45,0.8);border:1px solid rgba(30,144,255,0.1);border-radius:12px;padding:18px;margin-bottom:12px;">
+  <div style="font-size:15px;font-weight:700;color:#e8f4ff;margin-bottom:6px;">{{ lab.title }}</div>
+  <div style="font-size:13px;color:#5a7a9a;margin-bottom:12px;">{{ lab.description }}</div>
+  {% if lab.id in sub_map %}
+    {% set s = sub_map[lab.id] %}
+    <div style="background:rgba({% if s.status=='graded' %}0,200,83{% else %}255,200,0{% endif %},0.1);border:1px solid rgba({% if s.status=='graded' %}0,200,83{% else %}255,200,0{% endif %},0.2);border-radius:8px;padding:10px 14px;font-size:13px;">
+      {% if s.status == 'graded' %}
+        <span style="color:#00c853;">✓ Baholandi: {{ s.score }}/100</span>
+        {% if s.feedback %}<div style="color:#8899aa;font-size:12px;margin-top:4px;">{{ s.feedback }}</div>{% endif %}
+      {% else %}
+        <span style="color:#ffc107;">⏳ Tekshirilmoqda...</span>
+      {% endif %}
+    </div>
+  {% else %}
+    <div style="display:flex;gap:8px;">
+      <input type="text" id="lab-{{ lab.id }}" placeholder="Javobingizni yozing..." style="flex:1;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px 14px;font-size:13px;">
+      <button class="cs-btn" style="font-size:13px;" onclick="submitLab({{ lab.id }})">Topshirish</button>
+    </div>
+  {% endif %}
+</div>
+{% endfor %}
+{% endif %}
+
+{% if not progress or not progress.completed %}
+<button class="cs-btn" style="width:100%;margin-top:16px;padding:14px;font-size:15px;" onclick="completeTopic({{ topic.id }})">
+  ✅ Mavzuni tugatish (+{{ topic.coin_reward }}🪙 +{{ topic.xp_reward }}XP)
+</button>
+{% else %}
+<div style="text-align:center;padding:16px;color:#00c853;font-size:14px;font-weight:600;">✅ Bu mavzu tugatilgan</div>
+{% endif %}
+
+<script>
+function completeTopic(id) {
+  fetch(`/edu/student/topic/${id}/complete`, {method:'POST'})
+  .then(r=>r.json()).then(d=>{alert(d.msg);if(d.ok)location.reload();});
+}
+function submitLab(id) {
+  const answer = document.getElementById('lab-'+id).value.trim();
+  if(!answer) return alert('Javob yozing!');
+  fetch(`/edu/student/lab/${id}/submit`, {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`answer=${encodeURIComponent(answer)}`})
+  .then(r=>r.json()).then(d=>{alert(d.msg);if(d.ok)location.reload();});
+}
+</script>
+{% endblock %}

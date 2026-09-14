@@ -1,0 +1,20 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Qo'shilish so'rovlari — {{ group.name }}{% endblock %}
+{% block app_content %}
+<h1 style="font-size:19px; margin-bottom:16px;">{{ icon('users',18) }} «{{ group.name }}» — qo'shilish so'rovlari</h1>
+{% for r in requests_list %}
+<div class="cs-card" style="padding:16px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+  <div>
+    <strong style="font-size:13px;">{{ r.familiya }} {{ r.ism }}</strong>
+    <div class="muted" style="font-size:11px;">ID #{{ r.custom_id }}</div>
+  </div>
+  <form method="post" action="{{ url_for('groups_bp.group_join_request_review', group_id=group.id, request_id=r.id) }}" style="display:flex; gap:8px;">
+    <button type="submit" name="decision" value="approve" class="cs-btn cs-btn-sm cs-btn-primary">{{ icon('check',12) }} Qabul qilish</button>
+    <button type="submit" name="decision" value="reject" class="cs-btn cs-btn-sm cs-btn-danger">{{ icon('x',12) }} Rad etish</button>
+  </form>
+</div>
+{% else %}
+<p class="muted" style="text-align:center; padding:40px;">Hozircha so'rov yo'q.</p>
+{% endfor %}
+{% endblock %}

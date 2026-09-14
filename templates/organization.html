@@ -1,0 +1,54 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}{{ org.name }} — MAXSUS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:20px;">{{ icon('briefcase',18) }} {{ org.name }}</h1>
+  <span class="hacker-badge">Admin boshqaruvida</span>
+</div>
+
+<div class="cs-card" style="margin-bottom:16px;">
+  <p style="font-size:14px; color:#d8d0e8; line-height:1.7;">{{ org.description }}</p>
+  <div class="grid grid-3" style="gap:10px; margin-top:16px;">
+    <div style="text-align:center; padding:12px; background:rgba(168,85,247,.06); border-radius:8px;">
+      <div style="font-size:22px; font-weight:900; color:var(--cs-text-primary);">{{ org.stats_members }}</div>
+      <div class="muted" style="font-size:10px;">A'ZOLAR</div>
+    </div>
+    <div style="text-align:center; padding:12px; background:rgba(168,85,247,.06); border-radius:8px;">
+      <div style="font-size:22px; font-weight:900; color:var(--cs-text-primary);">{{ org.stats_projects }}</div>
+      <div class="muted" style="font-size:10px;">LOYIHALAR</div>
+    </div>
+    <div style="text-align:center; padding:12px; background:rgba(168,85,247,.06); border-radius:8px;">
+      <div style="font-size:22px; font-weight:900; color:var(--cs-text-primary);">{{ org.stats_years }}</div>
+      <div class="muted" style="font-size:10px;">YIL TAJRIBA</div>
+    </div>
+  </div>
+</div>
+
+<div class="cs-card" style="margin-bottom:16px;">
+  <h3 style="font-size:13px; margin-bottom:12px;">{{ icon('zap',14) }} E'LONLAR</h3>
+  {% for p in posts %}
+  <div style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,.05);">
+    <div style="font-size:13px; font-weight:700; color:#e8e0f5;">{{ p.title }}</div>
+    <div class="muted" style="font-size:12px; margin-top:4px;">{{ p.content }}</div>
+    <div class="muted" style="font-size:10px; margin-top:4px;">{{ p.created_at | tashkent_time('%d.%m.%Y') }}</div>
+  </div>
+  {% else %}
+  <p class="muted" style="text-align:center; padding:20px;">Hali e'lon yo'q</p>
+  {% endfor %}
+</div>
+
+<div class="cs-card" style="max-width:500px;">
+  <h3 style="font-size:13px; margin-bottom:10px;">{{ icon('send',14) }} HAMKORLIK / QO'SHILISH SO'ROVI</h3>
+  {% if my_request %}
+  <div class="cs-chip solid" style="background:{{ '#e0393d' if my_request.status=='accepted' else ('#ff5555' if my_request.status=='rejected' else '#ffc107') }}; color:#000; border:0;">
+    Holat: {{ {'pending':'Kutilmoqda','accepted':'Qabul qilindi','rejected':'Rad etildi'}.get(my_request.status) }}
+  </div>
+  {% else %}
+  <form method="post" action="{{ url_for('tashkilot_bp.organization_request', org_key=org.org_key) }}">
+    <textarea name="message" class="cs-input" rows="3" style="margin-bottom:10px;" placeholder="O'z jamoangiz yoki hamkorlik taklifingiz haqida yozing..." required></textarea>
+    <button class="cs-btn cs-btn-primary cs-btn-full">{{ icon('send',13) }} So'rov yuborish</button>
+  </form>
+  {% endif %}
+</div>
+{% endblock %}

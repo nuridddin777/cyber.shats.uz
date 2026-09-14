@@ -1,0 +1,23 @@
+{% extends "app_base.html" %}
+{% block title %}Sandbox to'lov{% endblock %}
+{% block app_content %}
+
+<div class="cs-card" style="max-width:480px; margin:0 auto; padding:26px;">
+  <h2 style="font-size:15px; margin-bottom:10px;">⚠️ SANDBOX rejim</h2>
+  <p class="muted" style="font-size:12px; margin-bottom:16px;">
+    Bu — demo sahifa. Haqiqiy merchant kalitlari (Click/Payme/Uzum) hali kiritilmagan,
+    shuning uchun haqiqiy bank orqali to'lov o'tmaydi. Merchant hisobingiz tayyor bo'lgach
+    bu sahifa avtomatik ravishda haqiqiy checkout'ga almashadi.
+  </p>
+  <div style="background:rgba(255,255,255,.03); border-radius:8px; padding:12px 14px; margin-bottom:16px; font-size:12px;">
+    <div>Provayder: <strong>{{ txn.provider|upper }}</strong></div>
+    <div>Summa: <strong>{{ "{:,}".format(txn.amount_uzs) }} so'm</strong></div>
+    <div>CODE: <strong>{{ "{:,}".format(txn.code_amount) }}</strong></div>
+    <div>Buyurtma ID: <code>{{ txn.merchant_trans_id }}</code></div>
+  </div>
+  <form method="post">
+    <button type="submit" class="cs-btn" style="width:100%;">🧪 (Sandbox) To'lovni shartli tasdiqlash</button>
+  </form>
+</div>
+
+{% endblock %}

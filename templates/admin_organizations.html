@@ -1,0 +1,61 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Tashkilotlar — Admin{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:19px;">{{ icon('briefcase',18) }} M.A.T / JXT TASHKILOTLARI BOSHQARUVI</h1>
+  <a href="{{ url_for('admindash_bp.admin_dashboard') }}" class="cs-btn cs-btn-sm">← Admin Panel</a>
+</div>
+
+<div class="grid grid-2" style="gap:16px; margin-bottom:20px;">
+  {% for org in orgs %}
+  <div class="cs-card">
+    <h3 style="font-size:13px; margin-bottom:10px;">{{ org.name }}</h3>
+    <form method="post">
+      <input type="hidden" name="action" value="update_org">
+      <input type="hidden" name="org_key" value="{{ org.org_key }}">
+      <input type="text" name="name" value="{{ org.name }}" class="cs-input" style="margin-bottom:8px;">
+      <textarea name="description" class="cs-input" rows="3" style="margin-bottom:8px;">{{ org.description }}</textarea>
+      <div class="grid grid-3" style="gap:6px; margin-bottom:10px;">
+        <input type="number" name="stats_members" value="{{ org.stats_members }}" class="cs-input" placeholder="A'zolar" style="font-size:11px;">
+        <input type="number" name="stats_projects" value="{{ org.stats_projects }}" class="cs-input" placeholder="Loyihalar" style="font-size:11px;">
+        <input type="number" name="stats_years" value="{{ org.stats_years }}" class="cs-input" placeholder="Yillar" style="font-size:11px;">
+      </div>
+      <button class="cs-btn cs-btn-primary cs-btn-full">{{ icon('save',13) }} Saqlash</button>
+    </form>
+    <form method="post" style="margin-top:10px; border-top:1px solid rgba(255,255,255,.06); padding-top:10px;">
+      <input type="hidden" name="action" value="add_post">
+      <input type="hidden" name="org_key" value="{{ org.org_key }}">
+      <input type="text" name="title" required class="cs-input" style="margin-bottom:6px;" placeholder="E'lon sarlavhasi">
+      <textarea name="content" required class="cs-input" rows="2" style="margin-bottom:6px;" placeholder="E'lon matni"></textarea>
+      <button class="cs-btn cs-btn-sm cs-btn-full">{{ icon('plus',12) }} E'lon qo'shish</button>
+    </form>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="cs-card">
+  <h3 style="font-size:13px; margin-bottom:12px;">{{ icon('clock',14) }} SO'ROVLAR</h3>
+  {% for r in requests_list %}
+  <div style="padding:10px 0; border-bottom:1px solid rgba(255,255,255,.05);">
+    <div class="flex-between">
+      <span style="font-size:12.5px;">{{ r.familiya }} {{ r.ism }} → <strong>{{ r.org_key|upper }}</strong></span>
+      <span class="muted" style="font-size:10px;">{{ r.created_at | tashkent_time('%d.%m.%Y') }}</span>
+    </div>
+    <div class="muted" style="font-size:12px; margin:4px 0;">{{ r.message }}</div>
+    {% if r.status == 'pending' %}
+    <div style="display:flex; gap:6px;">
+      <form method="post"><input type="hidden" name="action" value="resolve_request"><input type="hidden" name="request_id" value="{{ r.id }}"><input type="hidden" name="new_status" value="accepted">
+        <button class="cs-btn cs-btn-sm" style="background:#e0393d; color:#000; border:0;">Qabul qilish</button></form>
+      <form method="post"><input type="hidden" name="action" value="resolve_request"><input type="hidden" name="request_id" value="{{ r.id }}"><input type="hidden" name="new_status" value="rejected">
+        <button class="cs-btn cs-btn-sm cs-btn-danger">Rad etish</button></form>
+    </div>
+    {% else %}
+    <span class="muted" style="font-size:11px;">Holat: {{ r.status }}</span>
+    {% endif %}
+  </div>
+  {% else %}
+  <p class="muted" style="text-align:center; padding:20px;">Hali so'rov yo'q</p>
+  {% endfor %}
+</div>
+{% endblock %}

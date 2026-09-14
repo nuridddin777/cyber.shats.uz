@@ -1,0 +1,49 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Do'stlar Taklif — MAXSUS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:20px;">{{ icon('send',18) }} Do'stlar Taklif</h1>
+  <span class="hacker-badge">MAXSUS</span>
+</div>
+
+<div class="cs-card" style="margin-bottom:20px;">
+  <h3 style="font-size:13px; margin-bottom:10px;">{{ icon('link',14) }} SIZNING TAKLIF HAVOLANGIZ</h3>
+  <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+    <input type="text" readonly value="https://{{ site_domain }}/register?ref={{ code }}" id="refLink"
+           class="cs-input" style="flex:1; min-width:240px; font-family:monospace; font-size:12px;">
+    <button class="cs-btn cs-btn-primary" onclick="navigator.clipboard.writeText(document.getElementById('refLink').value); this.textContent='Nusxalandi!';">
+      {{ icon('copy',13) }} Nusxalash
+    </button>
+  </div>
+  <div class="muted" style="font-size:11.5px; margin-top:10px;">
+    Do'stlaringizni taklif qiling — kimni taklif qilganingiz shu yerda va reytingda ko'rinadi.
+  </div>
+</div>
+
+<div class="grid grid-2" style="gap:16px;">
+  <div class="cs-card">
+    <h3 style="font-size:13px; margin-bottom:12px;">{{ icon('users',14) }} TAKLIF QILGANLARINGIZ ({{ stats.total }})</h3>
+    {% for u in stats.referred_users %}
+    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.05); font-size:12.5px;">
+      <span>{{ u.familiya }} {{ u.ism }} <span class="muted">#{{ u.custom_id }}</span></span>
+      <span class="muted">{{ u.created_at | tashkent_time('%d.%m.%Y') }}</span>
+    </div>
+    {% else %}
+    <p class="muted" style="text-align:center; padding:20px;">Hali hech kimni taklif qilmadingiz</p>
+    {% endfor %}
+  </div>
+
+  <div class="cs-card">
+    <h3 style="font-size:13px; margin-bottom:12px;">{{ icon('award',14) }} TOP ELCHILAR</h3>
+    {% for l in stats.leaderboard %}
+    <div style="display:flex; justify-content:space-between; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.05); font-size:12.5px;">
+      <span>{{ loop.index }}. {{ l.familiya }} {{ l.ism }} <span class="muted">#{{ l.custom_id }}</span></span>
+      <span style="color:var(--cs-text-primary); font-weight:700;">{{ l.total_invites }} ta</span>
+    </div>
+    {% else %}
+    <p class="muted" style="text-align:center; padding:20px;">Hali reyting yo'q</p>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

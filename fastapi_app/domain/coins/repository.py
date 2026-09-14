@@ -1,0 +1,9 @@
+from typing import Protocol
+
+from fastapi_app.domain.coins.entities import CoinTransaction, LeaderboardEntry
+
+
+class CoinsRepository(Protocol):
+    def get_balance(self, user_id: int) -> int | None: ...
+    def get_transactions(self, user_id: int, limit: int) -> list[CoinTransaction]: ...
+    def get_leaderboard(self, limit: int) -> list[LeaderboardEntry]: ...

@@ -1,0 +1,91 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}{{ 'Yo\'nalish tanlang' if is_first_time else 'Yo\'nalishni almashtirish' }} — CYBER SHATS{% endblock %}
+{% block app_content %}
+<style>
+.cd-hero{text-align:center;max-width:640px;margin:0 auto 30px;}
+.cd-hero .eyebrow{font-size:11px;font-weight:800;letter-spacing:1.5px;color:var(--cs-text-primary);text-transform:uppercase;}
+.cd-hero h1{font-size:23px;margin:8px 0 10px;color:var(--cs-text-white);}
+.cd-hero p{font-size:13px;color:var(--cs-text-muted);line-height:1.6;}
+.cd-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:980px;margin:0 auto;}
+.cd-group-title{font-size:11px;font-weight:800;letter-spacing:1px;text-transform:uppercase;color:var(--cs-text-muted);margin:26px auto 12px;max-width:980px;}
+.cd-card{width:100%;text-align:left;cursor:pointer;padding:20px;border-radius:14px;border:1px solid var(--cs-border);
+  background:var(--cs-bg-card);transition:all .18s;position:relative;}
+.cd-card:hover{border-color:var(--cs-border-active);transform:translateY(-3px);box-shadow:var(--cs-glow);}
+.cd-card.current{border-color:var(--cs-text-primary);box-shadow:var(--cs-glow);}
+.cd-card.locked{opacity:.55;cursor:not-allowed;}
+.cd-card.locked:hover{transform:none;box-shadow:none;}
+.cd-card h3{font-size:14.5px;color:var(--cs-text-white);margin:12px 0 4px;}
+.cd-card .desc{font-size:11.5px;color:var(--cs-text-muted);line-height:1.5;min-height:32px;}
+.cd-card .meta{font-size:10.5px;color:var(--cs-text-muted);margin-top:10px;display:flex;gap:10px;align-items:center;}
+.cd-card .lock-badge{position:absolute;top:14px;right:14px;font-size:9px;background:var(--cs-bg-glass);
+  border:1px solid var(--cs-border);border-radius:20px;padding:4px 9px;color:var(--cs-text-yellow, #ffb800);}
+@media(max-width:900px){.cd-grid{grid-template-columns:repeat(2,1fr);}}
+@media(max-width:600px){.cd-grid{grid-template-columns:1fr;}}
+</style>
+
+<div class="cd-hero">
+  <div class="eyebrow">{{ '1-QADAM' if is_first_time else 'YO\'NALISHNI ALMASHTIRISH' }}</div>
+  <h1>{{ 'Boshlashdan oldin — o\'zingizga mos IT yo\'nalishini tanlang' if is_first_time else 'Yangi asosiy yo\'nalish tanlang' }}</h1>
+  <p>
+    {% if is_first_time %}
+    Tasodifiy sayr qilish o'rniga — bitta yo'nalishni tanlab, uni boshidan oxirigacha izchil o'rganasiz.
+    Dashboard, kurslar va progress shu yo'nalishga moslashadi.
+    {% else %}
+    Yo'nalishni istalgan vaqtda almashtirishingiz mumkin. Eski yo'nalishdagi tugatilgan/yozilgan kurslaringiz va sertifikatlaringiz saqlanib qoladi.
+    {% endif %}
+  </p>
+</div>
+
+{% set groups = [
+  ("Dasturlash", ["web-dev","python","javascript","cpp","mobile-dev"]),
+  ("Kiberxavfsizlik va tarmoq", ["cyber-security","networking"]),
+  ("Ma'lumot va sun'iy intellekt", ["database","ai-ml","data-science"]),
+  ("Infratuzilma", ["cloud","devops"]),
+  ("Biznes va marketing (Pro)", ["smm","targetolog","logistika"]),
+  ("Qo'shimcha fanlar", ["ingliz-tili","matematika","office"]),
+] %}
+
+{% for group_name, slugs in groups %}
+  {% set group_dirs = directions|selectattr('slug', 'in', slugs)|list %}
+  {% if group_dirs %}
+  <div class="cd-group-title">{{ group_name }}</div>
+  <div class="cd-grid">
+    {% for d in group_dirs %}
+    {% set is_locked = d.is_pro_only and not has_pro_plan %}
+    {% if is_locked %}
+    <div class="cd-card locked">
+      <span class="lock-badge">{{ icon('lock', 10) }} Pro talab qilinadi</span>
+      <div class="hex-icon">{{ icon(d.icon, 22) }}</div>
+      <h3>{{ d.name_uz }}</h3>
+      <div class="desc">{{ d.description or 'Pro rejaga o\'tib shu yo\'nalishni ochishingiz mumkin.' }}</div>
+      <div class="meta">{{ icon('layers',11) }} {{ d.course_count }} kurs</div>
+    </div>
+    {% else %}
+    <form method="post" action="{{ url_for('choose_direction') }}">
+      <input type="hidden" name="direction_id" value="{{ d.id }}">
+      <button type="submit" class="cd-card {{ 'current' if current_user.primary_direction_id == d.id }}">
+        <div class="hex-icon">{{ icon(d.icon, 22) }}</div>
+        <h3>{{ d.name_uz }}</h3>
+        <div class="desc">{{ d.description or "Boshlang'ichdan yuqori darajagacha kurslar" }}</div>
+        <div class="meta">
+          {{ icon('layers',11) }} {{ d.course_count }} kurs
+          {% if current_user.primary_direction_id == d.id %}
+          <span class="cs-chip solid" style="font-size:9px;">{{ icon('check',10) }} Joriy tanlov</span>
+          {% endif %}
+        </div>
+      </button>
+    </form>
+    {% endif %}
+    {% endfor %}
+  </div>
+  {% endif %}
+{% endfor %}
+
+{% if not is_first_time %}
+<div style="text-align:center;margin-top:26px;">
+  <a href="{{ url_for('dashboard') }}" class="tier3-pill" style="display:inline-flex;">{{ icon('chevron-left',12) }} Dashboardga qaytish</a>
+</div>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,28 @@
+{# CYBER SHATS — HUD (4 burchak) — ochiq sahifalarda SYSTEM/PROTOCOL/ENCRYPTION,
+   shaxsiy kabinetda online/bugun ko'rsatkichlari #}
+{% set landing_endpoints = ['index', 'pricing', 'directions', 'courses', 'news', 'library'] %}
+{% set is_landing = (request.endpoint in landing_endpoints) %}
+{% set hud_theme = 'gold' %}
+<div class="hud-overlay hud-minimal hud-theme-{{ hud_theme }}" id="hudOverlay">
+    <div class="hud-tl">
+        <div class="hud-line">IP: <span class="green">{{ hud_ip }}</span></div>
+        <div class="hud-line">HOLAT: <span class="dot-live"></span> <span class="green">ONLINE</span></div>
+    </div>
+    <div class="hud-tr">
+        <div class="hud-line">THREAT: <span class="green hud-dynamic" id="hudThreatVal">LOW</span></div>
+        <div class="hud-line">FIREWALL: <span class="green hud-dynamic" id="hudFirewallVal">FAOL</span></div>
+    </div>
+    <div class="hud-bl">
+        {% if is_landing %}
+        <div class="hud-line"><span class="dot-live"></span> SYSTEM: <span class="green">ONLINE</span></div>
+        <div class="hud-line">PROTOCOL: <span class="green">HTTPS</span> &nbsp; ENCRYPTION: <span class="green">256-BIT</span></div>
+        {% else %}
+        <div class="hud-line" id="hud-online" data-base="{{ hud_online }}">{{ hud_online }} online</div>
+        <div class="hud-line">BUGUN: <span class="green">+{{ hud_today }}</span></div>
+        {% endif %}
+    </div>
+    <div class="hud-br">
+        <div class="hud-line" id="hud-time">--:--:--</div>
+        <div class="hud-line" id="hud-uptime">UPTIME: {{ uptime_days }}D</div>
+    </div>
+</div>

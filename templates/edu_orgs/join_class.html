@@ -1,0 +1,35 @@
+{% import "edu_orgs/_shared.html" as shared %}
+<!DOCTYPE html>
+<html lang="uz"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sinf/Kurs kodi — SHATS CYBER EDU</title>
+</head><body>
+{% include "edu_orgs/_shared.html" %}
+<div class="container" style="max-width:520px;">
+  <div class="top-nav">
+    <div class="brand">SHATS CYBER <span>EDU</span></div>
+    <a href="{{ url_for('edu_orgs.login_page') }}" class="btn secondary">Kirish</a>
+  </div>
+
+  <div class="card">
+    <h1>O'quvchi sifatida ro'yxatdan o'tish</h1>
+    <p style="color:#a1a1c0;">
+      O'qituvchingiz yoki markazingiz sizga bergan <b>sinf/kurs kodini</b> kiriting —
+      shu orqali aniq o'sha sinf/bo'lim (maktab) yoki kursga (texnikum) ulanasiz.
+      Kodni o'qituvchingiz yoki markaz ma'muridan so'rang (markaz tarif sotib olgandan
+      keyingina bu kod ishlaydi).
+    </p>
+
+    {{ shared.flashes() }}
+    {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+
+    <form method="POST" action="{{ url_for('edu_orgs.join_class_page') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Sinf/Kurs kodi</label>
+      <input type="text" name="class_code" placeholder="MASALAN: 7K9XQ2R" autofocus required
+             style="text-transform:uppercase;">
+      <button type="submit" class="btn">Davom etish</button>
+    </form>
+  </div>
+</div>
+</body></html>

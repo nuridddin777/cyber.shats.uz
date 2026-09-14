@@ -1,0 +1,91 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Reyting va Liderlar — CYBER SHATS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+  <h1 style="font-size:20px;">{{ icon('trending-up',18) }} Reyting va Liderlar</h1>
+  {% if my_rank %}
+  <span class="cs-chip solid">Sizning o'rningiz: #{{ my_rank }}</span>
+  {% endif %}
+</div>
+
+<div class="grid" style="grid-template-columns: 1fr 300px; gap:20px; align-items:flex-start;">
+  <div>
+    <div style="display:flex; gap:8px; margin-bottom:16px;">
+      <a href="?type=xp" class="cs-btn cs-btn-sm {{ 'cs-btn-primary' if board_type=='xp' }}">{{ icon('award',12) }} Reyting (XP)</a>
+      <a href="?type=code" class="cs-btn cs-btn-sm {{ 'cs-btn-primary' if board_type=='code' }}" style="{{ 'color:var(--cs-text-yellow); border-color:rgba(217,119,6,.4);' if board_type!='code' }}">⚡ CODE Liderlar (boylar)</a>
+    </div>
+
+    {% for l in leaders %}
+    <div class="cs-card" style="padding:14px 18px; margin-bottom:10px; display:flex; align-items:center; gap:16px;
+      {{ 'background:linear-gradient(135deg,rgba(255,215,0,.06),rgba(37,99,235,.03)); border-color:rgba(255,215,0,.3);' if loop.index==1 else
+         'background:linear-gradient(135deg,rgba(192,192,192,.06),rgba(37,99,235,.03)); border-color:rgba(192,192,192,.3);' if loop.index==2 else
+         'background:linear-gradient(135deg,rgba(205,127,50,.06),rgba(37,99,235,.03)); border-color:rgba(205,127,50,.3);' if loop.index==3 else '' }}">
+
+      <div style="width:36px; text-align:center; font-family:var(--cs-font-display); font-size:18px; font-weight:900;
+        color:{{ '#FFD700' if loop.index==1 else '#C0C0C0' if loop.index==2 else '#CD7F32' if loop.index==3 else 'var(--cs-text-muted)' }}">
+        {{ '🥇' if loop.index==1 else '🥈' if loop.index==2 else '🥉' if loop.index==3 else loop.index }}
+      </div>
+
+      <div class="avatar-fallback flex-center" style="width:40px; height:40px; border-radius:50%; flex-shrink:0;
+        background:rgba(37,99,235,.1); color:var(--cs-text-primary); font-family:var(--cs-font-display);">
+        {{ l.ism[0]|upper }}
+      </div>
+
+      <div style="flex:1;">
+        <div style="font-weight:600; display:flex; align-items:center; gap:6px; flex-wrap:wrap;">
+          {{ l.familiya }} {{ l.ism }}
+          {% if l.role in ('admin','super_admin','mentor') %}
+          <span class="cs-chip solid" style="font-size:8.5px; padding:2px 7px; background:linear-gradient(135deg,#334155,#0f172a); color:#fff; border:none; letter-spacing:.5px;">{{ icon('shield',9) }} {{ 'SUPER ADMIN' if l.role=='super_admin' else ('MENTOR' if l.role=='mentor' else 'ADMIN') }}</span>
+          {% endif %}
+          {% if l.plan=='pro' %}<span class="cs-chip solid" style="font-size:9px; padding:2px 6px; background:linear-gradient(135deg,#b45309,#92400e); color:#fff; border:none;">PRO</span>{% endif %}
+          {% if l.plan=='vip' %}<span class="cs-chip solid" style="font-size:9px; padding:2px 6px; background:linear-gradient(135deg,#BF953F,#FCF6BA,#B38728); color:#050505; border:none;">VIP</span>{% endif %}
+        </div>
+        {% if board_type == 'code' %}
+        <div class="muted" style="font-size:11px;">Daraja {{ l.level }}</div>
+        {% else %}
+        <div class="muted" style="font-size:11px;">Daraja {{ l.level }} · {{ l.courses_done }} kurs · {{ l.tests_passed }} test</div>
+        {% endif %}
+      </div>
+
+      <div style="text-align:right;">
+        {% if board_type == 'code' %}
+        <div style="font-family:var(--cs-font-display); font-size:20px; font-weight:900; color:var(--cs-text-yellow);">
+          ⚡ {{ "{:,}".format(l.code_balance|default(0)|int) }}
+        </div>
+        <div class="muted" style="font-size:10px;">CODE</div>
+        {% else %}
+        <div style="font-family:var(--cs-font-display); font-size:20px; font-weight:900; color:var(--cs-text-primary);">
+          {{ "{:,}".format(l.total_score|int) }}
+        </div>
+        <div class="muted" style="font-size:10px;">BALL</div>
+        <div style="font-size:11px; color:var(--cs-text-yellow); margin-top:2px;">⚡ {{ "{:,}".format(l.code_balance|default(0)|int) }}</div>
+        {% endif %}
+      </div>
+    </div>
+    {% else %}
+    <p class="muted" style="text-align:center; padding:40px;">Hozircha ma'lumot yo'q.</p>
+    {% endfor %}
+  </div>
+
+  <div>
+    <div class="cs-card" style="margin-bottom:18px;">
+      <h3 style="font-size:12.5px; margin-bottom:10px;">{{ icon('zap',14) }} SIZNING DARAJANGIZ</h3>
+      <div class="flex-center" style="font-family:var(--cs-font-display); font-size:30px; color:var(--cs-text-primary);">LVL {{ current_user.level }}</div>
+      <div class="cs-progress" style="margin-top:14px;"><span style="width:{{ (current_user.xp % 500) / 500 * 100 }}%;"></span></div>
+      <div class="muted flex-between" style="font-size:10.5px; margin-top:6px;"><span>{{ current_user.xp }} XP</span><span>{{ next_level_xp }} XP</span></div>
+    </div>
+    <div class="cs-card">
+      <h3 style="font-size:12.5px; margin-bottom:14px;">{{ icon('award',14) }} BARCHA YUTUQLAR</h3>
+      <div class="grid grid-3">
+        {% for b in all_badges %}
+        <div class="flex-center" style="flex-direction:column;">
+          <div class="badge-icon {{ 'locked' if b.id not in earned_ids }}">{{ icon(b.icon, 20) }}</div>
+          <div style="font-size:9.5px; text-align:center; color:var(--cs-text-muted);">{{ b.name }}</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

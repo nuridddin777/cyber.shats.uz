@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Bejik tasdiqlash — CYBER SHATS{% endblock %}
+{% block content %}
+<div style="max-width:480px; margin:60px auto; padding:20px;">
+  <div class="cs-card" style="padding:32px; text-align:center; border:1px solid rgba(255,59,59,.4);">
+    <div style="font-size:40px; margin-bottom:10px;">✅</div>
+    <h1 style="font-size:20px; color:#e0393d;">HAQIQIY BEJIK</h1>
+    <p class="muted" style="font-size:12px; margin:10px 0 20px;">Bu shaxs CYBER SHATS platformasining tasdiqlangan MAXSUS a'zosi.</p>
+    <div style="width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,#a855f7,#581c87); display:flex; align-items:center; justify-content:center; font-size:26px; font-weight:900; margin:0 auto 12px;">
+      {{ u.ism[0] }}
+    </div>
+    <div style="font-size:17px; font-weight:700;">{{ u.familiya }} {{ u.ism }}</div>
+    <div class="muted" style="font-size:12px; margin-top:4px;">#{{ u.custom_id }} · LVL {{ u.level or 1 }}</div>
+  </div>
+</div>
+{% endblock %}

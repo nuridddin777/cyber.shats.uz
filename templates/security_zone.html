@@ -1,0 +1,135 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Xavfsizlik Zonasi — MAXSUS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:20px;">{{ icon('shield',18) }} Xavfsizlik Zonasi</h1>
+  <span class="hacker-badge">MAXSUS</span>
+</div>
+
+<!-- YUQORI: BALL + PAROL TEKSHIRUVCHI -->
+<div class="grid grid-2" style="gap:16px; margin-bottom:20px;">
+  <div class="cs-card">
+    <h3 style="font-size:13px; margin-bottom:10px;">{{ icon('award',14) }} SIZNING XAVFSIZLIK BALINGIZ</h3>
+    {% if user_score %}
+    <div style="display:flex; align-items:center; gap:16px;">
+      <div style="font-size:36px; font-weight:900; font-family:var(--cs-font-display); color:var(--cs-text-primary);">
+        {{ user_score.score }}/{{ user_score.total }}
+      </div>
+      <div>
+        <span class="hacker-badge">{{ user_score.level }}</span>
+        <div class="muted" style="font-size:11px; margin-top:4px;">So'nggi test: {{ user_score.taken_at | tashkent_time('%d.%m.%Y') }}</div>
+      </div>
+    </div>
+    {% else %}
+    <p class="muted" style="font-size:12px; margin-bottom:10px;">Hali test topshirmadingiz.</p>
+    {% endif %}
+    <a href="{{ url_for('secz_bp.security_zone_quiz') }}" class="cs-btn cs-btn-primary" style="margin-top:12px; display:inline-flex;">
+      {{ icon('zap',13) }} {{ 'Testni qayta topshirish' if user_score else 'Testni boshlash' }}
+    </a>
+  </div>
+
+  <div class="cs-card">
+    <h3 style="font-size:13px; margin-bottom:10px;">{{ icon('lock',14) }} PAROL KUCHINI TEKSHIRISH</h3>
+    <input type="password" id="pwdCheckInput" class="cs-input" placeholder="Parolni shu yerga kiriting (saqlanmaydi)" style="margin-bottom:10px;">
+    <div id="pwdMeterBar" style="height:6px; border-radius:3px; background:rgba(255,255,255,.08); overflow:hidden; margin-bottom:8px;">
+      <div id="pwdMeterFill" style="height:100%; width:0%; transition:all .3s;"></div>
+    </div>
+    <div id="pwdLabel" class="muted" style="font-size:12px;">Parolni kiriting...</div>
+    <ul id="pwdTips" style="font-size:11px; color:var(--cs-text-muted); margin-top:6px; padding-left:16px;"></ul>
+  </div>
+</div>
+
+<!-- CHEKLIST -->
+<div class="cs-card" id="cheklist" style="margin-bottom:20px;">
+  <div class="flex-between" style="margin-bottom:10px;">
+    <h3 style="font-size:13px;">{{ icon('check-square',14) }} "SAYTIM XAVFSIZMI?" CHEKLISTI ({{ checklist_done }}/{{ checklist_total }})</h3>
+    <a href="{{ url_for('secz_bp.security_zone_checklist_pdf') }}" class="cs-btn cs-btn-sm">{{ icon('download',12) }} PDF yuklab olish</a>
+  </div>
+  {% for category, items in checklist.items() %}
+  <div style="margin-bottom:12px;">
+    <div style="font-size:11.5px; font-weight:700; color:var(--cs-text-primary); margin-bottom:6px;">{{ category }}</div>
+    {% for item in items %}
+    <form method="post" action="{{ url_for('secz_bp.security_zone_checklist_toggle') }}" style="display:flex; align-items:center; gap:8px; padding:5px 0;">
+      <input type="hidden" name="item_id" value="{{ item.id }}">
+      <button type="submit" style="background:none; border:none; cursor:pointer; padding:0; font-size:16px;">
+        {{ '✅' if item.checked else '⬜' }}
+      </button>
+      <span style="font-size:12.5px; {{ 'text-decoration:line-through; opacity:.5;' if item.checked }}">{{ item.text }}</span>
+    </form>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+
+<!-- QO'LLANMALAR -->
+<div class="cs-card" style="margin-bottom:20px;">
+  <h3 style="font-size:13px; margin-bottom:14px;">{{ icon('book',14) }} QO'LLANMALAR VA DARSLIKLAR</h3>
+  {% for category, arts in articles.items() %}
+  <div style="margin-bottom:16px;">
+    <div style="font-size:12px; font-weight:700; color:var(--cs-text-primary); margin-bottom:8px;">{{ category }}</div>
+    <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:10px;">
+      {% for a in arts %}
+      <a href="{{ url_for('secz_bp.security_zone_article', slug=a.slug) }}" style="text-decoration:none;">
+        <div class="cs-card" style="padding:14px; height:100%;">
+          <div style="font-size:13px; font-weight:700; color:#e8e0f5; margin-bottom:4px;">{{ a.title }}</div>
+          <div class="muted" style="font-size:11px;">{{ a.summary }}</div>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+<div class="grid grid-2" style="gap:16px;">
+  <!-- LUG'AT -->
+  <div class="cs-card">
+    <h3 style="font-size:13px; margin-bottom:12px;">{{ icon('file-text',14) }} XAVFSIZLIK LUG'ATI</h3>
+    {% for g in glossary %}
+    <div style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,.05);">
+      <div style="font-size:12.5px; font-weight:700; color:var(--cs-text-primary);">{{ g.term }}</div>
+      <div class="muted" style="font-size:11.5px; margin-top:2px;">{{ g.definition }}</div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- QORA RO'YXAT -->
+  <div class="cs-card">
+    <h3 style="font-size:13px; margin-bottom:12px; color:#ff5555;">{{ icon('alert-triangle',14) }} XATARLI NARSALAR (QORA RO'YXAT)</h3>
+    {% for b in blacklist %}
+    <div style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,.05);">
+      <div style="font-size:12.5px; font-weight:700; color:#ff8888;">⚠️ {{ b.name }}</div>
+      <div class="muted" style="font-size:11.5px; margin-top:2px;">{{ b.reason }}</div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+document.getElementById('pwdCheckInput').addEventListener('input', function() {
+  var pwd = this.value;
+  if (!pwd) {
+    document.getElementById('pwdLabel').textContent = 'Parolni kiriting...';
+    document.getElementById('pwdMeterFill').style.width = '0%';
+    document.getElementById('pwdTips').innerHTML = '';
+    return;
+  }
+  fetch('/api/xavfsizlik-zonasi/parol-tekshirish', {
+    method: 'POST', credentials: 'same-origin',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({password: pwd})
+  }).then(r => r.json()).then(d => {
+    if (!d.success) return;
+    var data = d.data;
+    var pct = Math.round((data.score / data.max_score) * 100);
+    document.getElementById('pwdMeterFill').style.width = pct + '%';
+    document.getElementById('pwdMeterFill').style.background = data.color;
+    document.getElementById('pwdLabel').innerHTML = '<strong style="color:' + data.color + '">' + data.label + '</strong>';
+    document.getElementById('pwdTips').innerHTML = data.tips.map(t => '<li>' + t + '</li>').join('');
+  });
+});
+</script>
+{% endblock %}

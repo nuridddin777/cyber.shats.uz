@@ -1,0 +1,61 @@
+/* ============================================================
+   O'ZBEKISTON MUSTAQILLIGI — 35 YILLIGI TEMASI
+   "Premium Dark — Navy & Cream" asosiy palitrasiga moslashtirilgan —
+   chuqur to'q ko'k fon + krem matn + yorqin ko'k aksent, milliy oltin
+   nishon saqlanadi.
+   ============================================================ */
+:root {
+    --cs-bg-primary: #0F172A;
+    --cs-bg-secondary: #111C33;
+    --cs-bg-card: #1E293B;
+    --cs-bg-glass: rgba(30, 41, 59, 0.88);
+    --cs-bg-sidebar: #0F172A;
+    --cs-bg-input: #1A2740;
+
+    --cs-text-primary: #3B82F6;
+    --cs-text-secondary: #38BDF8;
+    --cs-text-muted: #94A3B8;
+    --cs-text-cyan: #38BDF8;
+    --cs-text-violet: #ce1126;
+    --cs-text-white: #F5EFEB;
+    --cs-text-dark: #0F172A;
+    --cs-text-red: #ce1126;
+    --cs-text-yellow: #d4a017;
+
+    --cs-border: rgba(59, 130, 246, 0.22);
+    --cs-border-active: rgba(59, 130, 246, 0.6);
+    --cs-glow: 0 4px 18px rgba(59, 130, 246, 0.25);
+    --cs-glow-strong: 0 10px 32px rgba(59, 130, 246, 0.35);
+    --cs-glow-red: 0 4px 14px rgba(206, 17, 38, 0.25);
+    --cs-glow-cyan: 0 4px 14px rgba(56, 189, 248, 0.3);
+    --cs-glow-violet: 0 4px 14px rgba(212, 160, 23, 0.3);
+
+    --cs-grad-main:
+        radial-gradient(1200px 700px at 15% -10%, rgba(59,130,246,.10), transparent 55%),
+        radial-gradient(1100px 650px at 100% 10%, rgba(30,181,58,.06), transparent 55%),
+        radial-gradient(1000px 600px at 40% 115%, rgba(212,160,23,.05), transparent 55%),
+        linear-gradient(160deg, #0F172A 0%, #111C33 50%, #0F172A 100%);
+    --cs-grad-card: linear-gradient(155deg, rgba(59,130,246,.08) 0%, rgba(30,41,59,0) 55%);
+    --cs-grad-btn: linear-gradient(135deg, #60A5FA 0%, #3B82F6 55%, #2563EB 100%);
+    --cs-grad-sidebar: linear-gradient(180deg, #0F172A 0%, #0A101F 100%);
+    --cs-grad-accent: linear-gradient(90deg, #3B82F6, #1eb53a, #d4a017, #3B82F6);
+}
+
+/* Bayroq chizig'i — sahifa tepasida */
+body::before {
+    content: ''; position: fixed; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, #0099b5 32%, #ffffff 32%, #ffffff 36%, #1eb53a 36%, #1eb53a 64%,
+                #ffffff 64%, #ffffff 68%, #ce1126 68%);
+    z-index: 99999;
+}
+
+/* "35 YIL" jubiley nishoni — logotip yoniga */
+.logo::after {
+    content: '35 YIL';
+    display: inline-block; margin-left: 8px; font-size: 9px; font-weight: 800; letter-spacing: 1px;
+    background: linear-gradient(135deg, #d4a017, #f2c94c); color: #3a2a00;
+    padding: 3px 8px; border-radius: 20px; vertical-align: middle;
+    box-shadow: 0 2px 8px rgba(212, 160, 23, 0.4);
+}
+
+.cs-btn-primary { background: linear-gradient(135deg, #60A5FA, #3B82F6) !important; border-color: #3B82F6 !important; }

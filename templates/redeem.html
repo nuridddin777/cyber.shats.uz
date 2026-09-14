@@ -1,0 +1,19 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Kod faollashtirish — CYBER SHATS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:20px;">{{ icon('key',18) }} Kod orqali faollashtirish</h1>
+</div>
+
+<div class="cs-card" style="max-width:480px;">
+  <p class="muted" style="font-size:12px; margin-bottom:16px;">
+    MAXSUS versiya aktivatsiya kodingiz bo'lsa, shu yerga kiriting. Kod muddati
+    (1 soat yoki 30 kun) avtomatik hisoblanadi va tugagach tarif o'zi FREE'ga qaytadi.
+  </p>
+  <form method="post">
+    <input type="text" name="code" required class="cs-input" style="margin-bottom:12px; text-transform:uppercase; font-family:monospace; font-size:14px;" placeholder="MAX-XXXXXXXX">
+    <button type="submit" class="cs-btn cs-btn-primary cs-btn-full">{{ icon('zap',13) }} Faollashtirish</button>
+  </form>
+</div>
+{% endblock %}

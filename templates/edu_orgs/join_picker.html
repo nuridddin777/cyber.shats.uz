@@ -1,0 +1,38 @@
+{% import "edu_orgs/_shared.html" as shared %}
+<!DOCTYPE html>
+<html lang="uz"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tashkilotni tanlang — SHATS CYBER EDU</title>
+</head><body>
+{% include "edu_orgs/_shared.html" %}
+<div class="container">
+  <div class="top-nav"><div class="brand">SHATS CYBER <span>EDU</span></div>
+    <a href="{{ url_for('edu_orgs.login_page') }}">Kirish</a></div>
+
+  {{ shared.flashes() }}
+
+  <div class="card">
+    <h1>{{ 'O\'qituvchi' if role == 'teacher' else 'O\'quvchi' }} sifatida ro'yxatdan o'tish</h1>
+    <p style="color:#a1a1c0;">Markazingiz sizga bergan <b>ulanish kodini</b> kiriting — shu orqali
+      aniq o'sha markazga ulanasiz. Kodni markazingiz ma'muridan so'rang (markaz tarif sotib
+      olgandan keyingina bu kod ishlaydi).</p>
+
+    {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+
+    <form method="POST" action="{{ url_for('edu_orgs.join_resolve') }}" style="max-width:360px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="role" value="{{ role }}">
+      <label>Markaz ulanish kodi</label>
+      <input type="text" name="connect_code" placeholder="masalan: 7K9XQ2RT" style="text-transform:uppercase;" required autofocus>
+      <button type="submit" class="btn" style="margin-top:10px;">Davom etish</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <p>Boshqa rolda ro'yxatdan o'tmoqchimisiz?</p>
+    <a href="{{ url_for('edu_orgs.join_picker', role='teacher') }}" class="btn secondary">O'qituvchi</a>
+    <a href="{{ url_for('edu_orgs.join_picker', role='student') }}" class="btn secondary">O'quvchi</a>
+    <a href="{{ url_for('edu_orgs.register_org_page') }}" class="btn secondary">Tashkilot (markaz)</a>
+  </div>
+</div>
+</body></html>

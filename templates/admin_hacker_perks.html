@@ -1,0 +1,27 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Maxsus Imtiyozlar — Admin{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:19px;">{{ icon('gift',18) }} MAXSUS IMTIYOZLAR BOSHQARUVI</h1>
+  <a href="{{ url_for('admindash_bp.admin_dashboard') }}" class="cs-btn cs-btn-sm">← Admin Panel</a>
+</div>
+<div class="cs-card" style="max-width:480px; margin-bottom:20px;">
+  <form method="post">
+    <input type="hidden" name="action" value="add">
+    <input type="text" name="title" required class="cs-input" style="margin-bottom:8px;" placeholder="Sarlavha">
+    <textarea name="description" required class="cs-input" rows="2" style="margin-bottom:8px;" placeholder="Tavsif"></textarea>
+    <input type="text" name="link" class="cs-input" style="margin-bottom:8px;" placeholder="Havola (ixtiyoriy)">
+    <button class="cs-btn cs-btn-primary cs-btn-full">{{ icon('plus',13) }} Qo'shish</button>
+  </form>
+</div>
+<div class="cs-card">
+  {% for p in perks %}
+  <div class="flex-between" style="padding:8px 0; border-bottom:1px solid rgba(255,255,255,.05);">
+    <span style="font-size:13px;">{{ p.title }}</span>
+    <form method="post"><input type="hidden" name="action" value="delete"><input type="hidden" name="perk_id" value="{{ p.id }}">
+      <button class="cs-btn cs-btn-sm cs-btn-danger">O'chirish</button></form>
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

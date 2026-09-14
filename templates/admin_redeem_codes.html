@@ -1,0 +1,46 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}MAXSUS kodlari — Admin{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:19px;">{{ icon('key',18) }} MAXSUS AKTIVATSIYA KODLARI</h1>
+  <a href="{{ url_for('admindash_bp.admin_dashboard') }}" class="cs-btn cs-btn-sm">← Admin Panel</a>
+</div>
+
+<div class="cs-card" style="margin-bottom:16px; max-width:480px;">
+  <h3 style="font-size:13px; margin-bottom:12px;">{{ icon('plus',14) }} YANGI KODLAR YARATISH</h3>
+  <form method="post">
+    <label class="muted" style="font-size:10px; display:block; margin-bottom:4px;">Muddat</label>
+    <select name="duration_type" class="cs-input" style="margin-bottom:10px; font-size:12px;">
+      <option value="1h">1 soat</option>
+      <option value="30d" selected>30 kun (1 oy)</option>
+    </select>
+    <label class="muted" style="font-size:10px; display:block; margin-bottom:4px;">Nechta kod</label>
+    <input type="number" name="count" value="1" min="1" max="200" class="cs-input" style="margin-bottom:12px; font-size:12px;">
+    <button type="submit" class="cs-btn cs-btn-primary cs-btn-full">{{ icon('zap',13) }} Kod(lar) yaratish</button>
+  </form>
+</div>
+
+<div class="cs-card">
+  <h3 style="font-size:13px; margin-bottom:12px;">{{ icon('clock',14) }} SO'NGGI KODLAR</h3>
+  <table class="cs-table" style="font-size:11.5px;">
+    <thead><tr><th>Kod</th><th>Muddat</th><th>Yaratdi</th><th>Ishlatildi</th></tr></thead>
+    <tbody>
+    {% for c in codes %}
+    <tr>
+      <td style="font-family:monospace;">{{ c.code }}</td>
+      <td>{{ '1 soat' if c.duration_type=='1h' else '30 kun' }}</td>
+      <td>{{ c.creator_ism or '—' }}</td>
+      <td>
+        {% if c.used_by %}
+        <span style="color:#e0393d;">✓ {{ c.user_ism }} {{ c.user_familiya }}</span>
+        {% else %}
+        <span class="muted">Kutilmoqda</span>
+        {% endif %}
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

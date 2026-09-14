@@ -1,0 +1,35 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Developer Hub — MAXSUS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:20px;">{{ icon('code',18) }} Developer Hub / API</h1>
+</div>
+
+<div class="cs-card" style="max-width:640px; margin-bottom:20px;">
+  <h3 style="font-size:13px; margin-bottom:10px;">{{ icon('key',14) }} API KALITINGIZ</h3>
+  {% if api_key %}
+  <input type="text" readonly value="{{ api_key.api_key }}" class="cs-input" style="font-family:monospace; font-size:11px;">
+  {% else %}
+  <p class="muted" style="font-size:12px; margin-bottom:8px;">Hali API kalitingiz yo'q.</p>
+  <a href="{{ url_for('settings') }}" class="cs-btn cs-btn-sm">Sozlamalarda yaratish →</a>
+  {% endif %}
+</div>
+
+<div class="cs-card" style="max-width:640px;">
+  <h3 style="font-size:13px; margin-bottom:12px;">{{ icon('book',14) }} HUJJATLAR</h3>
+  <p style="font-size:13px; margin-bottom:10px;">API so'rovlarida <code>X-API-Key</code> header orqali kalitingizni yuboring.</p>
+  <div style="background:#0d0a14; border:1px solid rgba(168,85,247,.3); border-radius:8px; padding:14px; font-family:monospace; font-size:11.5px; color:#a855f7; overflow-x:auto;">
+    curl https://{{ site_domain }}/api/v1/me \<br>
+    &nbsp;&nbsp;-H "X-API-Key: {{ api_key.api_key if api_key else 'SIZNING_KALITINGIZ' }}"
+  </div>
+  <h4 style="font-size:12px; margin-top:16px; margin-bottom:8px; color:var(--cs-text-primary);">Mavjud endpointlar</h4>
+  <table class="cs-table" style="font-size:11.5px;">
+    <thead><tr><th>Endpoint</th><th>Tavsif</th></tr></thead>
+    <tbody>
+      <tr><td><code>GET /api/v1/me</code></td><td>Profil ma'lumotlaringiz (ID, plan, level, XP, balans)</td></tr>
+    </tbody>
+  </table>
+  <p class="muted" style="font-size:11px; margin-top:10px;">Ko'proq endpointlar keyingi versiyalarda qo'shiladi.</p>
+</div>
+{% endblock %}

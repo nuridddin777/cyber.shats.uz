@@ -1,0 +1,30 @@
+{% import "edu_orgs/_shared.html" as shared %}
+<!DOCTYPE html>
+<html lang="uz"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Edu Admin kirish — SHATS CYBER EDU</title>
+</head><body>
+{% include "edu_orgs/_shared.html" %}
+<div class="container">
+  <div class="top-nav"><div class="brand">SHATS CYBER <span>EDU ADMIN</span></div></div>
+
+  <div class="card" style="max-width:420px;margin:60px auto;">
+    <h1>Edu Admin</h1>
+    <p style="color:#a1a1c0;font-size:13px;">
+      Bu hisob asosiy SHATS CYBER admin/super_admin hisoblaridan MUSTAQIL —
+      faqat Edu tashkilotlari, tariflari va Edu G'aznasi uchun javobgar.
+    </p>
+
+    {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+
+    <form method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Email</label>
+      <input type="email" name="email" placeholder="shatsadmin@edu" required autofocus>
+      <label>Parol</label>
+      <input type="password" name="password" required>
+      <button type="submit" class="btn" style="width:100%;margin-top:10px;">Kirish</button>
+    </form>
+  </div>
+</div>
+</body></html>

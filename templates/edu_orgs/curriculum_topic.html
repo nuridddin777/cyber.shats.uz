@@ -1,0 +1,88 @@
+{% import "edu_orgs/_shared.html" as shared %}
+<!DOCTYPE html>
+<html lang="uz"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ topic['title'] }} — SHATS CYBER EDU</title>
+</head><body{% if is_pro %} class="{{ 'pro-student-theme' if role=='student' else ('pro-teacher-theme' if role=='teacher' else '') }}"{% endif %}>
+{% include "edu_orgs/_shared.html" %}
+<div class="container">
+  <div class="top-nav">
+    <div class="brand">SHATS CYBER <span>EDU</span>{% if is_pro %} <span class="badge" style="margin-left:6px;">PRO</span>{% endif %}</div>
+    <a href="{{ url_for('edu_orgs.curriculum_topics', grade_label=topic['grade_label']) }}" class="btn secondary">← {{ topic['grade_label'] }} mavzulari</a>
+  </div>
+
+  {{ shared.flashes() }}
+
+  <div class="card">
+    <h1>{{ topic['chapter_no'] }}-bob. {{ topic['title'] }}</h1>
+    <p style="color:#a1a1c0;">{{ topic['summary'] }}</p>
+  </div>
+
+  {% if topic['full_text'] %}
+  <div class="card">
+    <h2>📖 Mavzuni o'qib o'rganish</h2>
+    <div style="font-size:15px; line-height:1.8; white-space:pre-wrap;">{{ topic['full_text'] }}</div>
+  </div>
+  {% endif %}
+
+  {% if topic['simulation_type'] == 'scratch_blocks' %}
+    {% include "edu_orgs/partials/sim_scratch.html" %}
+  {% elif topic['simulation_type'] == 'html_editor' %}
+    {% include "edu_orgs/partials/sim_html.html" %}
+  {% endif %}
+
+  <div class="card">
+    <h2>Amaliy topshiriqlar</h2>
+    {% if practicals %}
+      {% for p in practicals %}
+      <div class="card" style="background:#1a1a2a;">
+        <h3>{{ p['order_no'] }}. {{ p['title'] }} {% if p['is_pro_only'] %}<span class="badge">PRO</span>{% endif %}</h3>
+        <p>{{ p['instructions'] }}</p>
+        {% if p['image_hint'] %}
+          <p style="color:var(--edu-accent);font-size:13px;">
+            🖼️ Tavsiya etilgan vizual: {{ p['image_hint'] }}
+          </p>
+        {% endif %}
+      </div>
+      {% endfor %}
+    {% else %}
+      <p style="color:#a1a1c0;">Bu mavzu uchun amaliy topshiriqlar hali qo'shilmagan.</p>
+    {% endif %}
+
+    {% if locked_count > 0 %}
+      <div class="card" style="background:#1a1a2a;border:1px dashed var(--edu-border);">
+        <p class="badge warn">🔒 Yana {{ locked_count }} ta amaliy + rasm tavsiyalari — faqat Pro tarifda</p>
+        {% if role == 'org' %}
+          <a href="{{ url_for('edu_orgs.tariffs_page') }}" class="btn secondary">Pro tarifga o'tish</a>
+        {% else %}
+          <p style="color:#a1a1c0;font-size:13px;">Tashkilotingiz admini Pro tarifni faollashtirsa, bu qismlar avtomatik ochiladi.</p>
+        {% endif %}
+      </div>
+    {% endif %}
+  </div>
+
+  {% if is_pro %}
+  <div class="card">
+    <h2>🤖 AI yordamchi <span class="badge">PRO</span></h2>
+    <p style="color:#a1a1c0;font-size:13px;">
+      Ushbu mavzu yoki amaliy topshiriqlar bo'yicha savolingiz bo'lsa, AI yordamchidan so'rang.
+      {% if ai_reply and not ai_is_live %}
+        <span class="badge warn">Demo rejim — real javob uchun administrator API kalitini sozlashi kerak</span>
+      {% endif %}
+    </p>
+    <form method="POST" action="{{ url_for('edu_orgs.curriculum_ai_ask', topic_id=topic['id']) }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Savolingiz</label>
+      <textarea name="question" rows="3" required placeholder="masalan: RAM va ROM orasidagi farqni yana bir marta sodda tilda tushuntirib bera olasizmi?"
+                style="width:100%;padding:12px 14px;margin:6px 0 16px 0;border-radius:10px;border:1px solid var(--edu-border);background:var(--edu-bg-soft);color:#fff;font-size:16px;">{{ ai_question or '' }}</textarea>
+      <button type="submit" class="btn">Savol berish</button>
+    </form>
+    {% if ai_reply %}
+      <div class="card" style="background:#1a1a2a;margin-top:14px;">
+        <p style="white-space:pre-wrap;">{{ ai_reply }}</p>
+      </div>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+</body></html>

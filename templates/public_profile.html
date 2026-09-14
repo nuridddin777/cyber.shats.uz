@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}{{ u.familiya }} {{ u.ism }} — CYBER SHATS{% endblock %}
+{% set tier = {
+  'vip': {
+    'label': 'SHATS CYBER PRO', 'badge_bg': 'linear-gradient(135deg,#BF953F 0%,#FCF6BA 50%,#B38728 100%)',
+    'badge_icon_color': '#050505', 'card_bg': 'linear-gradient(155deg,#050505 0%,#1a1508 60%,#050505 100%)',
+    'card_border': '#B38728', 'text_color': '#FCF6BA', 'name_color': '#FCF6BA',
+    'sub_color': 'rgba(252,246,186,.65)', 'avatar_ring': '#BF953F'
+  },
+  'cyber_pro': {
+    'label': 'CYBER PRO', 'badge_bg': 'linear-gradient(135deg,#ff3366 0%,#4d7fff 100%)',
+    'badge_icon_color': '#fff', 'card_bg': 'linear-gradient(155deg,#08080f 0%,#12121d 100%)',
+    'card_border': 'rgba(255,51,102,.35)', 'text_color': '#eef0fc', 'name_color': '#ff3366',
+    'sub_color': 'rgba(238,240,252,.6)', 'avatar_ring': '#ff3366'
+  },
+  'pro': {
+    'label': 'PRO', 'badge_bg': 'linear-gradient(135deg,#b45309 0%,#92400e 100%)',
+    'badge_icon_color': '#fff', 'card_bg': 'linear-gradient(155deg,#faf6f1 0%,#f3ebe1 100%)',
+    'card_border': 'rgba(146,64,14,.3)', 'text_color': '#2e1a0a', 'name_color': '#92400e',
+    'sub_color': 'rgba(46,26,10,.6)', 'avatar_ring': '#b45309'
+  },
+  'hacker': {
+    'label': 'MAXSUS', 'badge_bg': 'linear-gradient(135deg,#a855f7 0%,#6d28d9 100%)',
+    'badge_icon_color': '#fff', 'card_bg': 'linear-gradient(155deg,#0a0710 0%,#150f22 100%)',
+    'card_border': 'rgba(168,85,247,.35)', 'text_color': '#f1eaff', 'name_color': '#a855f7',
+    'sub_color': 'rgba(241,234,255,.6)', 'avatar_ring': '#a855f7'
+  },
+}.get(u.plan) %}
+{% if u.exclusive_theme == 'cars' %}
+{% set tier = {'label': 'GARAGE', 'badge_bg': 'linear-gradient(135deg,#ff3d38,#e10600)', 'badge_icon_color': '#fff',
+  'card_bg': 'linear-gradient(155deg,#0c0d0f,#1a1c20)', 'card_border': 'rgba(225,6,0,.35)', 'text_color': '#f2f3f5',
+  'name_color': '#e10600', 'sub_color': 'rgba(242,243,245,.6)', 'avatar_ring': '#e10600'} %}
+{% elif u.exclusive_theme == 'wolfpack' %}
+{% set tier = {'label': "QASHQIRLAR MAKONI", 'badge_bg': 'linear-gradient(135deg,#c23b3b,#6e1212)', 'badge_icon_color': '#fff',
+  'card_bg': 'linear-gradient(155deg,#0a0a0c,#17171b)', 'card_border': 'rgba(154,28,28,.35)', 'text_color': '#e8e8ec',
+  'name_color': '#c23b3b', 'sub_color': 'rgba(232,232,236,.6)', 'avatar_ring': '#9a1c1c'} %}
+{% endif %}
+{% block extra_head %}
+<style>
+.pp-card {
+  background: {{ tier.card_bg if tier else 'var(--cs-bg-card)' }};
+  border: 1px solid {{ tier.card_border if tier else 'var(--cs-border)' }};
+  color: {{ tier.text_color if tier else 'var(--cs-text-white)' }};
+  border-radius: var(--cs-radius); padding: 36px 32px; text-align: center; position: relative; overflow: hidden;
+}
+{% if tier %}
+.pp-card::before { content:''; position:absolute; inset:0; background: radial-gradient(circle at 50% -10%, {{ tier.avatar_ring }}22, transparent 60%); pointer-events:none; }
+{% endif %}
+.pp-avatar {
+  width: 84px; height: 84px; border-radius: 50%; display:flex; align-items:center; justify-content:center;
+  font-size: 32px; font-weight: 900; margin: 0 auto 16px; position:relative; z-index:1;
+  {% if tier %}background: {{ tier.card_bg }}; border: 3px solid {{ tier.avatar_ring }}; color: {{ tier.name_color }};{% else %}background: rgba(37,99,235,.1); border: 2px solid var(--cs-border-active); color: var(--cs-text-primary);{% endif %}
+}
+.pp-tier-badge {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 800; letter-spacing: 1px;
+  padding: 4px 12px; border-radius: var(--cs-radius-pill); margin-top: 10px;
+  {% if tier %}background: {{ tier.badge_bg }}; color: {{ tier.badge_icon_color }};{% else %}background: rgba(100,116,139,.12); color: var(--cs-text-muted);{% endif %}
+}
+.pp-admin-badge {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 9.5px; font-weight: 800; letter-spacing: 1px;
+  padding: 4px 12px; border-radius: var(--cs-radius-pill); margin-top: 8px;
+  background: linear-gradient(135deg, #1e293b, #0f172a); color: #fff;
+  border: 1px solid rgba(255,255,255,.15);
+}
+.pp-check {
+  display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; border-radius: 50%;
+  vertical-align: middle; margin-left: 4px;
+  {% if tier %}background: {{ tier.badge_bg }};{% else %}background: #2563eb;{% endif %}
+}
+.pp-check svg { width: 11px; height: 11px; {% if tier %}color: {{ tier.badge_icon_color }};{% else %}color: #fff;{% endif %} }
+.pp-sub { color: {{ tier.sub_color if tier else 'var(--cs-text-muted)' }}; font-size: 12px; }
+@keyframes frame-pulse-kf { 0%,100%{ filter:brightness(1); } 50%{ filter:brightness(1.35); } }
+.frame-pulse{ animation:frame-pulse-kf 1.6s ease-in-out infinite; }
+@keyframes frame-spin-kf { from{ transform:rotate(0deg);} to{ transform:rotate(360deg);} }
+.frame-spin-slow{ animation:frame-spin-kf 6s linear infinite; }
+@keyframes frame-shimmer-kf { 0%,100%{ box-shadow:0 0 10px rgba(191,149,63,.4);} 50%{ box-shadow:0 0 22px rgba(191,149,63,.9);} }
+.frame-shimmer{ animation:frame-shimmer-kf 1.8s ease-in-out infinite; }
+@keyframes frame-glitch-kf { 0%,100%{ transform:translateX(0);} 25%{ transform:translateX(-1.5px);} 75%{ transform:translateX(1.5px);} }
+.frame-glitch{ animation:frame-glitch-kf .3s steps(2) infinite; }
+@keyframes frame-rainbow-kf { 0%{ background-position:0% 50%;} 100%{ background-position:200% 50%;} }
+.frame-rainbow-flow{ animation:frame-rainbow-kf 3s linear infinite; background-size:200% 200%; }
+@media (prefers-reduced-motion: reduce){ .frame-pulse,.frame-spin-slow,.frame-shimmer,.frame-glitch,.frame-rainbow-flow{ animation:none !important; } }
+</style>
+{% endblock %}
+{% block content %}
+<div style="max-width:560px; margin:60px auto; padding:20px;">
+  <div class="pp-card">
+    <div class="pp-avatar {{ frame.animation_class or '' }}" {% if frame %}style="{{ frame.css_style }}"{% endif %}>
+      {% if u.avatar_path %}<img src="{{ u.avatar_path }}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">{% else %}{{ u.ism[0] }}{% endif %}
+    </div>
+    <h1 style="font-size:22px; color:{{ tier.name_color if tier else 'inherit' }}; display:flex; align-items:center; justify-content:center; gap:2px;">
+      {{ u.familiya }} {{ u.ism }}
+      {% if tier or u.bio_verified %}
+      {% if u.exclusive_theme == 'cars' %}
+      <span class="pp-check" title="GARAGE — eksklyuziv a'zo" style="background:linear-gradient(135deg,#ff3d38,#e10600);">
+        <img src="{{ url_for('static', filename='img/garage-car-icon.svg') }}" style="width:13px; height:auto; filter: brightness(0) invert(1);">
+      </span>
+      {% else %}
+      <span class="pp-check" title="Tasdiqlangan">{{ icon('check',10) }}</span>
+      {% endif %}
+      {% endif %}
+    </h1>
+    <div class="pp-sub" style="margin-bottom:4px;">#{{ u.custom_id }} · LVL {{ u.level }}</div>
+    <div class="cs-chip solid" style="display:inline-flex; align-items:center; gap:4px; background:rgba(217,119,6,.12); color:var(--cs-text-yellow); border-color:rgba(217,119,6,.3); margin-bottom:4px;">
+      ⚡ {{ "{:,}".format(u.code_balance|default(0)|int) }} CODE
+    </div>
+    {% if u.role in ('admin', 'super_admin', 'mentor') %}
+    <div class="pp-admin-badge">{{ icon('shield',10) }} {{ 'SUPER ADMIN' if u.role=='super_admin' else ('MENTOR' if u.role=='mentor' else 'ADMIN') }}</div>
+    {% endif %}
+    {% if tier %}<div class="pp-tier-badge">{{ icon('star',10) }} {{ tier.label }}</div>{% endif %}
+    {% if u.bio_motto %}<p style="font-size:14px; margin:16px 0; opacity:.85;">"{{ u.bio_motto }}"</p>{% endif %}
+    <div style="display:flex; gap:10px; justify-content:center; margin-top:20px; flex-wrap:wrap;">
+      {% if u.bio_portfolio_url %}<a href="{{ u.bio_portfolio_url }}" target="_blank" class="cs-btn cs-btn-sm">Portfolio</a>{% endif %}
+      {% if u.bio_github_url %}<a href="{{ u.bio_github_url }}" target="_blank" class="cs-btn cs-btn-sm">GitHub</a>{% endif %}
+      {% if current_user and current_user.id != u.id %}
+        {% if friendship_status == 'friends' %}
+        <span class="cs-chip solid" style="color:var(--cs-text-primary);">{{ icon('check',11) }} Do'stsiz</span>
+        {% elif friendship_status == 'pending_sent' %}
+        <span class="cs-chip">So'rov yuborilgan...</span>
+        {% elif friendship_status == 'pending_received' %}
+        <form method="post" action="{{ url_for('friends.friends_respond', requester_id=u.id) }}" style="display:flex; gap:6px;">
+          <input type="hidden" name="decision" value="accept">
+          <button type="submit" class="cs-btn cs-btn-sm cs-btn-primary">Do'stlikni qabul qilish</button>
+        </form>
+        {% else %}
+        <form method="post" action="{{ url_for('friends.friends_send_request', target_id=u.id) }}">
+          <button type="submit" class="cs-btn cs-btn-sm cs-btn-primary">{{ icon('user-plus',11) }} Do'stlikka taklif qilish</button>
+        </form>
+        {% endif %}
+      {% endif %}
+    </div>
+    <div class="pp-sub" style="margin-top:24px;">{{ u.profile_views }} marta ko'rildi</div>
+    {% if mutual_friends %}
+    <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,.1); padding-top:16px;">
+      <div style="font-size:10.5px; opacity:.6; letter-spacing:1px; margin-bottom:10px;">🤝 {{ mutual_friends|length }} TA UMUMIY DO'ST</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+        {% for mf in mutual_friends[:8] %}
+        <a href="{{ url_for('public_profile_view', custom_id=mf.custom_id) }}" title="{{ mf.familiya }} {{ mf.ism }}">
+          {% if mf.avatar_path %}<img src="{{ mf.avatar_path }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;">
+          {% else %}<div style="width:32px;height:32px;border-radius:50%;background:rgba(0,255,106,.15);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--cs-text-primary);">{{ mf.ism[0]|upper }}</div>{% endif %}
+        </a>
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+    {% if pinned_statuettes %}
+    <div style="margin-top:20px; border-top:1px solid rgba(255,255,255,.1); padding-top:16px;">
+      <div style="font-size:10.5px; opacity:.6; letter-spacing:1px; margin-bottom:10px;">KOLEKSIYA</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; justify-content:center;">
+        {% for s in pinned_statuettes %}
+        <img src="{{ url_for('shop.collection_statuette_svg', level=s.level) }}" style="width:44px; height:44px;" title="Daraja {{ s.level }} — {{ s.tier.label }}">
+        {% endfor %}
+      </div>
+    </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

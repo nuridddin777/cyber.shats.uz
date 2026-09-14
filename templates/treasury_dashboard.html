@@ -1,0 +1,482 @@
+{% extends "base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}G'azna paneli — CYBER SHATS{% endblock %}
+{% block extra_head %}
+<style>
+/* G'azna paneli — VIP (Obsidian + Tilla) uslubida, chunki bu — moliyaviy
+   nazorat markazi, alohida "hashamatli" ko'rinish beriladi. */
+body{ background: linear-gradient(180deg, #050505 0%, #0e0e0e 100%) !important; }
+body::before{ display:none !important; }
+.cs-card{
+  background: linear-gradient(155deg, #0e0e0e 0%, #1a1508 60%, #0e0e0e 100%) !important;
+  border: 1px solid rgba(179,135,40,.35) !important;
+  color: #FCF6BA !important;
+}
+.cs-card h1, .cs-card h2, .cs-card h3, h1, h2, h3 { color: #FCF6BA !important; }
+.muted { color: rgba(252,246,186,.55) !important; }
+a { color: #BF953F; }
+.cs-btn-primary {
+  background: linear-gradient(135deg,#BF953F 0%,#FCF6BA 50%,#B38728 100%) !important;
+  color: #050505 !important; font-weight: 800; border: none !important;
+}
+.cs-input {
+  background: #1a1a1a !important; border-color: rgba(179,135,40,.3) !important; color: #FCF6BA !important;
+}
+.cs-table th { color: rgba(252,246,186,.6) !important; }
+.cs-table td { color: #FCF6BA !important; border-color: rgba(179,135,40,.15) !important; }
+.cs-chip { border-color: rgba(179,135,40,.3) !important; color: #FCF6BA !important; }
+</style>
+{% endblock %}
+{% block content %}
+
+<div style="max-width:1200px; margin:24px auto; padding:0 20px;">
+
+  <div class="flex-between" style="margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+    <div>
+      <h1 style="font-size:22px; color:var(--cs-text-yellow);">{{ icon('zap',20) }} CYBER SHATS — G'AZNA PANELI</h1>
+      <p class="muted" style="font-size:11.5px; margin-top:4px;">
+        Xodim: <strong>{{ treasury_ism }}</strong> · Jamg'arma boshqaruvi
+      </p>
+    </div>
+    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <a href="{{ url_for('treasury_bp.treasury_bot_purchases') }}" class="cs-btn cs-btn-sm" style="background:linear-gradient(135deg,#0088cc,#005f7c); color:#fff; border:0;">{{ icon('zap',14) }} Bot to'lovlari</a>
+      <a href="{{ url_for('treasury_bp.treasury_ids_page') }}" class="cs-btn cs-btn-sm" style="background:linear-gradient(135deg,#BF953F,#B38728); color:#050505; border:0; font-weight:700;">{{ icon('hash',14) }} ID Boshqaruvi</a>
+      <a href="{{ url_for('treasury_bp.treasury_design_orders') }}" class="cs-btn cs-btn-sm" style="background:linear-gradient(135deg,#a855f7,#7c3aed); color:#fff; border:0; font-weight:700;">🎨 Dizayn Zakazlari</a>
+      <a href="{{ url_for('treasury_bp.treasury_history') }}" class="cs-btn cs-btn-sm">{{ icon('clock',14) }} To'liq tarix</a>
+      <a href="{{ url_for('treasury_bp.treasury_certificates') }}" class="cs-btn cs-btn-sm">{{ icon('award',14) }} Sertifikat arizalari</a>
+      <a href="{{ url_for('treasury_bp.treasury_accounts_page') }}" class="cs-btn cs-btn-sm">{{ icon('users',14) }} Xodimlar</a>
+      <a href="#edu" class="cs-btn cs-btn-sm" style="background:rgba(255,59,59,.12); border-color:#e0393d; color:#e0393d;">🎓 Edu bo'limi</a>
+      <a href="{{ url_for('treasury_bp.treasury_logout') }}" class="cs-btn cs-btn-sm cs-btn-danger">{{ icon('logout',14) }} Chiqish</a>
+    </div>
+  </div>
+
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="cs-card" style="padding:10px 14px; margin-bottom:14px; border-color:{{ '#ff5555' if category=='error' else 'var(--cs-text-primary)' }}; font-size:12px;">
+        {{ message }}
+      </div>
+    {% endfor %}
+  {% endwith %}
+
+  <!-- JAMG'ARMA BALANSI -->
+  <div class="cs-card" style="padding:24px; margin-bottom:20px; text-align:center; border-color:rgba(255,210,63,.5); background:linear-gradient(135deg, rgba(255,210,63,.05), rgba(0,0,0,0));">
+    <div class="muted" style="font-size:11.5px; text-transform:uppercase; letter-spacing:1px;">Jamg'armadagi balans</div>
+    <div style="font-family:var(--cs-font-display); font-size:46px; font-weight:800; color:var(--cs-text-yellow); margin-top:6px;">
+      ⚡ {{ "{:,}".format(stats.balance) }}
+    </div>
+    <div class="muted" style="font-size:13px; margin-top:2px;">
+      ≈ <strong style="color:var(--cs-text-primary);">{{ "{:,}".format(stats.balance * code_to_som_rate) }} so'm</strong>
+      <span style="font-size:10.5px;">(1 CODE = {{ "{:,}".format(code_to_som_rate) }} so'm)</span>
+    </div>
+    <div class="muted" style="font-size:11.5px; margin-top:6px;">
+      Jami kirim: <strong style="color:var(--cs-text-primary);">+{{ "{:,}".format(stats.total_in) }}</strong>
+      &nbsp;·&nbsp;
+      Jami chiqim: <strong style="color:#ff9900;">−{{ "{:,}".format(stats.total_out) }}</strong>
+    </div>
+  </div>
+
+  <div class="grid grid-3" style="gap:14px; margin-bottom:20px;">
+    {% for r in stats.in_by_reason %}
+    <div class="stat-card">
+      <div class="label" style="font-size:11px;">
+        {% if r.reason == 'buy_pro' %}Pro sotib olish
+        {% elif r.reason == 'buy_cyber_pro' %}Cyber Pro sotib olish
+        {% elif r.reason == 'buy_course' %}Kurs sotib olish
+        {% elif r.reason == 'ai_usage' %}AI ishlatish
+        {% elif r.reason == 'ai_weekly_sub' %}AI haftalik obuna
+        {% elif r.reason == 'transfer_fee' %}P2P komissiya
+        {% elif r.reason == 'certificate_fee' %}Sertifikat to'lovi
+        {% elif r.reason == 'ping_test' %}Ping test to'lovi
+        {% elif r.reason.startswith('admin_deposit') %}Admin to'ldirgan
+        {% elif r.reason.startswith('id_sale') %}ID auksion sotuvi
+        {% else %}{{ r.reason }}{% endif %}
+      </div>
+      <div class="num" style="font-size:18px; color:var(--cs-text-primary);">+{{ "{:,}".format(r.total) }}</div>
+    </div>
+    {% else %}
+    <div class="cs-card" style="padding:14px; grid-column:1/-1; text-align:center;">
+      <span class="muted">Hozircha jamg'armaga kirim bo'lmagan. Foydalanuvchilar Pro sotib olganda, kurs ochganda yoki o'zaro o'tkazma qilganda kirim boshlanadi.</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- FOYDALANUVCHIGA CODE CHIQARISH -->
+  <div class="cs-card" style="margin-bottom:20px;">
+    <div class="cs-card-title">
+      <h3 style="font-size:13px;">{{ icon('send',14) }} FOYDALANUVCHIGA CODE CHIQARISH</h3>
+    </div>
+    <form method="get" action="{{ url_for('treasury_bp.treasury_dashboard') }}" style="display:flex; gap:8px; margin-bottom:14px;">
+      <input type="text" name="q" value="{{ search_q }}" placeholder="Foydalanuvchini ism, email yoki ID orqali qidiring..." class="cs-input" style="flex:1;">
+      <button type="submit" class="cs-btn cs-btn-primary">{{ icon('search',14) }} Qidirish</button>
+    </form>
+
+    {% if search_q %}
+      {% if search_results %}
+      <div style="overflow-x:auto;">
+      <table class="cs-table">
+        <thead><tr><th>#</th><th>Foydalanuvchi</th><th>Email</th><th>Balans</th><th>Plan</th><th>Code chiqarish</th></tr></thead>
+        <tbody>
+        {% for u in search_results %}
+        <tr>
+          <td class="muted">#{{ u.custom_id or u.id }}</td>
+          <td><strong>{{ u.familiya }} {{ u.ism }}</strong></td>
+          <td class="muted" style="font-size:11px;">{{ u.email }}</td>
+          <td style="color:var(--cs-text-primary); font-weight:700;">⚡ {{ "{:,}".format(u.code_balance|default(0)|int) }}</td>
+          <td><span class="cs-chip {{ 'solid' if u.plan in ['pro','cyber_pro'] }}">{{ u.plan|upper }}</span></td>
+          <td>
+            <form method="post" action="{{ url_for('treasury_bp.treasury_issue_coins', user_id=u.id) }}" style="display:flex; gap:4px;">
+              <input type="hidden" name="q" value="{{ search_q }}">
+              <input type="number" name="amount" min="1" value="500" class="cs-input"
+                     style="width:90px; padding:4px 6px; font-size:11px; height:30px;" required>
+              <button class="cs-btn cs-btn-sm" style="background:rgba(255,210,63,.15); border-color:var(--cs-text-yellow); color:var(--cs-text-yellow);">
+                ⚡ Chiqarish
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% else %}
+      <p class="muted" style="text-align:center; padding:20px;">"{{ search_q }}" bo'yicha foydalanuvchi topilmadi</p>
+      {% endif %}
+    {% else %}
+    <p class="muted" style="text-align:center; padding:20px; font-size:12px;">
+      Foydalanuvchini qidirib, jamg'armadan code chiqarib bering. Jamg'armada yetarli mablag' bo'lmasa, chiqarib bera olmaysiz.
+    </p>
+    {% endif %}
+  </div>
+
+  <!-- JAMG'ARMA KIRIM-CHIQIM TARIXI -->
+  <div class="cs-card" style="margin-bottom:20px;">
+    <div class="cs-card-title">
+      <h3 style="font-size:13px;">{{ icon('clock',14) }} JAMG'ARMA HARAKATLARI TARIXI</h3>
+    </div>
+    <div style="max-height:500px; overflow-y:auto; overflow-x:auto;">
+      <table class="cs-table">
+        <thead><tr><th>Yo'nalish</th><th>Miqdor</th><th>Sabab</th><th>Foydalanuvchi</th><th>G'azna xodimi</th><th>Sana</th></tr></thead>
+        <tbody>
+        {% for log in fund_log %}
+        <tr>
+          <td>
+            {% if log.direction == 'in' %}
+            <span class="cs-chip" style="color:var(--cs-text-primary); font-size:10px;">↓ Kirim</span>
+            {% else %}
+            <span class="cs-chip" style="color:#ff9900; font-size:10px;">↑ Chiqim</span>
+            {% endif %}
+          </td>
+          <td style="font-family:var(--cs-font-display); font-weight:700; color:{{ 'var(--cs-text-primary)' if log.direction=='in' else '#ff9900' }};">
+            {{ '+' if log.direction=='in' else '−' }}{{ "{:,}".format(log.amount) }}
+          </td>
+          <td class="muted" style="font-size:11px;">
+            {% if log.reason == 'buy_pro' %}Pro sotib olish
+            {% elif log.reason == 'buy_cyber_pro' %}Cyber Pro sotib olish
+            {% elif log.reason == 'buy_course' %}Kurs sotib olish
+            {% elif log.reason == 'ai_usage' %}AI ishlatish
+            {% elif log.reason == 'ai_weekly_sub' %}AI haftalik obuna
+            {% elif log.reason == 'transfer_fee' %}P2P komissiya
+            {% elif log.reason == 'issue_to_user' %}Foydalanuvchiga chiqarish
+            {% elif log.reason == 'certificate_fee' %}Sertifikat to'lovi
+            {% elif log.reason == 'ping_test' %}Ping test
+            {% elif log.reason.startswith('admin_deposit') %}Admin to'ldirgan
+            {% elif log.reason.startswith('id_sale') %}ID sotuvi ({{ log.reason[8:] }})
+            {% else %}{{ log.reason }}{% endif %}
+          </td>
+          <td style="font-size:11px;">
+            {% if log.user_ism %}{{ log.user_ism }} {{ log.user_familiya }}{% else %}—{% endif %}
+          </td>
+          <td style="font-size:11px;">{{ log.treasury_ism or '—' }}</td>
+          <td class="muted" style="font-size:10px;">{{ log.created_at|tashkent_time }}</td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="muted" style="text-align:center; padding:30px;">Hozircha harakatlar yo'q</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CODE NARXLARINI O'ZGARTIRISH -->
+  <div class="cs-card" style="margin-bottom:20px;">
+    <div class="cs-card-title">
+      <h3 style="font-size:13px; color:#ffd700;">{{ icon('settings',14) }} CODE NARXLARINI O'ZGARTIRISH</h3>
+    </div>
+    <div class="grid" style="grid-template-columns:1fr 1fr; gap:16px;">
+
+      <!-- Paket narxlari -->
+      <div>
+        <div style="font-size:11px; font-weight:700; margin-bottom:10px; color:#38bff8;">PAKET NARXLARI (Telegram bot)</div>
+        <form method="post" action="{{ url_for('treasury_bp.treasury_update_packages') }}">
+          {% set packs = [1,5,10,15,20,25,30,35,40,45,50,55,60,65,70,75,80,85,90,95,100] %}
+          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px; max-height:280px; overflow-y:auto;">
+            {% for amt in packs %}
+            <div class="grid" style="grid-template-columns:1fr 1fr; gap:6px; align-items:center;">
+              <div style="font-size:11px; color:#38bff8;">⚡ {{ "{:,}".format(amt) }} Code</div>
+              <input type="number" name="code_pack_{{ amt }}"
+                     value="{{ pricing.get('code_pack_' ~ amt, '') }}"
+                     class="cs-input" style="font-size:11px; padding:5px 8px;" min="0">
+            </div>
+            {% endfor %}
+          </div>
+          <button type="submit" class="cs-btn cs-btn-primary cs-btn-sm cs-btn-full">{{ icon('save',12) }} Paket narxlarini saqlash</button>
+        </form>
+      </div>
+
+      <!-- Plan narxlari + Trading -->
+      <div>
+        <div style="font-size:11px; font-weight:700; margin-bottom:10px; color:#38bff8;">PLAN NARXLARI</div>
+        <form method="post" action="{{ url_for('treasury_bp.treasury_update_pricing') }}">
+          {% set pfields = [
+            ('pro_price_code', 'Cyber Pro (CODE)'),
+            ('cyber_pro_price_code', 'SHATS CYBER PRO (CODE)'),
+            ('vip_price_code', 'VIP (CODE)'),
+            ('welcome_bonus_code', 'Xush kelibsiz bonusi'),
+            ('paid_course_code_default', 'Kurs standart narxi'),
+          ] %}
+          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+            {% for key, label in pfields %}
+            <div>
+              <div class="muted" style="font-size:9.5px; margin-bottom:2px;">{{ label }}</div>
+              <input type="number" name="{{ key }}" value="{{ pricing.get(key,'') }}"
+                     class="cs-input" style="font-size:11px; padding:5px 8px;" min="0">
+            </div>
+            {% endfor %}
+          </div>
+          <div style="font-size:11px; font-weight:700; margin:10px 0 6px 0; color:#e0393d;">🤖 BOT TARIFLARI (so'mda, karta orqali)</div>
+          {% set bot_tariff_fields = [
+            ("bot_tariff_price_pro", "Pro Oddiy (so'm)"),
+            ("bot_tariff_price_cyber_pro", "Cyber Pro (so'm)"),
+            ("bot_tariff_price_vip", "VIP (so'm)"),
+            ("bot_tariff_price_hacker", "HackerLab (so'm)"),
+          ] %}
+          <div style="display:flex; flex-direction:column; gap:6px; margin-bottom:10px;">
+            {% for key, label in bot_tariff_fields %}
+            <div>
+              <div class="muted" style="font-size:9.5px; margin-bottom:2px;">{{ label }}</div>
+              <input type="number" name="{{ key }}" value="{{ pricing.get(key,'') }}"
+                     class="cs-input" style="font-size:11px; padding:5px 8px;" min="0">
+            </div>
+            {% endfor %}
+          </div>
+          <button type="submit" class="cs-btn cs-btn-primary cs-btn-sm cs-btn-full">{{ icon('save',12) }} Plan narxlarini saqlash</button>
+        </form>
+
+        <div style="margin-top:12px; padding:10px; background:rgba(0,0,0,.2); border-radius:6px;">
+          <div class="muted" style="font-size:9px; margin-bottom:4px;">TRADING JORIY NARXI</div>
+          <div style="font-size:20px; font-weight:800; color:#b8b8c0; font-family:var(--cs-font-display);">{{ "%.4f"|format(trading_current.price) }}</div>
+          <div style="font-size:10px; {{ 'color:#b8b8c0' if trading_current.change_pct >= 0 else 'color:#ff4444' }}; margin-top:3px;">
+            {{ '+' if trading_current.change_pct >= 0 else '' }}{{ "%.3f"|format(trading_current.change_pct) }}%
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- G'AZNA QR KODI -->
+  <div class="cs-card" style="padding:20px; margin-bottom:20px; text-align:center;">
+    <h3 style="font-size:16px; color:var(--cs-text-yellow); margin-bottom:12px;">📛 G'azna QR Kodi</h3>
+    <div style="background:rgba(5,10,20,0.8); border:1px solid rgba(255,210,63,0.2); border-radius:12px; padding:20px; display:inline-block;">
+      <div style="font-size:14px; color:#e8f4ff; margin-bottom:8px; font-weight:600;">{{ treasury_ism }}</div>
+      <div style="width:120px; height:120px; background:rgba(184,184,192,0.08); border:1px solid rgba(184,184,192,0.2); border-radius:10px; display:flex; align-items:center; justify-content:center; margin:0 auto; font-size:48px;">🏦</div>
+      <div style="font-size:11px; color:#5a7a9a; margin-top:8px;">G'azna xodimi</div>
+    </div>
+  </div>
+
+  <!-- ================================================================ -->
+  <!-- EDU BO'LIMI — Edu qismi uchun ALOHIDA jamg'arma (asosiy jamg'armadan
+       mustaqil). Shu yerdan tashkilotlarga (markazlarga) ID orqali CODE
+       chiqarish va 9 xonali faollashtirish kaliti berish mumkin.        -->
+  <!-- ================================================================ -->
+  <div id="edu" style="margin:32px 0 12px 0; padding-top:8px; border-top:2px solid rgba(255,59,59,.25);">
+    <div style="display:flex; align-items:center; gap:10px; margin:18px 0;">
+      <span style="font-size:22px;">🎓</span>
+      <h2 style="font-size:18px; color:#e0393d; margin:0;">EDU G'AZNASI</h2>
+      <span class="cs-chip" style="border-color:#e0393d; color:#e0393d;">Alohida jamg'arma</span>
+    </div>
+    <p class="muted" style="font-size:12px; margin:-8px 0 16px 0;">
+      Bu — asosiy SHATS CYBER jamg'armasidan MUSTAQIL, faqat Edu (tashkilotlar/markazlar) qismi
+      uchun alohida balans. Edu tashkilotlarining o'z Edu admin paneli ham bor (/edu2/admin/login).
+    </p>
+  </div>
+
+  <div class="cs-card" style="padding:24px; margin-bottom:20px; text-align:center; border-color:rgba(255,59,59,.4); background:linear-gradient(135deg, rgba(255,59,59,.06), rgba(0,0,0,0));">
+    <div class="muted" style="font-size:11.5px; text-transform:uppercase; letter-spacing:1px;">Edu jamg'armasidagi balans</div>
+    <div style="font-family:var(--cs-font-display); font-size:40px; font-weight:800; color:#e0393d; margin-top:6px;">
+      {{ edu_fund_balance }} CODE
+    </div>
+    <form method="post" action="{{ url_for('treasury_bp.treasury_edu_deposit') }}" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end; justify-content:center; margin-top:16px;">
+      <div>
+        <label class="muted" style="font-size:11px; display:block; margin-bottom:3px;">Jamg'armaga CODE qo'shish</label>
+        <input type="number" name="amount" placeholder="1000" class="cs-input" style="width:130px;">
+      </div>
+      <div>
+        <label class="muted" style="font-size:11px; display:block; margin-bottom:3px;">Izoh (ixtiyoriy)</label>
+        <input type="text" name="note" placeholder="masalan: boshlang'ich depozit" class="cs-input" style="width:220px;">
+      </div>
+      <button type="submit" class="cs-btn cs-btn-sm" style="background:rgba(255,59,59,.15); border-color:#e0393d; color:#e0393d;">Qo'shish</button>
+    </form>
+  </div>
+
+  <!-- MARKAZGA ID ORQALI CODE CHIQARISH -->
+  <div class="cs-card" style="margin-bottom:20px; border-color:rgba(255,59,59,.3);">
+    <div class="cs-card-title">
+      <h3 style="font-size:13px; color:#e0393d;">{{ icon('send',14) }} MARKAZGA ID ORQALI CODE CHIQARISH</h3>
+    </div>
+    <form method="get" action="{{ url_for('treasury_bp.treasury_dashboard') }}#edu" style="display:flex; gap:8px; margin-bottom:14px;">
+      <input type="text" name="org_q" value="{{ org_search_q or '' }}" placeholder="Markaz ID (masalan 10001), nomi yoki @username orqali qidiring..." class="cs-input" style="flex:1;">
+      <button type="submit" class="cs-btn" style="background:rgba(255,59,59,.15); border-color:#e0393d; color:#e0393d;">{{ icon('search',14) }} Qidirish</button>
+    </form>
+
+    {% if org_search_q %}
+      {% if org_search_results %}
+      <div style="overflow-x:auto;">
+      <table class="cs-table">
+        <thead><tr><th>ID</th><th>Markaz</th><th>Turi</th><th>Holat</th><th>Coin</th><th>CODE chiqarish</th></tr></thead>
+        <tbody>
+        {% for o in org_search_results %}
+        <tr>
+          <td class="muted">#{{ o['org_number'] }}</td>
+          <td><strong>{{ o['name'] }}</strong> <span class="muted" style="font-size:10px;">@{{ o['username'] }}</span></td>
+          <td class="muted" style="font-size:11px;">{{ o['org_type'] }}</td>
+          <td>{% if o['is_active'] %}<span class="cs-chip solid" style="color:#e0393d;">Faol</span>{% else %}<span class="cs-chip" style="color:#ff4444;">Faol emas</span>{% endif %}</td>
+          <td style="color:#e0393d; font-weight:700;">{{ o['coin_balance'] }}</td>
+          <td>
+            <form method="post" action="{{ url_for('treasury_bp.treasury_edu_issue_coins', org_id=o['id']) }}" style="display:flex; gap:4px;">
+              <input type="hidden" name="org_q" value="{{ org_search_q }}">
+              <input type="number" name="amount" min="1" value="100" class="cs-input"
+                     style="width:90px; padding:4px 6px; font-size:11px; height:30px;" required>
+              <button class="cs-btn cs-btn-sm" style="background:rgba(255,59,59,.15); border-color:#e0393d; color:#e0393d;">
+                ⚡ Chiqarish
+              </button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+      </div>
+      {% else %}
+      <p class="muted" style="text-align:center; padding:20px;">"{{ org_search_q }}" bo'yicha markaz topilmadi</p>
+      {% endif %}
+    {% else %}
+    <p class="muted" style="text-align:center; padding:20px; font-size:12px;">
+      Markazni ID (masalan #10001), nomi yoki @username orqali qidirib, Edu jamg'armasidan CODE chiqarib bering.
+      Har bir markazning to'liq ro'yxati pastda ham ko'rinadi.
+    </p>
+    {% endif %}
+  </div>
+
+  <!-- MARKAZLARDAN KELGAN HAQIQIY TO'LOV SO'ROVLARI -->
+  <div class="cs-card" style="margin-bottom:20px;">
+    <div class="cs-card-title">
+      <h3 style="font-size:13px;">💳 MARKAZLARDAN CODE SOTIB OLISH SO'ROVLARI (kutilayotgan)</h3>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="cs-table">
+        <thead><tr><th>Sana</th><th>Markaz</th><th>Miqdor</th><th>Summa</th><th>Chek</th><th>Amal</th></tr></thead>
+        <tbody>
+        {% for r in edu_purchase_requests %}
+        <tr>
+          <td class="muted" style="font-size:11px;">{{ r['created_at'] }}</td>
+          <td>{{ r['org_name'] }} <span class="muted">#{{ r['org_number'] }}</span></td>
+          <td>{{ r['code_amount'] }} CODE</td>
+          <td>{{ "{:,}".format(r['price_uzs']) }} so'm</td>
+          <td><a href="{{ url_for('treasury_bp.treasury_edu_purchase_receipt', req_id=r['id']) }}" target="_blank" class="cs-chip">Ko'rish</a></td>
+          <td style="display:flex; gap:4px;">
+            <form method="post" action="{{ url_for('treasury_bp.treasury_edu_purchase_approve', req_id=r['id']) }}">
+              <button type="submit" class="cs-btn cs-btn-sm" style="color:#e0393d;">Tasdiqlash</button>
+            </form>
+            <form method="post" action="{{ url_for('treasury_bp.treasury_edu_purchase_reject', req_id=r['id']) }}">
+              <button type="submit" class="cs-btn cs-btn-sm" style="color:#ff4444;">Rad etish</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="6" class="muted" style="text-align:center; padding:20px;">Kutilayotgan so'rovlar yo'q.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid" style="grid-template-columns:1fr 1fr; gap:20px; margin-bottom:20px;">
+    <!-- 9 XONALI FAOLLASHTIRISH KALITI -->
+    <div class="cs-card">
+      <div class="cs-card-title">
+        <h3 style="font-size:13px;">🔑 9 XONALI FAOLLASHTIRISH KALITI</h3>
+      </div>
+      <p class="muted" style="font-size:11px; margin-bottom:12px;">
+        Coin talab qilmasdan tarifni ochish uchun bir martalik kalit chiqaring.
+      </p>
+      <form method="post" action="{{ url_for('treasury_bp.treasury_edu_generate_key') }}" style="display:flex; gap:8px; flex-wrap:wrap; align-items:flex-end;">
+        <div>
+          <label class="muted" style="font-size:10px; display:block; margin-bottom:3px;">Tarif</label>
+          <select name="tarif_code" class="cs-input" required>
+            {% for t in edu_tariffs %}<option value="{{ t['code'] }}">{{ t['display_name'] }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label class="muted" style="font-size:10px; display:block; margin-bottom:3px;">Necha oyga</label>
+          <input type="number" name="months" value="1" min="1" class="cs-input" style="width:70px;">
+        </div>
+        <button type="submit" class="cs-btn cs-btn-primary cs-btn-sm">Kalit yaratish</button>
+      </form>
+    </div>
+
+    <!-- EDU JAMG'ARMA TARIXI -->
+    <div class="cs-card">
+      <div class="cs-card-title">
+        <h3 style="font-size:13px;">{{ icon('clock',14) }} EDU JAMG'ARMA TARIXI (so'nggi 40 ta)</h3>
+      </div>
+      <div style="max-height:220px; overflow-y:auto; overflow-x:auto;">
+        <table class="cs-table" style="font-size:11px;">
+          <thead><tr><th>Vaqt</th><th>Yo'nalish</th><th>Miqdor</th><th>Sabab</th><th>Markaz</th></tr></thead>
+          <tbody>
+          {% for l in edu_fund_log %}
+          <tr>
+            <td class="muted" style="font-size:10px;">{{ l['created_at'] }}</td>
+            <td>{% if l['direction'] == 'in' %}<span style="color:#e0393d;">Kirim</span>{% else %}<span style="color:#ff4444;">Chiqim</span>{% endif %}</td>
+            <td>{{ l['amount'] }}</td><td>{{ l['reason'] }}</td><td>{{ l['org_name'] or '-' }}</td>
+          </tr>
+          {% else %}
+          <tr><td colspan="5" class="muted" style="text-align:center; padding:16px;">Hozircha harakatlar yo'q</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- BARCHA MARKAZLAR RO'YXATI -->
+  <div class="cs-card" style="margin-bottom:20px;">
+    <div class="cs-card-title">
+      <h3 style="font-size:13px;">🏫 BARCHA MARKAZLAR RO'YXATI</h3>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="cs-table">
+        <thead><tr><th>ID</th><th>Nomi</th><th>Turi</th><th>Holat</th><th>Tarif</th><th>Coin</th><th>CODE chiqarish</th></tr></thead>
+        <tbody>
+        {% for o in edu_orgs %}
+        <tr>
+          <td class="muted">#{{ o['org_number'] }}</td><td>{{ o['name'] }}</td><td class="muted" style="font-size:11px;">{{ o['org_type'] }}</td>
+          <td>{% if o['is_active'] %}<span class="cs-chip solid" style="color:#e0393d;">Faol</span>{% else %}<span class="cs-chip" style="color:#ff4444;">Faol emas</span>{% endif %}</td>
+          <td class="muted" style="font-size:11px;">{{ o['tarif_code'] or '-' }}</td><td style="color:#e0393d; font-weight:700;">{{ o['coin_balance'] }}</td>
+          <td>
+            <form method="post" action="{{ url_for('treasury_bp.treasury_edu_issue_coins', org_id=o['id']) }}" style="display:flex; gap:4px;">
+              <input type="number" name="amount" placeholder="10" class="cs-input" style="width:70px; padding:4px 6px; font-size:11px; height:30px;">
+              <button type="submit" class="cs-btn cs-btn-sm" style="color:#e0393d;">Chiqarish</button>
+            </form>
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="7" class="muted" style="text-align:center; padding:20px;">Hozircha ro'yxatdan o'tgan markaz yo'q.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+{% endblock %}

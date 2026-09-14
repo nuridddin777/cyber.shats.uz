@@ -1,0 +1,59 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Yangiliklar boshqaruvi — Admin{% endblock %}
+{% block app_content %}
+<h1 style="font-size:19px; margin-bottom:16px;">{{ icon('message',18) }} Yangiliklar boshqaruvi</h1>
+
+<div class="cs-card" style="margin-bottom:20px; padding:20px;">
+  <h3 style="font-size:12.5px; margin-bottom:14px;">{{ icon('plus',13) }} YANGI YANGILIK QO'SHISH</h3>
+  <form method="post" action="{{ url_for('adminann_bp.admin_news_create') }}" style="display:flex; flex-direction:column; gap:10px;">
+    <input type="text" name="title" class="cs-input" placeholder="Sarlavha *" required>
+    <textarea name="summary" class="cs-textarea" rows="2" placeholder="Qisqa mazmun"></textarea>
+    <div class="grid grid-2 gap-8">
+      <input type="text" name="source" class="cs-input" placeholder="Manba (masalan: TechCrunch)" value="CYBER SHATS">
+      <select name="category" class="cs-input">
+        <option value="umumiy">Umumiy</option>
+        <option value="ai">AI</option>
+        <option value="xavfsizlik">Xavfsizlik</option>
+        <option value="dasturlash">Dasturlash</option>
+        <option value="karyera">Karyera</option>
+      </select>
+    </div>
+    <input type="url" name="url" class="cs-input" placeholder="Havola (ixtiyoriy) — https://...">
+    <button type="submit" class="cs-btn cs-btn-primary" style="align-self:flex-start;">{{ icon('send',13) }} Nashr qilish</button>
+  </form>
+</div>
+
+<div class="cs-card" style="padding:20px;">
+  <h3 style="font-size:12.5px; margin-bottom:14px;">{{ icon('list',13) }} MAVJUD YANGILIKLAR ({{ news_list|length }})</h3>
+  {% for n in news_list %}
+  <details class="cs-card" style="margin-bottom:10px; padding:14px 16px; background:var(--cs-bg-glass);">
+    <summary style="cursor:pointer; display:flex; justify-content:space-between; align-items:center; gap:10px;">
+      <div>
+        <strong style="font-size:12.5px;">{{ n.title }}</strong>
+        <div class="muted" style="font-size:10.5px; margin-top:2px;">{{ n.source }} · {{ n.category }} · {{ n.published_at }}</div>
+      </div>
+      <form method="post" action="{{ url_for('adminann_bp.admin_news_delete', news_id=n.id) }}" onsubmit="event.stopPropagation(); return confirm('O\'chirilsinmi?');">
+        <button type="submit" class="cs-btn cs-btn-sm cs-btn-danger" onclick="event.stopPropagation();">{{ icon('trash-2',11) }}</button>
+      </form>
+    </summary>
+    <form method="post" action="{{ url_for('adminann_bp.admin_news_edit', news_id=n.id) }}" style="margin-top:14px; display:flex; flex-direction:column; gap:8px;">
+      <input type="text" name="title" class="cs-input" value="{{ n.title }}" required>
+      <textarea name="summary" class="cs-textarea" rows="2">{{ n.summary or '' }}</textarea>
+      <div class="grid grid-2 gap-8">
+        <input type="text" name="source" class="cs-input" value="{{ n.source }}">
+        <select name="category" class="cs-input">
+          {% for c in ['umumiy','ai','xavfsizlik','dasturlash','karyera'] %}
+          <option value="{{ c }}" {{ 'selected' if n.category == c }}>{{ c|capitalize }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <input type="url" name="url" class="cs-input" value="{{ n.url or '' }}" placeholder="Havola">
+      <button type="submit" class="cs-btn cs-btn-sm cs-btn-secondary" style="align-self:flex-start;">{{ icon('save',11) }} Saqlash</button>
+    </form>
+  </details>
+  {% else %}
+  <p class="muted" style="text-align:center; padding:30px;">Hali yangiliklar yo'q.</p>
+  {% endfor %}
+</div>
+{% endblock %}

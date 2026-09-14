@@ -1,0 +1,36 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Mentorlar Birlashmasi — MAXSUS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:20px;">{{ icon('user-check',18) }} Mentorlar Birlashmasi</h1>
+</div>
+
+{% if not am_i_mentor %}
+<div class="cs-card" style="max-width:520px; margin-bottom:20px;">
+  <h3 style="font-size:13px; margin-bottom:10px;">{{ icon('plus',14) }} MENTOR SIFATIDA RO'YXATDAN O'TISH</h3>
+  <form method="post" action="{{ url_for('mentors_bp.mentors_register') }}">
+    <input type="text" name="skills" required class="cs-input" style="margin-bottom:8px;" placeholder="Ko'nikmalar (masalan: Python, Web xavfsizligi)">
+    <textarea name="bio" class="cs-input" rows="2" style="margin-bottom:8px;" placeholder="O'zingiz haqingizda"></textarea>
+    <input type="text" name="contact" class="cs-input" style="margin-bottom:10px;" placeholder="Aloqa (Telegram va h.k.)">
+    <button class="cs-btn cs-btn-primary cs-btn-full">{{ icon('user-check',13) }} Mentor bo'lish</button>
+  </form>
+</div>
+{% endif %}
+
+<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px;">
+  {% for m in mentors %}
+  <div class="cs-card">
+    <h3 style="font-size:14px;">{{ m.familiya }} {{ m.ism }} <span class="muted" style="font-size:11px;">#{{ m.custom_id }}</span></h3>
+    <div style="font-size:12px; color:var(--cs-text-primary); margin:6px 0;">{{ m.skills }}</div>
+    <p class="muted" style="font-size:12px; margin-bottom:10px;">{{ m.bio }}</p>
+    <form method="post" action="{{ url_for('mentors_bp.mentors_request', mentor_id=m.user_id) }}">
+      <input type="text" name="message" class="cs-input" style="font-size:11px; margin-bottom:6px;" placeholder="Nima haqida dars kerak?">
+      <button class="cs-btn cs-btn-sm cs-btn-full">{{ icon('send',11) }} Dars so'rash</button>
+    </form>
+  </div>
+  {% else %}
+  <p class="muted" style="grid-column:1/-1; text-align:center; padding:30px;">Hali mentor yo'q</p>
+  {% endfor %}
+</div>
+{% endblock %}

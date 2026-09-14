@@ -1,0 +1,260 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Code Tangalar — CYBER SHATS{% endblock %}
+{% block extra_head %}
+<style>
+.history-scroll { max-height: 400px; overflow-y: auto; padding-right: 8px; }
+.history-scroll::-webkit-scrollbar { width: 4px; }
+.history-scroll::-webkit-scrollbar-track { background: transparent; }
+.history-scroll::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 4px; }
+.history-scroll::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+.history-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 14px; margin-bottom: 6px; background: rgba(255,255,255,0.02); border-radius: 8px; transition: all 0.2s; }
+.history-row:hover { background: rgba(255,255,255,0.04); transform: translateX(2px); }
+</style>
+<style>
+.coin-stage{ perspective:700px; width:96px; height:96px; flex-shrink:0; }
+.coin3d{
+  width:96px; height:96px; border-radius:50%; position:relative;
+  background:radial-gradient(circle at 32% 26%, #fff6d0, #ffb238 42%, #d9820f 74%, #7a4405 100%);
+  box-shadow:0 10px 26px rgba(255,178,56,.35), inset 0 3px 7px rgba(255,255,255,.55), inset 0 -8px 14px rgba(0,0,0,.35);
+  display:flex; align-items:center; justify-content:center;
+  animation:coin-spin 4.5s linear infinite;
+}
+.coin3d::before{ content:''; position:absolute; inset:7px; border-radius:50%; border:2px dashed rgba(255,255,255,.4); }
+.coin3d span{ font-size:38px; filter:drop-shadow(0 2px 2px rgba(0,0,0,.4)); }
+@keyframes coin-spin{ from{transform:rotateY(0deg);} to{transform:rotateY(360deg);} }
+@media (prefers-reduced-motion: reduce){ .coin3d{ animation:none; } }
+.tier-grid{ display:grid; grid-template-columns:repeat(4,1fr); gap:14px; }
+@media(max-width:900px){ .tier-grid{ grid-template-columns:repeat(2,1fr); } }
+.tier-card{ position:relative; border-radius:16px; padding:20px 16px; text-align:center; border:1px solid rgba(255,255,255,.08); overflow:hidden; }
+.tier-card .ti{ font-size:26px; margin-bottom:8px; }
+.tier-card .tn{ font-family:var(--cs-font-display); font-weight:800; font-size:13px; letter-spacing:1px; margin-bottom:4px; }
+.tier-card .tc{ font-size:12px; color:var(--cs-text-yellow); font-weight:700; margin-bottom:12px; }
+.tier-card .td{ font-size:10.5px; color:var(--cs-text-muted); margin-bottom:14px; min-height:28px; }
+.tier-card button{ width:100%; border:none; border-radius:10px; padding:9px; font-size:11.5px; font-weight:800; cursor:pointer; color:#fff; }
+.tier-pro{ background:linear-gradient(155deg, rgba(184,184,192,.08), rgba(10,15,26,0)); }
+.tier-pro button{ background:linear-gradient(135deg,#8a8a92,#5b5b62); }
+.tier-cyberpro{ background:linear-gradient(155deg, rgba(255,59,59,.08), rgba(184,184,192,.05)); }
+.tier-cyberpro button{ background:linear-gradient(135deg,#ff3b3b,#8a8a92); }
+.tier-vip{ background:linear-gradient(155deg, rgba(255,59,59,.14), rgba(10,15,26,0)); border-color:rgba(255,59,59,.3); }
+.tier-vip button{ background:linear-gradient(135deg,#ff4d4d,#8c0f0f); }
+.tier-maxsus{ background:linear-gradient(155deg, rgba(168,85,247,.12), rgba(10,15,26,0)); border-color:rgba(168,85,247,.3); }
+.tier-maxsus button{ background:linear-gradient(135deg,#a855f7,#4c1d95); }
+</style>{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+  <h1 style="font-size:20px;">{{ icon('zap',18) }} Code Tangalar</h1>
+</div>
+
+<!-- Balans kartasi — 3D tanga vizuali bilan -->
+<div class="cs-card" style="text-align:left; padding:32px; margin-bottom:20px; background:linear-gradient(135deg,rgba(255,59,59,.08),rgba(255,178,56,.05)); display:flex; align-items:center; gap:26px; flex-wrap:wrap;">
+  <div class="coin-stage"><div class="coin3d"><span>⚡</span></div></div>
+  <div style="flex:1; min-width:200px;">
+    <div style="font-size:11px; letter-spacing:2px; color:var(--cs-text-muted); margin-bottom:6px;">SIZNING BALANSINGIZ</div>
+    <div style="font-size:44px; font-weight:900; font-family:var(--cs-font-display); color:var(--cs-text-primary); line-height:1;">
+      {{ "{:,}".format(balance) }} <span style="font-size:16px; color:var(--cs-text-muted); font-weight:600;">CODE</span>
+    </div>
+    <div class="muted" style="font-size:11.5px; margin-top:8px;">
+      {{ icon('repeat',11) }} Ayirboshlash kursi: 1 CODE = {{ "{:,}".format(code_to_som_rate) }} so'm
+    </div>
+    <a href="{{ url_for('coins_bp.coins_buy_page') }}" class="cs-btn cs-btn-primary" style="margin-top:16px; display:inline-flex;">
+      {{ icon('zap',14) }} CODE sotib olish
+    </a>
+  </div>
+</div>
+
+<!-- TARIF YANGILASH — kartochka ko'rinishida -->
+<div class="cs-card" style="margin-bottom:20px; padding:22px;">
+  <h3 style="font-size:12.5px; margin-bottom:16px; letter-spacing:1px;">{{ icon('star',14) }} TARIFNI YANGILASH</h3>
+  <div class="tier-grid">
+    {% if current_user.plan not in ['pro','cyber_pro','vip'] %}
+    <div class="tier-card tier-pro" style="position:relative;">
+      <div style="position:absolute; top:-8px; right:-8px; background:linear-gradient(135deg,#ff3030,#c81212); color:#fff; font-size:9px; font-weight:800; padding:3px 9px; border-radius:10px; box-shadow:0 2px 8px rgba(200,18,18,.5);">🔥 AKSIYA</div>
+      <div class="ti">⭐</div><div class="tn">PRO</div>
+      <div class="tc"><span class="muted" style="text-decoration:line-through; font-size:11px; margin-right:6px;">{{ pro_cost + 1 }}</span>⚡ {{ "{:,}".format(pro_cost) }} CODE</div>
+      <div class="td">Cheksiz AI, barcha pulik kurslar bepul</div>
+      <form method="post" action="{{ url_for('coins_bp.coins_buy_pro') }}">
+        <button {{ 'disabled' if balance < pro_cost }}>Sotib olish</button>
+      </form>
+      {% if balance < pro_cost %}<div class="muted" style="font-size:10px; margin-top:6px;">Yetishmayapti: {{ "{:,}".format(pro_cost - balance) }} CODE</div>{% endif %}
+    </div>
+    {% endif %}
+    {% if current_user.plan not in ['cyber_pro','vip'] %}
+    <div class="tier-card tier-cyberpro" style="position:relative;">
+      <div style="position:absolute; top:-8px; right:-8px; background:linear-gradient(135deg,#ff3030,#c81212); color:#fff; font-size:9px; font-weight:800; padding:3px 9px; border-radius:10px; box-shadow:0 2px 8px rgba(200,18,18,.5);">🔥 AKSIYA</div>
+      <div class="ti">👑</div><div class="tn">CYBER PRO</div>
+      <div class="tc"><span class="muted" style="text-decoration:line-through; font-size:11px; margin-right:6px;">{{ cyber_pro_cost + 1 }}</span>⚡ {{ "{:,}".format(cyber_pro_cost) }} CODE</div>
+      <div class="td">Office · 10,000 CODE bonus · 0% komissiya</div>
+      <form method="post" action="{{ url_for('coins_bp.coins_buy_cyber_pro') }}">
+        <button {{ 'disabled' if balance < cyber_pro_cost }}>Sotib olish</button>
+      </form>
+    </div>
+    {% endif %}
+    {% if current_user.plan == 'vip' %}
+    <div class="tier-card tier-vip"><div class="ti">🔥</div><div class="tn">SHATS CYBER PRO</div>
+      <div class="cs-chip solid" style="margin-top:6px; background:linear-gradient(135deg,#ff3030,#8c0f0f); border:0;">FAOL</div></div>
+    {% elif vip_enabled %}
+    <div class="tier-card tier-vip" style="position:relative;">
+      <div style="position:absolute; top:-8px; right:-8px; background:linear-gradient(135deg,#ff3030,#c81212); color:#fff; font-size:9px; font-weight:800; padding:3px 9px; border-radius:10px; box-shadow:0 2px 8px rgba(200,18,18,.5);">🔥 AKSIYA</div>
+      <div class="ti">🔥</div><div class="tn">SHATS CYBER PRO</div>
+      <div class="tc"><span class="muted" style="text-decoration:line-through; font-size:11px; margin-right:6px;">{{ vip_cost + 1 }}</span>⚡ {{ "{:,}".format(vip_cost) }} CODE</div>
+      <div class="td">CYBER PRO + qizil-qora dizayn</div>
+      <form method="post" action="{{ url_for('coins_bp.coins_buy_vip') }}" onsubmit="return confirm('SHATS CYBER PRO sotib olishni tasdiqlaysizmi?');">
+        <button {{ 'disabled' if balance < vip_cost }}>Sotib olish</button>
+      </form>
+    </div>
+    {% endif %}
+    {% if current_user.plan == 'hacker' %}
+    <div class="tier-card tier-maxsus"><div class="ti">⚡</div><div class="tn">MAXSUS</div>
+      <div class="cs-chip solid" style="margin-top:6px; background:linear-gradient(135deg,#a855f7,#4c1d95); border:0;">FAOL</div></div>
+    {% else %}
+    <div class="tier-card tier-maxsus" style="position:relative;">
+      <div style="position:absolute; top:-8px; right:-8px; background:linear-gradient(135deg,#ff3030,#c81212); color:#fff; font-size:9px; font-weight:800; padding:3px 9px; border-radius:10px; box-shadow:0 2px 8px rgba(200,18,18,.5);">🔥 AKSIYA</div>
+      <div class="ti">⚡</div><div class="tn">MAXSUS</div>
+      <div class="tc"><span class="muted" style="text-decoration:line-through; font-size:11px; margin-right:6px;">{{ hacker_cost + 1 }}</span>⚡ {{ "{:,}".format(hacker_cost) }} CODE</div>
+      <div class="td">Binafsha-haker uslub · Jamoa jamg'armasi 3 oy bepul</div>
+      <form method="post" action="{{ url_for('coins_bp.coins_buy_hacker') }}">
+        <button {{ 'disabled' if balance < hacker_cost }}>Sotib olish</button>
+      </form>
+      <div class="muted" style="font-size:9.5px; margin-top:6px;"><a href="{{ url_for('coins_bp.redeem_page') }}" style="color:#a855f7;">yoki kod orqali faollashtirish</a></div>
+    </div>
+    {% endif %}
+    {% if current_user.plan == 'cyber_pro' %}
+    <div class="tier-card tier-cyberpro"><div class="ti">👑</div><div class="tn">CYBER PRO</div>
+      <div class="cs-chip solid" style="margin-top:6px; background:linear-gradient(135deg,#ff3b3b,#8a8a92); border:0;">FAOL</div></div>
+    {% endif %}
+  </div>
+  {% if current_user.plan_expires_at and current_user.plan in ['pro','cyber_pro','vip'] %}
+  <div class="muted" style="margin-top:16px; font-size:11px;">{{ icon('clock',11) }} Obuna muddati: {{ current_user.plan_expires_at | tashkent_time('%d.%m.%Y') }} gacha</div>
+  {% endif %}
+</div>
+
+<!-- SANDIQ CHIPTALARI — to'g'ridan-to'g'ri CODE bilan (Omadli Sandiq'ga
+     o'tmasdan, shu yerdan tezkor sotib olish) -->
+<div class="cs-card" style="margin-bottom:20px; padding:22px;">
+  <h3 style="font-size:12.5px; margin-bottom:16px; letter-spacing:1px;">🎰 SANDIQ CHIPTALARI (CODE bilan)</h3>
+  <div class="grid grid-3" style="gap:12px;">
+    <div style="text-align:center; padding:14px; border:1px solid var(--cs-border); border-radius:12px;">
+      <div style="font-size:22px; margin-bottom:6px;">🎲</div>
+      <div style="font-size:11.5px; font-weight:700; margin-bottom:8px;">Random ID</div>
+      <form method="post" action="{{ url_for('shop.chests_buy_tickets') }}" style="display:flex; flex-direction:column; gap:6px;">
+        <input type="hidden" name="chest_type" value="tariff">
+        <input type="hidden" name="qty" value="1">
+        <button type="submit" class="cs-btn cs-btn-sm" {{ 'disabled' if balance < ticket_prices.tariff['1'] }}>1 ta — ⚡{{ ticket_prices.tariff['1'] }} CODE</button>
+      </form>
+    </div>
+    <div style="text-align:center; padding:14px; border:1px solid var(--cs-border); border-radius:12px;">
+      <div style="font-size:22px; margin-bottom:6px;">🆔</div>
+      <div style="font-size:11.5px; font-weight:700; margin-bottom:8px;">ID Sandig'i</div>
+      <form method="post" action="{{ url_for('shop.chests_buy_tickets') }}" style="display:flex; flex-direction:column; gap:6px;">
+        <input type="hidden" name="chest_type" value="id">
+        <input type="hidden" name="qty" value="1">
+        <button type="submit" class="cs-btn cs-btn-sm" {{ 'disabled' if balance < ticket_prices.id['1'] }}>1 ta — ⚡{{ ticket_prices.id['1'] }} CODE</button>
+      </form>
+    </div>
+    <div style="text-align:center; padding:14px; border:1px solid var(--cs-border); border-radius:12px;">
+      <div style="font-size:22px; margin-bottom:6px;">🏆</div>
+      <div style="font-size:11.5px; font-weight:700; margin-bottom:8px;">Koleksiya Sandig'i</div>
+      <form method="post" action="{{ url_for('shop.chests_buy_tickets') }}" style="display:flex; flex-direction:column; gap:6px;">
+        <input type="hidden" name="chest_type" value="mystery">
+        <input type="hidden" name="qty" value="1">
+        <button type="submit" class="cs-btn cs-btn-sm" {{ 'disabled' if balance < ticket_prices.mystery['1'] }}>1 ta — ⚡{{ ticket_prices.mystery['1'] }} CODE</button>
+      </form>
+    </div>
+  </div>
+  <div style="text-align:center; margin-top:14px;">
+    <a href="{{ url_for('shop.chests_page') }}" class="pulse-glow" style="display:inline-block; font-size:12.5px; font-weight:700; color:var(--cs-text-yellow); background:rgba(255,178,56,0.1); border:1px solid rgba(255,178,56,0.4); padding:10px 18px; border-radius:8px; text-decoration:none; transition:all 0.2s;">Ko'proq (10 talik paketlar) va sandiqlarni ochish → Omadli Sandiq bo'limida</a>
+  </div>
+</div>
+
+<!-- Qanday topish mumkin -->
+<div class="grid grid-2" style="margin-bottom:20px; gap:16px;">
+  <div class="cs-card">
+    <h3 style="font-size:13px; margin-bottom:14px;">{{ icon('gift',14) }} CODE QANDAY TOPILADI</h3>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div style="padding:10px; background:rgba(255,59,59,.05); border-radius:6px; font-size:12px; color:var(--cs-text-muted);">
+        CODE tangalarini administratsiya bonus sifatida beradi yoki {{ icon('zap',12) }} <a href="{{ url_for('coins_bp.coins_buy_page') }}" style="color:var(--cs-text-primary);">sotib olish</a> orqali oling.
+      </div>
+    </div>
+  </div>
+  <div class="cs-card">
+    <h3 style="font-size:13px; margin-bottom:14px;">{{ icon('shopping-cart',14) }} NIMALARGA SARFLANADI</h3>
+    <div style="display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid rgba(255,59,59,.07);">
+        <span>{{ icon('star',14) }} Pro versiya</span>
+        <span style="color:var(--cs-text-yellow);">{{ "{:,}".format(pro_cost) }} CODE</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; padding:8px; border-bottom:1px solid rgba(255,59,59,.07);">
+        <span>{{ icon('book',14) }} Pulik kurs</span>
+        <span style="color:var(--cs-text-yellow);">{{ "{:,}".format(paid_course_code) }} CODE</span>
+      </div>
+      <div style="display:flex; justify-content:space-between; padding:8px;">
+        <span>{{ icon('bot',14) }} AI (haftalik obuna)</span>
+        <span style="color:var(--cs-text-yellow);">{{ ai_cost }} CODE / hafta</span>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- Tanga o'tkazish (foydalanuvchidan-foydalanuvchiga) -->
+<div class="cs-card" style="margin-bottom:20px;">
+  <div class="cs-card-title"><h3 style="font-size:13px;">{{ icon('send',14) }} BOSHQA FOYDALANUVCHIGA CODE O'TKAZISH</h3></div>
+  <form method="post" action="{{ url_for('coins_bp.coins_transfer') }}" style="display:flex; gap:10px; flex-wrap:wrap; align-items:flex-end; padding:4px 0;">
+    <div style="flex:1; min-width:200px;">
+      <label class="muted" style="font-size:11px; display:block; margin-bottom:5px;">Qabul qiluvchi (ID #0000 yoki email)</label>
+      <input type="text" name="recipient" placeholder="#1234 yoki email@misol.uz" class="cs-input" required>
+    </div>
+    <div style="width:160px;">
+      <label class="muted" style="font-size:11px; display:block; margin-bottom:5px;">Miqdor (CODE)</label>
+      <input type="number" name="amount" min="1" class="cs-input" required>
+    </div>
+    <button type="submit" class="cs-btn cs-btn-primary">{{ icon('send',14) }} Jo'natish</button>
+  </form>
+  <div class="muted" style="font-size:11px; margin-top:10px;">
+    {% if is_pro %}
+    {{ icon('crown',12) }} Siz Pro foydalanuvchisiz — o'tkazmalar komissiyasiz amalga oshadi.
+    {% else %}
+    {{ icon('info',12) }} Har bir o'tkazmadan {{ transfer_fee_percent }}% komissiya olinadi (Pro foydalanuvchilar uchun komissiyasiz).
+    {% endif %}
+  </div>
+</div>
+
+<!-- Tranzaksiyalar tarixi -->
+<div class="cs-card">
+  <div class="cs-card-title"><h3>{{ icon('clock',14) }} HARAKATLAR TARIXI</h3></div>
+  <div class="history-scroll">
+  {% for t in txns %}
+  <div class="history-row">
+    <div>
+      <span style="font-size:12px;">
+        {% if t.reason == 'admin_add' %}G'azna chiqargan
+        {% elif t.reason == 'transfer_in' %}O'tkazma qabul qilindi
+        {% elif t.reason == 'transfer_out' %}O'tkazma jo'natildi
+        {% elif t.reason == 'buy_pro' %}Pro sotib olindi
+        {% elif t.reason == 'pro_bonus' %}Pro bonus
+        {% elif t.reason == 'course_complete' %}Kurs bitirildi
+        {% elif t.reason == 'buy_course' %}Kurs sotib olindi
+        {% elif t.reason == 'ai_usage' %}AI ishlatildi
+        {% elif t.reason == 'ai_weekly_sub' %}AI haftalik obuna
+        {% elif t.reason == 'chest_tickets_mystery' %}Koleksiya sandig'i chiptasi
+        {% elif t.reason == 'chest_tickets_id' %}ID sandig'i chiptasi
+        {% elif t.reason == 'chest_tickets_tariff' %}Random ID chiptasi
+        {% elif t.reason == 'buy_hacker' %}Hacker tarifi xaridi
+        {% elif t.reason == 'buy_cyber_pro' %}Cyber Pro tarifi xaridi
+        {% elif t.reason == 'buy_vip' %}VIP tarifi xaridi
+        {% elif t.reason == 'buy_premium_id' %}Premium ID xaridi
+        {% elif t.reason == 'change_id' %}ID o'zgartirildi
+        {% else %}{{ t.reason }}{% endif %}
+      </span>
+      <div class="muted" style="font-size:10px;">{{ t.created_at | tashkent_time }}</div>
+    </div>
+    <span style="font-family:var(--cs-font-display); font-weight:700;
+      color:{{ 'var(--cs-text-primary)' if t.amount > 0 else '#ff5555' }}">
+      {{ '+' if t.amount > 0 else '' }}{{ "{:,}".format(t.amount) }} CODE
+    </span>
+  </div>
+  {% else %}
+  <p class="muted" style="text-align:center; padding:30px;">Hali harakatlar yo'q</p>
+  {% endfor %}
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,107 @@
+/* ============================================================
+   MAXSUS VERSIYA TEMASI — BINAFSHA + QORA ("real haker" uslubi)
+   Faqat plan='hacker' (MAXSUS) foydalanuvchilarga qo'llaniladi
+   (body class="hacker-theme" orqali aktivlashadi).
+
+   MUHIM: pastroq kontrast, kamroq yorqin nurlanish, sekinroq
+   animatsiya — uzoq muddat ekranga qarab o'tirsa ham ko'zni
+   charchatmasligi uchun ataylab "yumshoq" qilib tanlangan.
+   ============================================================ */
+
+body.hacker-theme {
+    /* Fonlar — chuqur qora, biroz binafsha tint bilan (juda to'q, porloq emas) */
+    --cs-bg-primary: #0d0a14;
+    --cs-bg-secondary: #120e1c;
+    --cs-bg-card: #150f22;
+    --cs-bg-glass: rgba(147, 51, 234, 0.05);
+    --cs-bg-sidebar: #100c1a;
+    --cs-bg-input: #170f26;
+
+    /* Matnlar — yumshoq binafsha gamma, oq emas, kontrast pasaytirilgan */
+    --cs-text-primary: #b48cf2;
+    --cs-text-secondary: #9d7cd8;
+    --cs-text-muted: #6e5c8f;
+    --cs-text-cyan: #a855f7;
+    --cs-text-white: #e8e0f5;
+    --cs-text-dark: #170f26;
+    --cs-text-red: #c084fc;
+    --cs-text-yellow: #d8b4fe;
+
+    /* Chegara va nurlanish — past intensivlik */
+    --cs-border: rgba(168, 85, 247, 0.22);
+    --cs-border-active: rgba(168, 85, 247, 0.5);
+    --cs-glow: 0 0 10px rgba(168, 85, 247, 0.25);
+    --cs-glow-strong: 0 0 18px rgba(168, 85, 247, 0.4);
+    --cs-glow-red: 0 0 14px rgba(168, 85, 247, 0.3);
+    --cs-glow-cyan: 0 0 12px rgba(168, 85, 247, 0.3);
+
+    /* Gradientlar */
+    --cs-grad-main: linear-gradient(135deg, #0d0a14 0%, #150f22 50%, #100c1a 100%);
+    --cs-grad-card: linear-gradient(135deg, #150f22 0%, #100c1a 100%);
+    --cs-grad-btn: linear-gradient(135deg, #a855f7 0%, #6b21a8 100%);
+    --cs-grad-sidebar: linear-gradient(180deg, #100c1a 0%, #0d0a14 100%);
+
+    --hacker-purple: #a855f7;
+    --hacker-purple-deep: #6b21a8;
+    --hacker-gradient: linear-gradient(135deg, #c084fc 0%, #a855f7 45%, #581c87 100%);
+    --hacker-glow: 0 0 22px rgba(168, 85, 247, 0.25);
+}
+
+body.hacker-theme {
+    background: var(--cs-grad-main);
+}
+body.hacker-theme .app-shell {
+    background: var(--cs-grad-main);
+}
+
+body.hacker-theme .cs-btn-primary {
+    background: var(--hacker-gradient);
+    border-color: transparent;
+    color: #f3e8ff;
+    box-shadow: var(--hacker-glow);
+}
+body.hacker-theme .cs-btn-primary:hover {
+    filter: brightness(1.08);
+}
+
+body.hacker-theme .cs-card,
+body.hacker-theme .cs-input {
+    background: var(--cs-bg-card);
+    border-color: var(--cs-border);
+}
+
+body.hacker-theme .cs-nav-item.active {
+    background: rgba(168, 85, 247, 0.1);
+    color: var(--cs-text-primary);
+    border-left: 2px solid var(--hacker-purple);
+}
+
+/* MAXSUS nishon */
+.hacker-badge {
+    background: var(--hacker-gradient, linear-gradient(135deg, #c084fc 0%, #581c87 100%));
+    color: #f3e8ff !important;
+    padding: 3px 12px;
+    border-radius: 4px;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    display: inline-block;
+    box-shadow: 0 0 12px rgba(168, 85, 247, 0.3);
+}
+
+body.hacker-theme ::selection {
+    background: rgba(168, 85, 247, 0.25);
+}
+
+/* Headerlar — yumshoq gradient, juda porloq emas */
+body.hacker-theme h1,
+body.hacker-theme h2 {
+    background: var(--hacker-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* HUD burchaklari uchun binafsha rang */
+body.hacker-theme .hud-overlay .green { color: rgba(168, 85, 247, 0.75) !important; }
+body.hacker-theme .dot-live { background: #a855f7; box-shadow: 0 0 8px rgba(168, 85, 247, 0.5); }

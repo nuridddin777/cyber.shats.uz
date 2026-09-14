@@ -1,0 +1,47 @@
+{% import "edu_orgs/_shared.html" as shared %}
+<!DOCTYPE html>
+<html lang="uz"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="{{ url_for('edu_orgs.edu_manifest') }}">
+<meta name="theme-color" content="#2dd4bf">
+<title>O'quvchi paneli — SHATS CYBER EDU</title>
+</head><body{% if is_pro %} class="pro-student-theme"{% endif %}>
+{% include "edu_orgs/_shared.html" %}
+<div class="container">
+  <div class="top-nav">
+    <div class="brand">SHATS CYBER <span>EDU</span>{% if is_pro %} <span class="badge" style="margin-left:6px;">PRO</span>{% endif %}</div>
+    <div>
+      <a href="{{ url_for('edu_orgs.curriculum_grades') }}" class="btn secondary" style="margin-right:8px;">O'quv dasturi</a>
+      <form method="POST" action="{{ url_for('edu_orgs.logout') }}" style="display:inline;"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn secondary">Chiqish</button></form>
+    </div>
+  </div>
+
+  {{ shared.flashes() }}
+
+  <div class="card">
+    <h1>{{ student['familiya'] }} {{ student['ism'] }} <span class="badge">ID: {{ student['student_number'] }}</span></h1>
+    <p style="color:#a1a1c0;">Tashkilot: {{ org['name'] }} (@{{ org['username'] }})
+      {% if group %} &middot; Guruh: {{ group['name'] }}{% endif %}
+      {% if student['region_name'] %} &middot; {{ student['region_name'] }}{% if student['district_name'] %}, {{ student['district_name'] }}{% endif %}{% endif %}</p>
+    <p>Login: <b>{{ student['full_login'] }}</b> &middot; Coin balans: <b>{{ student['coin_balance'] }}</b></p>
+    <p>Bepul 5-coin sovg'a: {% if can_gift %}<span class="badge">Mavjud</span>{% else %}<span class="badge locked">Ishlatilgan</span>{% endif %}</p>
+  </div>
+
+  <div class="card">
+    <h2>Coin o'tkazish</h2>
+    <form method="POST" action="{{ url_for('edu_orgs.transfer_route') }}" style="max-width:420px;"><input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Qabul qiluvchi turi</label>
+      <select name="receiver_type">
+        <option value="student">O'quvchi</option>
+        <option value="teacher">O'qituvchi</option>
+      </select>
+      <label>Qabul qiluvchi ID (bazadagi ichki ID)</label>
+      <input type="number" name="receiver_id" required>
+      <label>Miqdor</label>
+      <input type="number" name="amount" required>
+      <label><input type="checkbox" name="is_gift" value="1" style="width:auto;"> Bepul 5-coin sovg'a sifatida yuborish</label>
+      <button type="submit" class="btn">Yuborish</button>
+    </form>
+  </div>
+</div>
+</body></html>

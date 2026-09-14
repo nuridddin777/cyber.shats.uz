@@ -1,0 +1,210 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Do'stlar — CYBER SHATS{% endblock %}
+{% block app_content %}
+<h1 style="font-size:19px; margin-bottom:16px;">{{ icon('user-plus',18) }} Do'stlar</h1>
+
+<div class="friends-tabs">
+  <button class="friends-tab active" data-tab="list">{{ icon('users',13) }} Ro'yxat ({{ friends|length }})</button>
+  <button class="friends-tab" data-tab="activity">📰 Faoliyat</button>
+  <button class="friends-tab" data-tab="leaderboard">🏅 Reyting</button>
+  <button class="friends-tab" data-tab="discover">{{ icon('search',13) }} Qidirish</button>
+</div>
+
+<!-- ========== RO'YXAT ========== -->
+<div class="friends-panel" id="panel-list">
+  {% if received %}
+  <div class="cs-card" style="margin-bottom:16px; padding:20px;">
+    <h3 style="font-size:12.5px; margin-bottom:14px; color:var(--cs-text-yellow);">{{ icon('bell',13) }} SO'ROVLAR ({{ received|length }})</h3>
+    {% for f in received %}
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-top:1px solid var(--cs-border);">
+      <div style="display:flex; align-items:center; gap:10px;">
+        {% if f.avatar_path %}<img src="{{ f.avatar_path }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+        {% else %}<div class="avatar-fallback flex-center" style="width:36px;height:36px;border-radius:50%;background:rgba(37,99,235,.1); color:var(--cs-text-primary); font-family:var(--cs-font-display); display:flex;">{{ f.ism[0]|upper }}</div>{% endif %}
+        <div><div style="font-size:13px; font-weight:700;">{{ f.familiya }} {{ f.ism }}</div><div class="muted" style="font-size:10.5px;">#{{ f.custom_id }}</div></div>
+      </div>
+      <div style="display:flex; gap:6px;">
+        <form method="post" action="{{ url_for('friends.friends_respond', requester_id=f.id) }}"><input type="hidden" name="decision" value="accept"><button class="cs-btn cs-btn-sm cs-btn-primary">{{ icon('check',11) }} Qabul</button></form>
+        <form method="post" action="{{ url_for('friends.friends_respond', requester_id=f.id) }}"><input type="hidden" name="decision" value="reject"><button class="cs-btn cs-btn-sm cs-btn-danger">{{ icon('x',11) }}</button></form>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <div class="cs-card" style="padding:20px;">
+    <h3 style="font-size:12.5px; margin-bottom:14px;">{{ icon('users',13) }} DO'STLARIM ({{ friends|length }})</h3>
+    {% for f in friends %}
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-top:1px solid var(--cs-border);">
+      <a href="{{ url_for('public_profile_view', custom_id=f.custom_id) }}" style="display:flex; align-items:center; gap:10px; text-decoration:none; color:inherit;">
+        <div style="position:relative;">
+          {% if f.avatar_path %}<img src="{{ f.avatar_path }}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;">
+          {% else %}<div class="avatar-fallback flex-center" style="width:36px;height:36px;border-radius:50%;background:rgba(37,99,235,.1); color:var(--cs-text-primary); font-family:var(--cs-font-display); display:flex;">{{ f.ism[0]|upper }}</div>{% endif %}
+          {% if f.last_login_date == today_str %}
+          <span style="position:absolute; bottom:-1px; right:-1px; width:11px; height:11px; background:#22c55e; border-radius:50%; border:2px solid var(--cs-bg-card);" title="Bugun faol"></span>
+          {% endif %}
+        </div>
+        <div><div style="font-size:13px; font-weight:700;">{{ f.familiya }} {{ f.ism }}</div><div class="muted" style="font-size:10.5px;">LVL {{ f.level }} · #{{ f.custom_id }}{{ ' · 🟢 onlayn' if f.last_login_date == today_str }}</div></div>
+      </a>
+      <form method="post" action="{{ url_for('friends.friends_remove', other_id=f.id) }}" onsubmit="return confirm('Do\'stlikdan chiqarilsinmi?');" style="display:flex; gap:6px;">
+        <a href="{{ url_for('messages_bp.messages_thread', peer_id=f.id) }}" class="cs-btn cs-btn-sm" style="font-size:10px; text-decoration:none;">{{ icon('message-circle',11) }} Xabar</a>
+        <a href="{{ url_for('friends.friends_compare', other_id=f.id) }}" class="cs-btn cs-btn-sm" style="font-size:10px; text-decoration:none;">⚖️</a>
+        <button class="cs-btn cs-btn-sm" style="font-size:10px;">{{ icon('x',11) }} Chiqarish</button>
+      </form>
+    </div>
+    {% else %}
+    <p class="muted" style="text-align:center; padding:30px;">Hali do'stlaringiz yo'q. "Qidirish" bo'limidan toping.</p>
+    {% endfor %}
+  </div>
+
+  {% if sent %}
+  <div class="cs-card" style="margin-top:16px; padding:20px;">
+    <h3 style="font-size:12.5px; margin-bottom:14px; color:var(--cs-text-muted);">{{ icon('send',13) }} YUBORILGAN SO'ROVLAR ({{ sent|length }})</h3>
+    {% for f in sent %}
+    <div style="display:flex; align-items:center; gap:10px; padding:8px 0; border-top:1px solid var(--cs-border);">
+      {% if f.avatar_path %}<img src="{{ f.avatar_path }}" style="width:30px;height:30px;border-radius:50%;object-fit:cover;">
+      {% else %}<div class="avatar-fallback flex-center" style="width:30px;height:30px;border-radius:50%;background:rgba(37,99,235,.1); color:var(--cs-text-primary); font-family:var(--cs-font-display); display:flex; font-size:12px;">{{ f.ism[0]|upper }}</div>{% endif %}
+      <span style="font-size:12.5px;">{{ f.familiya }} {{ f.ism }}</span>
+      <span class="muted" style="font-size:10px; margin-left:auto;">Kutilmoqda...</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+
+<!-- ========== FAOLIYAT ========== -->
+<div class="friends-panel" id="panel-activity" style="display:none;">
+  <div class="cs-card" style="padding:20px;">
+    <h3 style="font-size:12.5px; margin-bottom:14px;">📰 DO'STLAR FAOLIYATI</h3>
+    {% for a in activity_feed %}
+    <div style="display:flex; gap:10px; align-items:flex-start; padding:8px 0; border-top:1px solid var(--cs-border);">
+      <span style="font-size:16px;">{{ a.icon }}</span>
+      <div style="flex:1;">
+        <div style="font-size:12px;">{{ a.text }}</div>
+        <div class="muted" style="font-size:10px; margin-top:2px;">{{ a.created_at | tashkent_time }}</div>
+      </div>
+    </div>
+    {% else %}
+    <p class="muted" style="text-align:center; padding:20px; font-size:12px;">Hali faoliyat yo'q — do'stlaringiz kurs tugatishi, daraja oshirishi bilan bu yerda ko'rinadi.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ========== REYTING ========== -->
+<div class="friends-panel" id="panel-leaderboard" style="display:none;">
+  <div class="cs-card" style="padding:20px;">
+    <h3 style="font-size:12.5px; margin-bottom:14px;">🏅 DO'STLAR REYTINGI</h3>
+    {% for f in friends_leaderboard %}
+    <div style="display:flex; align-items:center; gap:8px; padding:8px 0; border-top:1px solid var(--cs-border); {{ 'background:rgba(0,255,106,.06); border-radius:6px; padding:8px;' if f.id == my_id }}">
+      <span style="width:20px; font-size:12px; font-weight:800; color:var(--cs-text-muted);">{{ loop.index }}</span>
+      <span style="font-size:13px; flex:1;">{{ f.familiya }} {{ f.ism }}{{ ' (Siz)' if f.id == my_id }}</span>
+      <span style="font-size:12px; color:var(--cs-text-primary); font-weight:700;">Lvl {{ f.level }}</span>
+    </div>
+    {% else %}
+    <p class="muted" style="text-align:center; padding:20px; font-size:12px;">Hali do'stingiz yo'q.</p>
+    {% endfor %}
+  </div>
+</div>
+
+<!-- ========== QIDIRISH ========== -->
+<div class="friends-panel" id="panel-discover" style="display:none;">
+  <div class="cs-card" style="padding:20px;">
+    <form method="get" style="display:flex; gap:8px; margin-bottom:16px;">
+      <input type="hidden" name="tab" value="discover">
+      <input type="text" name="q" value="{{ search_q }}" class="cs-input" placeholder="ID, ism yoki familiya bo'yicha qidirish...">
+      <button type="submit" class="cs-btn cs-btn-primary">{{ icon('search',12) }} Qidirish</button>
+    </form>
+    <div class="discover-grid">
+      {% for d in discover %}
+      <a href="{{ url_for('public_profile_view', custom_id=d.custom_id) }}" class="discover-card
+        {{ 'excl-admin' if d.role in ('admin','super_admin') or d.plan=='admin' else ('excl-cars' if d.exclusive_theme=='cars' else ('excl-wolfpack' if d.exclusive_theme=='wolfpack' else ('tier-vip' if d.plan=='vip' else ('tier-cyberpro' if d.plan=='cyber_pro' else ('tier-pro' if d.plan=='pro' else ('tier-maxsus' if d.plan=='hacker' else '')))))) }}">
+        {% if d.avatar_path %}<img src="{{ d.avatar_path }}" class="dc-avatar">
+        {% else %}<div class="dc-avatar dc-avatar-fallback">{{ d.ism[0]|upper }}</div>{% endif %}
+        <div class="dc-name">{{ d.familiya }} {{ d.ism }}</div>
+        <div class="dc-sub">#{{ d.custom_id }} · LVL {{ d.level }}</div>
+        {% if d.role == 'super_admin' %}
+        <div class="dc-tier-badge">{{ icon('shield',9) }} SUPER ADMIN</div>
+        {% elif d.role == 'admin' %}
+        <div class="dc-tier-badge">{{ icon('shield',9) }} ADMIN</div>
+        {% elif d.role == 'mentor' %}
+        <div class="dc-tier-badge">{{ icon('star',9) }} MENTOR</div>
+        {% elif d.exclusive_theme == 'cars' %}
+        <div class="dc-tier-badge">🏎️ GARAGE</div>
+        {% elif d.exclusive_theme == 'wolfpack' %}
+        <div class="dc-tier-badge">🐺 QASHQIRLAR</div>
+        {% elif d.plan == 'admin' %}
+        <div class="dc-tier-badge">{{ icon('shield',9) }} ADMIN</div>
+        {% elif d.plan and d.plan != 'free' %}
+        <div class="dc-tier-badge">{{ icon('star',9) }} {{ 'VIP' if d.plan=='vip' else ('CYBER PRO' if d.plan=='cyber_pro' else ('PRO' if d.plan=='pro' else 'MAXSUS')) }}</div>
+        {% endif %}
+        {% if d.id in friend_ids %}
+        <div class="dc-friend-tag">{{ icon('check',9) }} Do'st</div>
+        {% endif %}
+      </a>
+      {% else %}
+      <p class="muted" style="grid-column:1/-1; text-align:center; padding:20px;">Hech kim topilmadi.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+
+<style>
+.friends-tabs{ display:flex; gap:6px; margin-bottom:18px; overflow-x:auto; padding-bottom:2px; }
+.friends-tab{
+  background:var(--cs-bg-input); border:1px solid var(--cs-border); color:var(--cs-text-muted);
+  padding:8px 16px; border-radius:var(--cs-radius-pill); font-size:12px; font-weight:700; cursor:pointer;
+  white-space:nowrap; transition:.15s;
+}
+.friends-tab.active{ background:var(--cs-grad-btn); color:#fff; border-color:transparent; }
+.friends-tab:hover:not(.active){ border-color:var(--cs-border-active); }
+
+.discover-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(130px,1fr)); gap:12px; }
+.discover-card{ text-decoration:none; text-align:center; padding:16px 10px; border-radius:12px; border:1px solid var(--cs-border); background:var(--cs-bg-input); transition:.2s; position:relative; }
+.discover-card:hover{ transform:translateY(-3px); box-shadow:var(--cs-glow); border-color:var(--cs-border-active); }
+.dc-avatar{ width:52px; height:52px; border-radius:50%; object-fit:cover; margin:0 auto 8px; display:block; }
+.dc-avatar-fallback{ display:flex; align-items:center; justify-content:center; background:rgba(37,99,235,.1); color:var(--cs-text-primary); font-family:var(--cs-font-display); font-size:20px; }
+.dc-name{ font-size:12px; font-weight:700; color:var(--cs-text-white); }
+.dc-sub{ font-size:10px; color:var(--cs-text-muted); margin-top:2px; }
+.dc-tier-badge{ font-size:8.5px; font-weight:800; letter-spacing:.5px; margin-top:6px; padding:2px 8px; border-radius:10px; display:inline-block; }
+.dc-friend-tag{ position:absolute; top:8px; right:8px; font-size:8px; background:rgba(37,99,235,.12); color:var(--cs-text-primary); padding:2px 6px; border-radius:8px; }
+.discover-card.tier-vip .dc-tier-badge{ background:linear-gradient(135deg,#BF953F,#FCF6BA,#B38728); color:#050505; }
+.discover-card.tier-vip .dc-name{ color:#B38728; }
+.discover-card.tier-cyberpro .dc-tier-badge{ background:linear-gradient(135deg,#ff3366,#4d7fff); color:#fff; }
+.discover-card.tier-cyberpro .dc-name{ color:#ff3366; }
+.discover-card.tier-pro .dc-tier-badge{ background:linear-gradient(135deg,#b45309,#92400e); color:#fff; }
+.discover-card.tier-pro .dc-name{ color:#92400e; }
+.discover-card.tier-maxsus .dc-tier-badge{ background:linear-gradient(135deg,#a855f7,#6d28d9); color:#fff; }
+.discover-card.tier-maxsus .dc-name{ color:#a855f7; }
+.discover-card.excl-cars{ background:linear-gradient(155deg,#1a0808 0%,#0d0303 100%); border-color:rgba(220,38,38,.4); }
+.discover-card.excl-cars .dc-tier-badge{ background:linear-gradient(135deg,#dc2626,#7f1d1d); color:#fff; }
+.discover-card.excl-cars .dc-name{ color:#ef4444; }
+.discover-card.excl-cars .dc-sub{ color:rgba(239,68,68,.55); }
+.discover-card.excl-wolfpack{ background:linear-gradient(155deg,#1a0a0a 0%,#0d0505 100%); border-color:rgba(153,27,27,.4); }
+.discover-card.excl-wolfpack .dc-tier-badge{ background:linear-gradient(135deg,#991b1b,#450a0a); color:#fff; }
+.discover-card.excl-wolfpack .dc-name{ color:#b91c1c; }
+.discover-card.excl-wolfpack .dc-sub{ color:rgba(185,28,28,.55); }
+.discover-card.excl-admin{ background:linear-gradient(155deg,#0f1729 0%,#050810 100%); border-color:rgba(100,116,139,.5); box-shadow:0 0 12px rgba(100,116,139,.15); }
+.discover-card.excl-admin .dc-tier-badge{ background:linear-gradient(135deg,#475569,#0f172a); color:#e2e8f0; letter-spacing:.5px; }
+.discover-card.excl-admin .dc-name{ color:#94a3b8; font-weight:800; }
+.discover-card.excl-admin .dc-sub{ color:rgba(148,163,184,.55); }
+@media(max-width:480px){ .discover-grid{ grid-template-columns:repeat(2,1fr); } }
+</style>
+
+<script>
+(function(){
+    var tabs = document.querySelectorAll('.friends-tab');
+    var panels = { list: 'panel-list', activity: 'panel-activity', leaderboard: 'panel-leaderboard', discover: 'panel-discover' };
+    function activate(name) {
+        tabs.forEach(function(t){ t.classList.toggle('active', t.dataset.tab === name); });
+        Object.keys(panels).forEach(function(k){
+            document.getElementById(panels[k]).style.display = (k === name) ? '' : 'none';
+        });
+    }
+    tabs.forEach(function(t){
+        t.addEventListener('click', function(){ activate(t.dataset.tab); });
+    });
+    var urlTab = new URLSearchParams(window.location.search).get('tab');
+    if (urlTab && panels[urlTab]) activate(urlTab);
+})();
+</script>
+{% endblock %}

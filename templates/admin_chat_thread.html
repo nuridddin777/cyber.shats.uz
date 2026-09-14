@@ -1,0 +1,27 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Chat — {{ target.ism }}{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:16px;">
+  <h1 style="font-size:18px;">{{ target.familiya }} {{ target.ism }} <span class="muted" style="font-size:12px;">#{{ target.custom_id }}</span></h1>
+  <a href="{{ url_for('adminchat_bp.admin_chat_inbox') }}" class="cs-btn cs-btn-sm">← Barcha murojaatlar</a>
+</div>
+
+<div class="cs-card" style="max-width:600px; min-height:300px; margin-bottom:16px;">
+  {% for m in messages %}
+  <div style="margin-bottom:10px; text-align:{{ 'right' if m.sender == 'admin' else 'left' }};">
+    <div style="display:inline-block; background:{{ 'rgba(168,85,247,0.15)' if m.sender == 'admin' else 'rgba(255,255,255,0.05)' }}; padding:8px 14px; border-radius:10px; max-width:80%; font-size:13px;">
+      {{ m.message }}
+    </div>
+    <div class="muted" style="font-size:9.5px; margin-top:2px;">{{ m.created_at | tashkent_time }}</div>
+  </div>
+  {% else %}
+  <p class="muted" style="text-align:center; padding:40px;">Hali xabar yo'q</p>
+  {% endfor %}
+</div>
+
+<form method="post" class="cs-card" style="max-width:600px; display:flex; gap:8px;">
+  <input type="text" name="message" required class="cs-input" style="flex:1;" placeholder="Javob yozing...">
+  <button class="cs-btn cs-btn-primary">{{ icon('send',13) }} Yuborish</button>
+</form>
+{% endblock %}

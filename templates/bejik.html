@@ -1,0 +1,48 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Bejik va QR kod — MAXSUS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:20px;">{{ icon('id',18) }} Bejik va QR kod</h1>
+  <a href="{{ url_for('bejik_bp.bejik_pdf') }}" class="cs-btn cs-btn-primary">{{ icon('download',13) }} PDF karta yuklab olish</a>
+</div>
+
+<div class="grid" style="grid-template-columns:1fr 1fr; gap:20px;">
+  <!-- BEJIK KARTOCHKA -->
+  <div class="cs-card" style="background:linear-gradient(135deg,#150f22,#0d0a14); border:1px solid rgba(168,85,247,.35); padding:24px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+      <div>
+        <div style="font-size:10px; letter-spacing:2px; color:#a855f7; margin-bottom:10px;">CYBER SHATS · MAXSUS</div>
+        <div style="font-size:18px; font-weight:800; color:#e8e0f5;">{{ u.familiya }} {{ u.ism }}</div>
+        <div class="muted" style="font-size:12px; margin-top:2px;">#{{ u.custom_id }}</div>
+        <div style="margin-top:12px; font-size:12px; color:#d8d0e8;">
+          {{ icon('award',12) }} LVL {{ u.level or 1 }} · {{ u.xp or 0 }} XP
+        </div>
+      </div>
+      <img src="{{ url_for('bejik_bp.bejik_qr_image', custom_id=u.custom_id) }}" alt="QR" style="width:90px; height:90px; border-radius:8px; background:#fff; padding:4px;">
+    </div>
+  </div>
+
+  <!-- STATISTIKA -->
+  <div class="cs-card">
+    <h3 style="font-size:13px; margin-bottom:12px;">{{ icon('activity',14) }} QR SKANERLASH STATISTIKASI</h3>
+    <div style="font-size:32px; font-weight:900; color:var(--cs-text-primary); margin-bottom:12px;">{{ scan_count }}</div>
+    <div class="muted" style="font-size:11px; margin-bottom:10px;">jami tekshirilgan</div>
+    {% for s in recent_scans %}
+    <div style="font-size:11.5px; padding:5px 0; border-bottom:1px solid rgba(255,255,255,.05);">
+      {{ s.scanned_at | tashkent_time }}
+    </div>
+    {% else %}
+    <p class="muted" style="font-size:11.5px;">Hali hech kim skanerlamagan</p>
+    {% endfor %}
+  </div>
+</div>
+
+<div class="cs-card" style="margin-top:16px; max-width:600px;">
+  <h3 style="font-size:13px; margin-bottom:8px;">{{ icon('link',14) }} TASDIQLASH HAVOLASI</h3>
+  <p class="muted" style="font-size:11.5px; margin-bottom:8px;">
+    Bu QR/havola orqali istalgan kishi sizning bejigingiz haqiqiyligini tekshirishi mumkin (tadbirlarda, ish beruvchi oldida va h.k.).
+  </p>
+  <input type="text" readonly value="https://{{ site_domain }}/bejik/verify/{{ u.custom_id }}" class="cs-input" style="font-family:monospace; font-size:11px;">
+</div>
+{% endblock %}

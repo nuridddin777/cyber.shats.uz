@@ -1,0 +1,61 @@
+{% import "edu_orgs/_shared.html" as shared %}
+<!DOCTYPE html>
+<html lang="uz"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G'azna — SHATS CYBER EDU</title>
+</head><body>
+{% include "edu_orgs/_shared.html" %}
+<div class="container" data-autorefresh="15">
+  <div class="top-nav">
+    <div class="brand">SHATS CYBER <span>EDU</span></div>
+    <a href="{{ url_for('edu_orgs.org_dashboard') }}" class="btn secondary">← Panelga qaytish</a>
+  </div>
+
+  {{ shared.flashes() }}
+
+  <div class="card">
+    <h1>G'azna</h1>
+    <p style="color:#a1a1c0;">Tashkilot: <b>{{ org['name'] }}</b> (@{{ org['username'] }})</p>
+    <div class="grid-2">
+      <div class="card" style="background:#1a1a2a;">
+        <p style="color:#a1a1c0;margin:0;font-size:13px;">CODE balans</p>
+        <h2 style="margin:6px 0 0 0;">{{ org['coin_balance'] }}</h2>
+      </div>
+      <div class="card" style="background:#1a1a2a;">
+        <p style="color:#a1a1c0;margin:0;font-size:13px;">Joriy tarif</p>
+        <h2 style="margin:6px 0 0 0;">{{ tarif['name'] if tarif else "Tanlanmagan" }}</h2>
+        {% if org['subscription_expires_at'] %}
+          <p style="color:#a1a1c0;font-size:12px;margin:4px 0 0 0;">Amal qilish muddati: {{ org['subscription_expires_at'] }}</p>
+        {% endif %}
+      </div>
+    </div>
+    <a href="{{ url_for('edu_orgs.buy_code_page') }}" class="btn">CODE sotib olish</a>
+    <a href="{{ url_for('edu_orgs.tariffs_page') }}" class="btn secondary">Tariflar</a>
+  </div>
+
+  <div class="card">
+    <h2>CODE sotib olish tarixi</h2>
+    {% if purchase_requests %}
+      <div class="table-wrap">
+        <table>
+          <tr><th>Sana</th><th>Miqdor</th><th>Narx (so'm)</th><th>Holat</th></tr>
+          {% for r in purchase_requests %}
+          <tr>
+            <td>{{ r['created_at'] }}</td>
+            <td>{{ r['code_amount'] }} CODE</td>
+            <td>{{ '{:,}'.format(r['price_uzs']).replace(',', ' ') }}</td>
+            <td>
+              {% if r['status'] == 'completed' %}<span class="badge">Bajarildi</span>
+              {% elif r['status'] == 'rejected' %}<span class="badge locked">Rad etildi</span>
+              {% else %}<span class="badge warn">Kutilmoqda</span>{% endif %}
+            </td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    {% else %}
+      <p style="color:#a1a1c0;">Hali CODE sotib olish so'rovlari yo'q.</p>
+    {% endif %}
+  </div>
+</div>
+</body></html>

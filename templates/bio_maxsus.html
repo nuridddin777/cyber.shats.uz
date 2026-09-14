@@ -1,0 +1,31 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Bio Maxsus — MAXSUS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:20px;">{{ icon('user',18) }} Bio Maxsus</h1>
+  <a href="{{ url_for('public_profile_view', custom_id=user.custom_id) }}" class="cs-btn cs-btn-sm" target="_blank">{{ icon('eye',12) }} Ochiq profilni ko'rish</a>
+</div>
+
+<div class="cs-card" style="max-width:520px; margin-bottom:16px;">
+  <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+    <div style="width:56px; height:56px; border-radius:50%; background:var(--hacker-gradient); display:flex; align-items:center; justify-content:center; font-size:22px; font-weight:900;">
+      {{ user.ism[0] }}
+    </div>
+    <div>
+      <div style="font-size:16px; font-weight:700;">{{ user.familiya }} {{ user.ism }} {% if user.bio_verified %}✅{% endif %}</div>
+      <div class="muted" style="font-size:11px;">shatscyber.uz/u/{{ user.custom_id }} · {{ user.profile_views }} ko'rildi</div>
+    </div>
+  </div>
+
+  <form method="post">
+    <label class="muted" style="font-size:10px; display:block; margin-bottom:4px;">Shaxsiy moto/status</label>
+    <input type="text" name="motto" value="{{ user.bio_motto or '' }}" maxlength="200" class="cs-input" style="margin-bottom:12px;" placeholder="masalan: Full-stack developer & hacker">
+    <label class="muted" style="font-size:10px; display:block; margin-bottom:4px;">Portfolio havolasi</label>
+    <input type="url" name="portfolio_url" value="{{ user.bio_portfolio_url or '' }}" class="cs-input" style="margin-bottom:12px;" placeholder="https://...">
+    <label class="muted" style="font-size:10px; display:block; margin-bottom:4px;">GitHub havolasi</label>
+    <input type="url" name="github_url" value="{{ user.bio_github_url or '' }}" class="cs-input" style="margin-bottom:14px;" placeholder="https://github.com/...">
+    <button class="cs-btn cs-btn-primary cs-btn-full">{{ icon('save',13) }} Saqlash</button>
+  </form>
+</div>
+{% endblock %}

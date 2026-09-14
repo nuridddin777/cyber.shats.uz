@@ -1,0 +1,37 @@
+{% extends "app_base.html" %}
+{% block title %}Maktablar — Admin EDU{% endblock %}
+{% block app_content %}
+<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+  <h2 style="color:#e8f4ff;font-size:20px;margin:0;">🏫 Maktablar ({{ schools|length }})</h2>
+  <button class="cs-btn" onclick="document.getElementById('addSchoolModal').style.display='flex'">+ Maktab qo'shish</button>
+</div>
+<input type="text" id="schSearch" placeholder="🔍 Qidirish..." oninput="filterS()" style="width:100%;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px 14px;font-size:14px;margin-bottom:14px;box-sizing:border-box;">
+<div id="schList">
+{% for s in schools %}
+<div class="sch-row" data-n="{{ s.name|lower }}" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid rgba(30,144,255,0.06);">
+  <span style="font-size:20px;">🏫</span>
+  <div style="flex:1;"><div style="color:#e8f4ff;font-weight:600;font-size:14px;">{{ s.name }}</div><div style="font-size:11px;color:#5a7a9a;">{{ s.region_name or '' }} · {{ s.district_name or '' }} · {{ s.school_type }}</div></div>
+  <span style="font-size:12px;color:{% if s.has_sub %}#00c853{% else %}#5a7a9a{% endif %};">{% if s.tarif %}{{ s.tarif|upper }}{% else %}—{% endif %}</span>
+  <span style="font-size:12px;color:#1e90ff;">{{ s.student_count }}👤</span>
+</div>
+{% endfor %}
+</div>
+<div id="addSchoolModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#0d1b2e;border:1px solid rgba(30,144,255,0.3);border-radius:16px;padding:28px;width:440px;max-width:95vw;">
+    <h3 style="color:#e8f4ff;margin:0 0 16px;">+ Yangi maktab</h3>
+    <input type="text" id="nsName" placeholder="Maktab nomi" style="width:100%;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px;font-size:14px;margin-bottom:10px;box-sizing:border-box;">
+    <select id="nsType" style="width:100%;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px;font-size:14px;margin-bottom:10px;"><option value="maktab">Maktab</option><option value="texnikum">Texnikum</option><option value="universitet">Universitet</option></select>
+    <select id="nsReg" onchange="loadD2(this.value)" style="width:100%;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px;font-size:14px;margin-bottom:10px;"><option value="">Viloyat</option>{% for r in regions %}<option value="{{ r.id }}">{{ r.name }}</option>{% endfor %}</select>
+    <select id="nsDist" style="width:100%;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px;font-size:14px;margin-bottom:14px;"><option value="">Tuman</option></select>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="cs-btn cs-btn-outline" onclick="this.closest('[id]').style.display='none'">Bekor</button>
+      <button class="cs-btn" onclick="addSch()">Qo'shish</button>
+    </div>
+  </div>
+</div>
+<script>
+function filterS(){const q=document.getElementById('schSearch').value.toLowerCase();document.querySelectorAll('.sch-row').forEach(r=>r.style.display=r.dataset.n.includes(q)?'flex':'none');}
+function loadD2(rid){fetch(`/edu/api/districts?region_id=${rid}`).then(r=>r.json()).then(d=>{const s=document.getElementById('nsDist');s.innerHTML='<option value="">Tuman</option>';(d.districts||[]).forEach(x=>s.innerHTML+=`<option value="${x.id}">${x.name}</option>`);});}
+function addSch(){const b=`name=${encodeURIComponent(document.getElementById('nsName').value)}&school_type=${document.getElementById('nsType').value}&district_id=${document.getElementById('nsDist').value}`;fetch('/edu/admin/school/add',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:b}).then(r=>r.json()).then(d=>{alert(d.msg);if(d.ok)location.reload();});}
+</script>
+{% endblock %}

@@ -1,0 +1,46 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block body_class %}has-sidebar teacher-theme{% endblock %}
+{% block title %}O'qituvchi paneli — CYBER SHATS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px; flex-wrap:wrap; gap:10px;">
+  <div>
+    <div class="eyebrow" style="color:var(--cs-text-primary);">O'QITUVCHI PANELI</div>
+    <h1 style="font-size:22px; color:var(--cs-text-white);">Xush kelibsiz, {{ current_user.ism }}!</h1>
+  </div>
+  <a href="{{ url_for('teacher_bp.teacher_create_group') }}" class="cs-btn cs-btn-primary">{{ icon('users',14) }} Yangi guruh ochish</a>
+</div>
+
+<div class="grid grid-2" style="gap:16px; margin-bottom:20px;">
+  <div class="cs-card" style="padding:20px;">
+    <h3 style="font-size:12px; margin-bottom:14px; color:var(--cs-text-muted); letter-spacing:1px;">{{ icon('users',14) }} MENING GURUHLARIM ({{ my_groups|length }})</h3>
+    {% for g in my_groups %}
+    <a href="{{ url_for('groups_bp.group_detail', group_id=g.id) }}" class="cs-nav-item" style="border:1px solid var(--cs-border); border-radius:10px; margin-bottom:8px; padding:10px 14px;">
+      <span style="flex:1;">{{ g.name }}</span>
+      <span class="cs-chip" style="font-size:9px;">{{ 'MAXFIY' if not g.is_public else 'OMMAVIY' }}</span>
+      <span class="muted" style="font-size:10px; margin-left:8px;">#{{ g.public_id or g.id }}</span>
+    </a>
+    {% else %}
+    <p class="muted" style="font-size:12px;">Hali guruh ochmagansiz.</p>
+    {% endfor %}
+  </div>
+  <div class="cs-card" style="padding:20px;">
+    <h3 style="font-size:12px; margin-bottom:14px; color:var(--cs-text-muted); letter-spacing:1px;">{{ icon('send',14) }} MENING KANALLARIM ({{ my_channels|length }})</h3>
+    {% for ch in my_channels %}
+    <a href="{{ url_for('groups_bp.channel_detail', channel_id=ch.id) }}" class="cs-nav-item" style="border:1px solid var(--cs-border); border-radius:10px; margin-bottom:8px; padding:10px 14px;">
+      <span style="flex:1;">{{ ch.name }}</span>
+      <span class="muted" style="font-size:10px;">#{{ ch.public_id or ch.id }}</span>
+    </a>
+    {% else %}
+    <p class="muted" style="font-size:12px;">Hali kanal ochmagansiz.</p>
+    {% endfor %}
+    <a href="{{ url_for('teacher_bp.teacher_create_channel') }}" class="cs-btn cs-btn-sm cs-btn-secondary" style="margin-top:8px;">{{ icon('plus',12) }} Yangi kanal</a>
+  </div>
+</div>
+
+<div class="cs-card" style="padding:20px;">
+  <h3 style="font-size:12px; margin-bottom:14px; color:var(--cs-text-muted); letter-spacing:1px;">{{ icon('book',14) }} KURS JOYLASH</h3>
+  <p class="muted" style="font-size:12px; margin-bottom:12px;">Word/PDF fayl yuklab yoki to'g'ridan-to'g'ri yozib yangi kurs mavzusi joylashtiring.</p>
+  <a href="{{ url_for('teacher_bp.teacher_post_course') }}" class="cs-btn cs-btn-primary">{{ icon('upload',13) }} Kurs mavzusi joylashtirish</a>
+</div>
+{% endblock %}

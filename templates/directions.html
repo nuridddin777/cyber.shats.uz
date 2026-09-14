@@ -1,0 +1,105 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Yo'nalishlar — CYBER SHATS{% endblock %}
+{% block app_content %}
+
+<!-- ============================================================
+     ORBITAL KO'RINISH — shats.uz uslubida, faqat shu sahifaga xos
+     (oq/ko'k/sariq yorug' fon, aylanib turuvchi yo'nalishlar)
+     ============================================================ -->
+<div class="orbit-hero">
+  <div class="orbit-stage">
+    {% set ring1 = directions[:9] %}
+    {% set ring2 = directions[9:] %}
+    <div class="orbit-ring orbit-ring-1">
+      {% for d in ring1 %}
+      <div class="orbit-item" style="--angle: {{ (loop.index0 * 40) }}deg;">
+        <a href="{{ url_for('courses_bp.courses', d=d.slug) }}" class="orbit-dot" title="{{ d.name_uz }}">
+          <span class="orbit-ic">{{ icon(d.icon, 16) }}</span>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="orbit-ring orbit-ring-2">
+      {% for d in ring2 %}
+      <div class="orbit-item" style="--angle: {{ (loop.index0 * 40) }}deg;">
+        <a href="{{ url_for('courses_bp.courses', d=d.slug) }}" class="orbit-dot" title="{{ d.name_uz }}">
+          <span class="orbit-ic">{{ icon(d.icon, 15) }}</span>
+        </a>
+      </div>
+      {% endfor %}
+    </div>
+    <div class="orbit-center">
+      <div class="orbit-center-inner">
+        <span class="oc-title">CYBER</span>
+        <span class="oc-sub">SHATS</span>
+      </div>
+    </div>
+  </div>
+  <p class="orbit-caption">18 ta IT yo'nalish — bittasini bosib boshlang</p>
+</div>
+
+<style>
+.orbit-hero{
+  background: linear-gradient(160deg, #fef9f0 0%, #eaf3ff 45%, #fef6e8 100%);
+  border-radius:24px; padding:36px 20px 28px; margin-bottom:28px; text-align:center; overflow:hidden;
+  position:relative;
+}
+.orbit-stage{ position:relative; width:100%; max-width:520px; aspect-ratio:1/1; margin:0 auto; }
+.orbit-ring{ position:absolute; inset:0; }
+.orbit-ring-1{ animation: orbit-spin 46s linear infinite; }
+.orbit-ring-2{ animation: orbit-spin-rev 68s linear infinite; }
+.orbit-item{ position:absolute; top:50%; left:50%; width:0; height:0; transform: rotate(var(--angle)) translateX(var(--r, 150px)); }
+.orbit-ring-1 .orbit-item{ --r: 38%; }
+.orbit-ring-2 .orbit-item{ --r: 50%; }
+.orbit-dot{
+  position:absolute; top:0; left:0; transform:translate(-50%,-50%);
+  width:46px; height:46px; border-radius:50%; display:flex; align-items:center; justify-content:center;
+  background:#fff; box-shadow:0 4px 14px rgba(30,60,110,.12); text-decoration:none; color:#2563eb;
+  animation: orbit-counter 46s linear infinite; border:1px solid rgba(37,99,235,.15);
+}
+.orbit-ring-2 .orbit-dot{ animation-name: orbit-counter-rev; animation-duration:68s; color:#d97706; border-color:rgba(217,119,6,.18); }
+.orbit-dot:hover{ transform:translate(-50%,-50%) scale(1.18); box-shadow:0 8px 22px rgba(30,60,110,.22); z-index:5; }
+@keyframes orbit-spin{ from{transform:rotate(0)} to{transform:rotate(360deg)} }
+@keyframes orbit-spin-rev{ from{transform:rotate(360deg)} to{transform:rotate(0)} }
+@keyframes orbit-counter{ from{transform:translate(-50%,-50%) rotate(0)} to{transform:translate(-50%,-50%) rotate(-360deg)} }
+@keyframes orbit-counter-rev{ from{transform:translate(-50%,-50%) rotate(-360deg)} to{transform:translate(-50%,-50%) rotate(0)} }
+.orbit-center{ position:absolute; inset:0; display:flex; align-items:center; justify-content:center; pointer-events:none; }
+.orbit-center-inner{
+  width:130px; height:130px; border-radius:50%; background:radial-gradient(circle at 35% 30%, #1e293b, #0b0f1a);
+  display:flex; flex-direction:column; align-items:center; justify-content:center; box-shadow:0 10px 30px rgba(30,60,110,.25), 0 0 0 6px rgba(37,99,235,.08);
+}
+.oc-title{ color:#fff; font-family:var(--cs-font-display); font-weight:800; font-size:15px; letter-spacing:1px; }
+.oc-sub{ color:#ff8a3d; font-family:var(--cs-font-display); font-weight:800; font-size:13px; letter-spacing:2px; }
+.orbit-caption{ margin-top:18px; font-size:12px; color:#5b6b82; font-family:var(--cs-font-mono); }
+@media (prefers-reduced-motion: reduce){ .orbit-ring, .orbit-dot{ animation:none !important; } }
+@media(max-width:600px){ .orbit-stage{ max-width:340px; } .orbit-dot{ width:38px; height:38px; } .orbit-center-inner{ width:98px; height:98px; } .oc-title{font-size:12px;} .oc-sub{font-size:10px;} }
+</style>
+
+<div class="section-head" style="margin-bottom:28px; text-align:left; max-width:none;">
+    <div class="eyebrow">{{ directions|length }} YO'NALISH</div>
+    {% if locked_direction %}
+    <h1 style="font-size:24px;">Sizning yo'nalishingiz: {{ locked_direction.name_uz }}</h1>
+    <p class="muted">O'quv jarayoni bitta yo'nalishga qaratilgan. Boshqasiga o'tishni istasangiz —
+        <a href="{{ url_for('choose_direction') }}" style="color:var(--cs-text-primary);">shu yerdan almashtiring</a>.</p>
+    {% else %}
+    <h1 style="font-size:24px;">O'zingizga mos IT yo'nalishini tanlang</h1>
+    <p class="muted">Har bir yo'nalish bo'yicha boshlang'ichdan yuqori darajagacha kurslar mavjud</p>
+    {% endif %}
+</div>
+<div class="grid grid-4">
+    {% for d in directions %}
+    {% set is_own = locked_direction and locked_direction.id == d.id %}
+    <a href="{{ url_for('courses_bp.courses', d=d.slug) if (not locked_direction or is_own) else url_for('choose_direction') }}"
+       class="direction-card fade-in-up" style="{{ 'opacity:.5;' if locked_direction and not is_own }}
+              {{ 'border-color:var(--cs-text-primary);box-shadow:var(--cs-glow);' if is_own }} position:relative;">
+        {% if d.coming_soon %}
+        <div style="position:absolute; top:8px; right:8px; background:rgba(217,119,6,.15); color:#d97706; font-size:9px; font-weight:800; padding:2px 8px; border-radius:10px;">Tez kunda</div>
+        {% endif %}
+        <div class="hex-icon lg {{ 'cyan' if loop.index is even }}">{{ icon(d.icon, 30) }}</div>
+        <div class="name" style="font-size:14px;">{{ d.name_uz }}{% if is_own %} ✓{% endif %}</div>
+        <div class="count">{{ d.course_count }} kurs mavjud</div>
+    </a>
+    {% endfor %}
+</div>
+{% endblock %}

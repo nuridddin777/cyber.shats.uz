@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}Avatar — Virtual Olam{% endblock %}
+{% block extra_head %}
+<style>
+.vw-header{background:linear-gradient(135deg,#050a18,#0d0a20);padding:28px 0 20px;margin-bottom:24px;border-bottom:1px solid rgba(30,144,255,0.15)}
+.avatar-3d{width:200px;height:200px;margin:0 auto 20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:80px;position:relative;overflow:hidden}
+.option-grid{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+.color-opt{width:100%;aspect-ratio:1;border-radius:8px;cursor:pointer;border:2px solid transparent;transition:all .15s}
+.color-opt:hover,.color-opt.active{border-color:#fff;transform:scale(1.1)}
+.style-opt{background:rgba(10,22,45,0.9);border:1px solid rgba(30,144,255,0.15);border-radius:8px;padding:10px;text-align:center;cursor:pointer;font-size:12px;color:#c8d8e8;transition:all .15s}
+.style-opt:hover,.style-opt.active{border-color:#1e90ff;background:rgba(30,144,255,0.1)}
+.inv-item{background:rgba(10,22,45,0.9);border:1px solid rgba(30,144,255,0.12);border-radius:10px;padding:12px;display:flex;align-items:center;gap:10px;margin-bottom:8px}
+.inv-item.equipped{border-color:rgba(0,200,83,0.4);background:rgba(0,200,83,0.05)}
+.rarity-common{color:#8899aa}.rarity-uncommon{color:#00c853}.rarity-rare{color:#1e90ff}.rarity-epic{color:#b47cff}.rarity-legendary{color:#ffc107}
+</style>
+{% endblock %}
+{% block content %}
+<div class="vw-header">
+  <div class="container">
+    <nav style="font-size:13px;color:#5a7a9a;margin-bottom:8px;">
+      <a href="{{ url_for('virtual.world_home') }}" style="color:#5a7a9a;">Virtual Olam</a> /
+      <span style="color:#7ec8f8;">Avatar</span>
+    </nav>
+    <h1 style="font-size:22px;font-weight:700;color:#e8f4ff;margin:0;">🎭 Avatar Sozlamalari</h1>
+  </div>
+</div>
+<div class="container">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px;align-items:start;">
+    <!-- Preview -->
+    <div style="background:rgba(10,22,45,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:16px;padding:24px;text-align:center;">
+      <div class="avatar-3d" id="avatarPreview" style="background:{{ avatar.outfit_color }};border:4px solid {{ avatar.outfit_color }}40;">🧑‍💻</div>
+      <input type="text" id="nicknameInput" value="{{ avatar.nickname }}" maxlength="20"
+        style="background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px 16px;font-size:16px;font-weight:700;text-align:center;width:100%;box-sizing:border-box;margin-bottom:12px;">
+      <div style="display:flex;justify-content:center;gap:20px;font-size:13px;color:#5a7a9a;margin-bottom:16px;">
+        <span>⭐ Level {{ avatar.level }}</span>
+        <span>🪙 {{ avatar.coins }} coin</span>
+        <span>✨ {{ avatar.xp }} XP</span>
+      </div>
+
+      <div style="text-align:left;margin-top:20px;">
+        <div style="font-size:13px;font-weight:600;color:#7ec8f8;margin-bottom:8px;">Kiyim rangi</div>
+        <div class="option-grid">
+          {% for c in ['#1E90FF','#00C853','#FF6600','#FF00FF','#FFD700','#FF4444','#00FFFF','#B47CFF','#FF69B4','#1DB954','#FF8C00','#4169E1'] %}
+          <div class="color-opt {% if avatar.outfit_color == c %}active{% endif %}" style="background:{{ c }};" onclick="setColor('outfit_color','{{ c }}',this)"></div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div style="text-align:left;margin-top:16px;">
+        <div style="font-size:13px;font-weight:600;color:#7ec8f8;margin-bottom:8px;">Teri rangi</div>
+        <div class="option-grid">
+          {% for c in ['#FFB74D','#FFCC80','#D7CCC8','#A1887F','#8D6E63','#5D4037'] %}
+          <div class="color-opt {% if avatar.skin_color == c %}active{% endif %}" style="background:{{ c }};" onclick="setColor('skin_color','{{ c }}',this)"></div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <div style="text-align:left;margin-top:16px;">
+        <div style="font-size:13px;font-weight:600;color:#7ec8f8;margin-bottom:8px;">Soch uslubi</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+          {% for s in ['short','medium','long','bald'] %}
+          <div class="style-opt {% if avatar.hair_style == s %}active{% endif %}" onclick="setStyle('hair_style','{{ s }}',this)">{{ s|capitalize }}</div>
+          {% endfor %}
+        </div>
+      </div>
+
+      <button class="cs-btn" style="width:100%;margin-top:20px;" onclick="saveAvatar()">💾 Saqlash</button>
+    </div>
+
+    <!-- Inventar -->
+    <div>
+      <h3 style="color:#e8f4ff;font-size:16px;margin-bottom:14px;">🎒 Inventar</h3>
+      {% if inventory %}
+        {% for item in inventory %}
+        <div class="inv-item {% if item.is_equipped %}equipped{% endif %}">
+          <div style="font-size:28px;width:40px;text-align:center;">
+            {% if item.item_type == 'hat' %}🎩{% elif item.item_type == 'accessory' %}👓{% elif item.item_type == 'outfit' %}👔{% elif item.item_type == 'badge' %}🏅{% elif item.item_type == 'pet' %}🐾{% elif item.item_type == 'tool' %}💻{% elif item.item_type == 'vehicle' %}🚁{% else %}📦{% endif %}
+          </div>
+          <div style="flex:1;">
+            <div style="color:#e8f4ff;font-weight:600;font-size:14px;">{{ item.item_name }}</div>
+            <div style="font-size:11px;margin-top:2px;" class="rarity-{{ item.rarity }}">{{ item.rarity|upper }}</div>
+          </div>
+          {% if item.is_equipped %}
+          <span style="font-size:11px;color:#00c853;border:1px solid rgba(0,200,83,0.3);border-radius:6px;padding:2px 8px;">Kiyilgan</span>
+          {% else %}
+          <button class="cs-btn cs-btn-outline" style="font-size:11px;padding:4px 10px;" onclick="equipItem({{ item.id }})">Kiyish</button>
+          {% endif %}
+        </div>
+        {% endfor %}
+      {% else %}
+      <div style="text-align:center;padding:40px;color:#5a7a9a;">
+        <div style="font-size:48px;margin-bottom:12px;">🎒</div>
+        <div>Inventar bo'sh</div>
+        <a href="{{ url_for('virtual.shop') }}" class="cs-btn" style="margin-top:12px;">🛍️ Do'konga o'tish</a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<script>
+let avatarData = {};
+
+function setColor(field, color, el) {
+  avatarData[field] = color;
+  el.parentElement.querySelectorAll('.color-opt').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+  if (field === 'outfit_color') {
+    document.getElementById('avatarPreview').style.background = color;
+    document.getElementById('avatarPreview').style.borderColor = color + '40';
+  }
+}
+
+function setStyle(field, val, el) {
+  avatarData[field] = val;
+  el.parentElement.querySelectorAll('.style-opt').forEach(e => e.classList.remove('active'));
+  el.classList.add('active');
+}
+
+function saveAvatar() {
+  avatarData.nickname = document.getElementById('nicknameInput').value.trim();
+  const body = Object.entries(avatarData).map(([k,v]) => `${k}=${encodeURIComponent(v)}`).join('&');
+  fetch('/virtual/avatar/update', {method:'POST', headers:{'Content-Type':'application/x-www-form-urlencoded'}, body})
+  .then(r => r.json())
+  .then(d => { alert(d.msg || 'Saqlandi!'); if(d.ok) location.reload(); });
+}
+
+function equipItem(invId) {
+  fetch(`/virtual/inventory/equip/${invId}`, {method:'POST'})
+  .then(r => r.json())
+  .then(d => { alert(d.msg); if(d.ok) location.reload(); });
+}
+</script>
+{% endblock %}

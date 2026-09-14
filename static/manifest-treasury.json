@@ -1,0 +1,15 @@
+{
+  "name": "CYBER SHATS — G'azna Panel",
+  "short_name": "CS G'azna",
+  "description": "CYBER SHATS g'azna (moliya) boshqaruv paneli",
+  "start_url": "/treasury/",
+  "scope": "/treasury/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#050505",
+  "theme_color": "#B38728",
+  "icons": [
+    { "src": "/static/img/pwa-icon-treasury-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/static/img/pwa-icon-treasury-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}

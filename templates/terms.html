@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Foydalanish shartlari — CYBER SHATS{% endblock %}
+{% block content %}
+<div style="max-width:760px; margin:60px auto 80px; padding:0 20px;">
+  <div style="margin-bottom:32px;">
+    <a href="{{ url_for('index') }}" style="color:var(--cs-text-primary); font-size:12px; text-decoration:none;">{{ icon('chevron-left',12) }} Bosh sahifaga qaytish</a>
+  </div>
+  <h1 style="font-size:26px; font-weight:800; color:var(--cs-text-white); margin-bottom:8px;">Foydalanish shartlari</h1>
+  <p class="muted" style="font-size:12.5px; margin-bottom:36px;">Oxirgi yangilanish: 2026-yil</p>
+
+  <div style="display:flex; flex-direction:column; gap:28px; font-size:14px; line-height:1.8; color:var(--cs-text-white);">
+
+    <section>
+      <h2 style="font-size:16px; color:var(--cs-text-primary); margin-bottom:10px;">1. Umumiy qoidalar</h2>
+      <p>CYBER SHATS ("Platforma") — IT ta'lim xizmatlarini taqdim etuvchi onlayn platforma. Platformadan ro'yxatdan o'tib foydalanish orqali siz ushbu Foydalanish shartlariga to'liq roziligingizni bildirasiz. Platformadan faqat qonuniy maqsadlarda va shu shartlarga muvofiq foydalanish talab qilinadi.</p>
+    </section>
+
+    <section>
+      <h2 style="font-size:16px; color:var(--cs-text-primary); margin-bottom:10px;">2. Kontent va mualliflik huquqi</h2>
+      <p>Platformadagi barcha kurslar, darslar, video materiallar, matnlar, testlar, kod namunalari va boshqa o'quv materiallari ("Kontent") CYBER SHATS yoki tegishli mualliflarga tegishli va O'zbekiston Respublikasi hamda xalqaro mualliflik huquqi qonunlari bilan himoyalangan.</p>
+      <p style="margin-top:10px;"><b>Quyidagilar QAT'IY TAQIQLANADI:</b></p>
+      <ul style="margin-top:8px; padding-left:20px; display:flex; flex-direction:column; gap:6px;">
+        <li>Kontentni (video, matn, taqdimot, kod va h.k.) ruxsatsiz nusxalash, ko'paytirish yoki uchinchi shaxslarga tarqatish;</li>
+        <li>Kontentni ochiqchasiga sotish, qayta sotish yoki tijorat maqsadida uzatish (Platforma ruxsatisiz);</li>
+        <li>Kontentni o'zlashtirib, o'z nomidan yoki boshqa platformada dars/kurs sifatida qayta tayyorlash yoki taqdim etish;</li>
+        <li>Platforma materiallarini avtomatlashtirilgan usulda (skript, bot, parser) yuklab olish yoki nusxalash;</li>
+        <li>Sertifikatlarni soxtalashtirish yoki noto'g'ri ma'lumot asosida olish.</li>
+      </ul>
+      <p style="margin-top:10px;">Ushbu qoidalarni buzish hisobni doimiy bloklash, yig'ilgan CODE va tarif imtiyozlarini bekor qilish hamda qonunchilikda nazarda tutilgan javobgarlikka olib kelishi mumkin.</p>
+    </section>
+
+    <section>
+      <h2 style="font-size:16px; color:var(--cs-text-primary); margin-bottom:10px;">3. Bilimlardan foydalanish</h2>
+      <p>Platformada olingan bilim va ko'nikmalardan shaxsiy rivojlanish, o'qish va qonuniy kasbiy faoliyat uchun erkin foydalanishingiz mumkin. Biroq olingan bilimlar asosida yaratilgan ishlar (loyihalar, kod, dizayn) boshqalarning mualliflik huquqini buzmasligi va noqonuniy (zararli dastur yaratish, xakerlik hujumi, firibgarlik va h.k.) maqsadlarda ishlatilmasligi shart.</p>
+    </section>
+
+    <section>
+      <h2 style="font-size:16px; color:var(--cs-text-primary); margin-bottom:10px;">4. Hisob va xavfsizlik</h2>
+      <p>Foydalanuvchi o'z hisob ma'lumotlari (email, parol) xavfsizligi uchun mas'uldir. Bitta hisobni bir nechta shaxs ishlatishi, hisobni sotish yoki uchinchi shaxsga topshirish taqiqlanadi. Shubhali faoliyat aniqlansa, Platforma hisobni vaqtincha yoki doimiy bloklash huquqiga ega.</p>
+    </section>
+
+    <section>
+      <h2 style="font-size:16px; color:var(--cs-text-primary); margin-bottom:10px;">5. Muomala qoidalari</h2>
+      <p>Guruhlar, kanallar, forum va boshqa muloqot vositalarida haqoratli, kamsituvchi, ekstremistik yoki noqonuniy kontent joylashtirish, boshqa foydalanuvchilarni bezovta qilish yoki soxta ma'lumot tarqatish qat'iyan taqiqlanadi.</p>
+    </section>
+
+    <section>
+      <h2 style="font-size:16px; color:var(--cs-text-primary); margin-bottom:10px;">6. To'lovlar va CODE tangalar</h2>
+      <p>CODE tanga — Platforma ichki valyutasi bo'lib, haqiqiy pulga bevosita ekvivalent emas va Platformadan tashqarida ishlatilmaydi. Sotib olingan tarif va xizmatlar, agar boshqacha ko'rsatilmagan bo'lsa, qaytarilmaydi.</p>
+    </section>
+
+    <section>
+      <h2 style="font-size:16px; color:var(--cs-text-primary); margin-bottom:10px;">7. Javobgarlik cheklovi</h2>
+      <p>Platforma o'quv maqsadlarida taqdim etiladi "bor holicha". CYBER SHATS Platformadan foydalanish natijasida yuzaga kelishi mumkin bo'lgan bilvosita zararlar uchun javobgar emas.</p>
+    </section>
+
+    <section>
+      <h2 style="font-size:16px; color:var(--cs-text-primary); margin-bottom:10px;">8. Shartlarning o'zgarishi</h2>
+      <p>CYBER SHATS ushbu shartlarni istalgan vaqtda yangilash huquqini saqlab qoladi. Muhim o'zgarishlar haqida foydalanuvchilar Platforma orqali xabardor qilinadi.</p>
+    </section>
+
+    <section>
+      <h2 style="font-size:16px; color:var(--cs-text-primary); margin-bottom:10px;">9. Bog'lanish</h2>
+      <p>Savol yoki shikoyatlar bo'yicha: <a href="mailto:info@shatscyber.uz" style="color:var(--cs-text-primary);">info@shatscyber.uz</a> yoki Telegram: <a href="https://t.me/shedow_777" style="color:var(--cs-text-primary);">@shedow_777</a></p>
+    </section>
+
+  </div>
+</div>
+{% endblock %}

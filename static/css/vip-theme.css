@@ -1,0 +1,189 @@
+/* ============================================================
+   SHATS CYBER PRO (VIP) TEMASI — "OBSIDIAN GOLD"
+   Chuqur qora (Obsidian) + tilla (oltin) gradient — hashamat va
+   nafosat. Endi QIZIL RANG UMUMAN ISHLATILMAYDI — faqat qora +
+   uch bosqichli tilla gradient (#BF953F -> #FCF6BA -> #B38728).
+   Faqat plan='vip' foydalanuvchilarga (body class="vip-theme").
+   ============================================================ */
+
+body.vip-theme {
+    /* Fonlar — chuqur Obsidian qora */
+    --cs-bg-primary: #050505;
+    --cs-bg-secondary: #0a0a0a;
+    --cs-bg-card: #0e0e0e;
+    --cs-bg-glass: rgba(191, 149, 63, 0.05);
+    --cs-bg-sidebar: #070707;
+    --cs-bg-input: #121212;
+
+    /* Matnlar — tilla gamma */
+    --cs-text-primary: #d4af37;
+    --cs-text-secondary: #fcf6ba;
+    --cs-text-muted: #8a7a52;
+    --cs-text-cyan: #e8d68a;
+    --cs-text-white: #f5efe0;
+    --cs-text-dark: #050505;
+    --cs-text-red: #cf6679;
+    --cs-text-yellow: #fcf6ba;
+
+    /* Chegara va nurlanish — yumshoq tilla nur */
+    --cs-border: rgba(191, 149, 63, 0.25);
+    --cs-border-active: rgba(212, 175, 55, 0.7);
+    --cs-glow: 0 0 14px rgba(212, 175, 55, 0.30);
+    --cs-glow-strong: 0 0 30px rgba(252, 246, 186, 0.45);
+    --cs-glow-red: 0 0 14px rgba(207, 102, 121, 0.35);
+    --cs-glow-cyan: 0 0 16px rgba(232, 214, 138, 0.35);
+
+    /* Gradientlar — uch bosqichli tilla */
+    --cs-grad-main: linear-gradient(135deg, #050505 0%, #0a0a0a 50%, #070707 100%);
+    --cs-grad-card: linear-gradient(155deg, rgba(191,149,63,0.06) 0%, #0e0e0e 60%);
+    --cs-grad-btn: linear-gradient(135deg, #BF953F 0%, #FCF6BA 50%, #B38728 100%);
+    --cs-grad-sidebar: linear-gradient(180deg, #070707 0%, #050505 100%);
+
+    --vip-gold: #d4af37;
+    --vip-gold-deep: #B38728;
+    --vip-gradient: linear-gradient(135deg, #BF953F 0%, #FCF6BA 50%, #B38728 100%);
+    --vip-glow: 0 0 30px rgba(212, 175, 55, 0.28);
+}
+
+body.vip-theme {
+    background: var(--cs-grad-main);
+}
+body.vip-theme .app-shell {
+    background: var(--cs-grad-main);
+}
+
+/* Tugmalar — jonli tilla gradient, sekin "shimmer" bilan (jonlantirilgan) */
+body.vip-theme .cs-btn-primary {
+    background: var(--vip-gradient);
+    background-size: 200% 100%;
+    border-color: transparent;
+    color: #1a1400;
+    font-weight: 800;
+    box-shadow: var(--vip-glow);
+    animation: vip-shimmer 4s ease-in-out infinite;
+}
+@keyframes vip-shimmer {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+@media (prefers-reduced-motion: reduce) {
+    body.vip-theme .cs-btn-primary { animation: none; }
+}
+
+body.vip-theme .cs-btn-primary:hover {
+    filter: brightness(1.1);
+    box-shadow: 0 0 42px rgba(252, 246, 186, 0.5);
+}
+
+body.vip-theme .cs-nav-item.active {
+    background: linear-gradient(90deg, rgba(212,175,55,.15), transparent);
+    border-left: 3px solid var(--vip-gold);
+}
+
+body.vip-theme .cs-chip.solid {
+    background: var(--vip-gradient);
+    color: #1a1400;
+    border-color: transparent;
+    font-weight: 800;
+}
+
+body.vip-theme .stat-card .num,
+body.vip-theme .cs-card-title h3 {
+    color: var(--vip-gold);
+}
+
+body.vip-theme a {
+    color: var(--vip-gold);
+}
+
+body.vip-theme .cs-card {
+    border-color: var(--cs-border);
+    background: var(--cs-grad-card);
+}
+
+body.vip-theme .cs-card:hover {
+    box-shadow: var(--vip-glow);
+    border-color: var(--cs-border-active);
+}
+
+/* Sidebar — qora + tilla chiziq */
+body.vip-theme .sidebar,
+body.vip-theme .app-sidebar {
+    border-color: var(--cs-border);
+    background: var(--cs-grad-sidebar);
+}
+
+/* Inputlar */
+body.vip-theme .cs-input {
+    background: var(--cs-bg-input);
+    border-color: var(--cs-border);
+    color: var(--cs-text-white);
+}
+body.vip-theme .cs-input:focus {
+    border-color: var(--vip-gold);
+    box-shadow: 0 0 0 2px rgba(212, 175, 55, 0.20);
+}
+
+body.vip-theme .terminal-box {
+    background: var(--cs-bg-input) !important;
+    border-color: var(--cs-border) !important;
+}
+body.vip-theme .terminal-box .term-head,
+body.vip-theme .browser-mock .bm-bar {
+    background: var(--cs-bg-card) !important;
+}
+body.vip-theme .terminal-box .term-dot {
+    background: var(--vip-gold-deep) !important;
+}
+body.vip-theme .intercept-box .raw-req {
+    background: var(--cs-bg-input) !important;
+    color: var(--vip-gold) !important;
+}
+body.vip-theme .intercept-box .raw-req .hl {
+    background: rgba(212, 175, 55, 0.20) !important;
+}
+body.vip-theme .msg pre {
+    background: var(--cs-bg-input) !important;
+}
+body.vip-theme .msg.bot {
+    background: rgba(212, 175, 55, 0.06) !important;
+}
+
+body.vip-theme ::selection,
+body.vip-theme .cs-btn:hover,
+body.vip-theme .cs-btn-primary,
+body.vip-theme .cs-btn-primary:hover,
+body.vip-theme .cs-btn-danger:hover,
+body.vip-theme .msg.user,
+body.vip-theme .chat-input-row button,
+body.vip-theme .q-grid .q-num.current,
+body.vip-theme .price-card .ribbon {
+    color: #1a1400 !important;
+}
+body.vip-theme ::selection {
+    background: rgba(212, 175, 55, 0.28);
+}
+
+/* VIP/SHATS CYBER PRO nishon — tilla */
+.vip-badge {
+    background: var(--vip-gradient, linear-gradient(135deg, #BF953F 0%, #FCF6BA 50%, #B38728 100%));
+    color: #1a1400 !important;
+    padding: 3px 12px;
+    border-radius: var(--cs-radius-pill);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    display: inline-block;
+    box-shadow: 0 0 16px rgba(212, 175, 55, 0.4);
+}
+
+/* Sarlavhalarda tilla gradient matn — sekin porlaydigan */
+body.vip-theme h1,
+body.vip-theme h2 {
+    background: var(--vip-gradient);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: vip-shimmer 6s ease-in-out infinite;
+}

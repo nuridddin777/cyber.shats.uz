@@ -1,0 +1,327 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Bosh sahifa — SHATS CYBER{% endblock %}
+{% block app_content %}
+<style>
+/* ============ YANGI PANEL DIZAYNI — binafsha nurlanish + gradient matn ============ */
+.dash-hero{ position:relative; overflow:hidden; border-radius:18px; margin-bottom:24px;
+  background:#0C0A14; border:1px solid rgba(168,85,247,.22); }
+.dash-hero::before{ content:''; position:absolute; top:-160px; left:-120px; width:600px; height:600px;
+  background:radial-gradient(circle, rgba(168,85,247,.28) 0%, rgba(124,58,237,.12) 42%, transparent 70%);
+  filter:blur(6px); pointer-events:none; animation:dashGlowDrift 16s ease-in-out infinite alternate; }
+@keyframes dashGlowDrift{ 0%{transform:translate(0,0) scale(1);} 100%{transform:translate(50px,30px) scale(1.1);} }
+.dash-hero-grid{ position:relative; z-index:1; display:grid; grid-template-columns:1.15fr .85fr; gap:0; }
+.dash-hero-copy{ padding:34px 32px; }
+.dash-hero-copy .greet{ font-size:24px; font-weight:800; line-height:1.2; }
+.dash-hero-copy .greet .grad{ background:linear-gradient(90deg,#A855F7,#D8B4FE 55%,var(--cs-text-cyan));
+  -webkit-background-clip:text; background-clip:text; color:transparent; }
+.dash-hero-copy .meta{ font-size:12.5px; color:var(--cs-text-muted); margin-top:8px; }
+.dash-hero-stats{ display:flex; gap:12px; margin-top:22px; flex-wrap:wrap; }
+.dhs-item{ background:rgba(255,255,255,.03); border:1px solid rgba(168,85,247,.18); border-radius:11px; padding:12px 18px; min-width:88px; }
+.dhs-item .val{ font-size:22px; font-weight:800; color:#F5F3FA; }
+.dhs-item .lbl{ font-size:10px; color:var(--cs-text-muted); text-transform:uppercase; letter-spacing:.06em; margin-top:2px; }
+.dash-code-window{ position:relative; z-index:1; background:#08070C; border-left:1px solid rgba(168,85,247,.18);
+  font-family:'JetBrains Mono',monospace; font-size:12px; padding:20px 20px; overflow:hidden; }
+.dash-code-window .dots{ display:flex; gap:5px; margin-bottom:14px; }
+.dash-code-window .dots span{ width:8px; height:8px; border-radius:50%; background:#2A2438; }
+.dash-code-window .line{ line-height:1.85; opacity:0; }
+.dash-code-window .im{ color:#9993AC; } .dash-code-window .cl{ color:#D8B4FE; }
+.dash-code-window .at{ color:#F5F3FA; } .dash-code-window .st{ color:#86EFAC; } .dash-code-window .nu{ color:var(--cs-text-cyan); }
+@media(max-width:900px){ .dash-hero-grid{grid-template-columns:1fr;} .dash-code-window{display:none;} }
+
+.reveal{ opacity:0; animation:dashFadeUp .7s cubic-bezier(.16,1,.3,1) forwards; }
+@keyframes dashFadeUp{ from{opacity:0; transform:translateY(16px);} to{opacity:1; transform:translateY(0);} }
+
+.dash-section-title{font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--cs-text-muted);margin:22px 0 12px;display:flex;align-items:center;gap:8px}
+.dash-section-title:first-of-type{margin-top:4px}
+
+/* DARAJA 1 — endi binafsha urg'u bilan, hover'da chuqur soya */
+.tier1-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.tier1-card{background:var(--cs-grad-card);border:1px solid var(--cs-border);border-radius:14px;padding:26px 18px;text-align:center;transition:transform .25s,border-color .25s,box-shadow .25s;text-decoration:none;display:block}
+.tier1-card:hover{border-color:rgba(168,85,247,.55);transform:translateY(-5px);box-shadow:0 16px 36px rgba(124,58,237,.22)}
+.tier1-card .p-icon{width:64px;height:64px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 14px;background:linear-gradient(135deg,rgba(168,85,247,.18),rgba(56,189,248,.10));border:1px solid rgba(168,85,247,.4)}
+.tier1-card .p-name{font-size:15px;font-weight:800;color:var(--cs-text-white)}
+.tier1-card .p-desc{font-size:11px;color:var(--cs-text-muted);margin-top:4px}
+
+/* DARAJA 2 — asosiy bo'limlar, o'rtacha kartalar */
+.tier2-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.tier2-card{background:var(--cs-bg-card);border:1px solid var(--cs-border);border-radius:12px;padding:18px 14px;text-align:center;transition:all .2s;text-decoration:none;display:block}
+.tier2-card:hover{border-color:rgba(168,85,247,.45);transform:translateY(-3px);box-shadow:0 10px 24px rgba(124,58,237,.15)}
+.tier2-card .p-icon{width:44px;height:44px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px;margin:0 auto 10px;background:var(--cs-bg-glass);border:1px solid var(--cs-border)}
+.tier2-card .p-name{font-size:12.5px;font-weight:700;color:var(--cs-text-white)}
+
+/* DARAJA 3 — qo'shimcha, kichik pill-ro'yxat */
+.tier3-row{display:flex;flex-wrap:wrap;gap:8px}
+.tier3-pill{display:inline-flex;align-items:center;gap:6px;background:var(--cs-bg-card);border:1px solid var(--cs-border);border-radius:20px;padding:7px 14px;font-size:11.5px;color:var(--cs-text-muted);text-decoration:none;transition:all .15s}
+.tier3-pill:hover{color:#D8B4FE;border-color:rgba(168,85,247,.5)}
+.tier3-pill svg{width:13px;height:13px}
+
+@media(max-width:1100px){.tier1-grid{grid-template-columns:repeat(2,1fr)}.tier2-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:700px){.tier1-grid{grid-template-columns:repeat(2,1fr)}.tier2-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.tier1-grid{grid-template-columns:1fr}.tier2-grid{grid-template-columns:repeat(2,1fr)}}
+
+/* Yo'nalish progress kartasi */
+.dir-card{background:linear-gradient(135deg, rgba(168,85,247,0.10), rgba(56,159,248,0.05));border:1px solid rgba(168,85,247,.4);
+  border-radius:14px;padding:20px 24px;margin-bottom:24px;}
+.dir-card-top{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:14px;}
+.dir-card-label{font-size:10.5px;font-weight:800;letter-spacing:1px;color:#D8B4FE;text-transform:uppercase;}
+.dir-card-name{font-size:18px;font-weight:800;color:var(--cs-text-white);margin-top:4px;}
+.dir-progress-track{background:var(--cs-bg-glass);border-radius:20px;height:8px;overflow:hidden;margin:10px 0;}
+.dir-progress-fill{background:linear-gradient(90deg,#A855F7,var(--cs-text-cyan));height:100%;border-radius:20px;transition:width 1.2s cubic-bezier(.16,1,.3,1);}
+.dir-course-mini{display:flex;align-items:center;gap:8px;font-size:11px;color:var(--cs-text-muted);padding:6px 0;border-top:1px solid var(--cs-border);}
+.dir-course-mini:first-of-type{border-top:none;}
+.dir-course-mini .name{flex:1;color:var(--cs-text-white);}
+</style>
+
+<!-- YANGI SALOM BANNERI — gradient matn + real kod oynasi -->
+<div class="dash-hero reveal">
+  <div class="dash-hero-grid">
+    <div class="dash-hero-copy">
+      <div class="greet">Salom, <span class="grad">{{ current_user.ism }}</span> 👋</div>
+      <div class="meta">ID: <b style="color:var(--cs-text-cyan);">#{{ current_user.custom_id or current_user.id }}</b> &nbsp;·&nbsp; Reja: <b style="color:#D8B4FE;">{{ current_user.plan|upper }}</b></div>
+      <div class="dash-hero-stats">
+        <div class="dhs-item"><div class="val" data-count="{{ current_user.code_balance|default(0)|int }}">0</div><div class="lbl">Code</div></div>
+        <div class="dhs-item"><div class="val" data-count="{{ current_user.xp|default(0)|int }}">0</div><div class="lbl">XP</div></div>
+        <div class="dhs-item"><div class="val" style="font-size:15px;">{{ current_user.plan|upper }}</div><div class="lbl">Tarif</div></div>
+      </div>
+    </div>
+    <div class="dash-code-window">
+      <div class="dots"><span></span><span></span><span></span></div>
+      <div id="dashCodeBody"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+window.__dashUserData = {
+  ism: {{ current_user.ism|tojson }},
+  tarif: {{ current_user.plan|upper|tojson }},
+  xp: {{ current_user.xp|default(0)|int }},
+  code: {{ current_user.code_balance|default(0)|int }}
+};
+</script>
+
+{% if locked_direction %}
+<!-- SIZNING YO'NALISHINGIZ — progress kartasi -->
+<div class="dir-card">
+  <div class="dir-card-top">
+    <div>
+      <div class="dir-card-label">{{ icon('target',11) }} Sizning yo'nalishingiz</div>
+      <div class="dir-card-name">{{ icon(locked_direction.icon, 18) }} {{ locked_direction.name_uz }}</div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:22px;font-weight:800;color:var(--cs-text-primary);">{{ direction_progress_pct }}%</div>
+      <a href="{{ url_for('choose_direction') }}" style="font-size:10.5px;color:var(--cs-text-muted);text-decoration:underline;">Yo'nalishni almashtirish</a>
+    </div>
+  </div>
+  <div class="dir-progress-track"><div class="dir-progress-fill" style="width:{{ direction_progress_pct }}%;"></div></div>
+  {% if direction_courses %}
+  <div style="margin-top:10px;">
+    {% for c in direction_courses %}
+    <div class="dir-course-mini">
+      {{ icon('check-circle' if c.completed_at else ('play' if c.progress_percent else 'lock'), 13) }}
+      <span class="name">{{ c.title }}</span>
+      <span>{{ c.progress_percent or 0 }}%</span>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if next_course %}
+  <a href="{{ url_for('courses_bp.course_detail', slug=next_course.slug) }}" class="cs-btn cs-btn-primary" style="margin-top:14px;display:inline-block;">
+    {{ 'Davom etish' if next_course.progress_percent else 'Boshlash' }} → {{ next_course.title }}
+  </a>
+  {% elif direction_courses %}
+  <div style="margin-top:12px;font-size:12px;color:var(--cs-text-primary);">{{ icon('award',13) }} Ushbu yo'nalishdagi barcha kurslarni tugatdingiz! Tabriklaymiz 🎉</div>
+  {% endif %}
+</div>
+{% endif %}
+
+<!-- AI SHAXSIY TAVSIYALAR -->
+<div class="cs-card" id="aiRecsCard" style="margin-bottom:24px; padding:20px 24px;">
+  <div class="flex-between" style="margin-bottom:12px; flex-wrap:wrap; gap:8px;">
+    <h3 style="font-size:12.5px; margin:0; display:flex; align-items:center; gap:7px;">
+      {{ icon('bot',15) }} AI SHAXSIY TAVSIYALAR
+    </h3>
+    <button id="aiRecsRefreshBtn" class="cs-btn cs-btn-sm cs-btn-secondary" style="font-size:10.5px;">{{ icon('zap',11) }} Yangilash</button>
+  </div>
+  <div id="aiRecsBody">
+    <p class="muted" style="font-size:12px;">{{ icon('clock',12) }} Yuklanmoqda...</p>
+  </div>
+</div>
+
+<!-- MAXSUS TOPSHIRIQ (KRIPTIKIS) — targ'ibot kartasi -->
+<a href="{{ url_for('kriptikis_bp.special_challenge_page') }}" style="text-decoration:none;display:block;margin-bottom:24px;">
+  <div style="background:linear-gradient(135deg, rgba(255,59,59,0.10), rgba(56,159,248,0.06));border:1px solid var(--cs-border-active);border-radius:14px;padding:18px 22px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <div>
+      <div style="font-size:11px;font-weight:800;letter-spacing:1px;color:var(--cs-text-primary);text-transform:uppercase;">🔐 Maxsus Topshiriq</div>
+      <div style="font-size:15px;font-weight:700;color:var(--cs-text-white);margin-top:4px;">KRIPTIKIS — 3 bosqichli kriptografik jumboq</div>
+      <div style="font-size:12px;color:var(--cs-text-muted);margin-top:2px;">Har bir bosqichni yeching, CODE mukofot oling</div>
+    </div>
+    <div class="cs-btn cs-btn-primary" style="white-space:nowrap;">Boshlash →</div>
+  </div>
+</a>
+
+<!-- DARAJA 1: eng ko'p ishlatiladigan 4 bo'lim -->
+<div class="dash-section-title reveal" style="animation-delay:.15s">{{ icon('star',13) }} Tez-tez ishlatiladigan</div>
+<div class="tier1-grid">
+  <a href="{{ url_for('courses_bp.courses') }}" class="tier1-card reveal" style="animation-delay:.2s">
+    <div class="p-icon">📚</div>
+    <div class="p-name">Kurslar</div>
+  </a>
+  <a href="{{ url_for('hackerlab_bp.hacker_lab') }}" class="tier1-card reveal" style="animation-delay:.26s">
+    <div class="p-icon">💻</div>
+    <div class="p-name">Amaliyot</div>
+  </a>
+  <a href="{{ url_for('messages_bp.messages_page') }}" class="tier1-card reveal" style="animation-delay:.32s">
+    <div class="p-icon">✉️</div>
+    <div class="p-name">Xabarlar</div>
+  </a>
+  <a href="{{ url_for('ai_bp.ai_assistant') }}" class="tier1-card reveal" style="animation-delay:.38s">
+    <div class="p-icon">🤖</div>
+    <div class="p-name">AI Yordamchi</div>
+  </a>
+</div>
+
+<!-- DARAJA 2: asosiy bo'limlar -->
+<div class="dash-section-title">{{ icon('grid',13) }} Asosiy bo'limlar</div>
+<div class="tier2-grid">
+  <a href="{{ url_for('directions') }}" class="tier2-card"><div class="p-icon">🧭</div><div class="p-name">Yo'nalishlar</div></a>
+  <a href="{{ url_for('tests_bp.tests') }}" class="tier2-card"><div class="p-icon">📝</div><div class="p-name">Testlar</div></a>
+  <a href="{{ url_for('forum_bp.forum') }}" class="tier2-card"><div class="p-icon">💬</div><div class="p-name">Forum</div></a>
+  <a href="{{ url_for('startups_bp.startups_list') }}" class="tier2-card"><div class="p-icon">🚀</div><div class="p-name">Startaplar</div></a>
+  <a href="{{ url_for('library_bp.gamification') }}" class="tier2-card"><div class="p-icon">🏆</div><div class="p-name">Reyting</div></a>
+  <a href="{{ url_for('coins_bp.coins_page') }}" class="tier2-card"><div class="p-icon">🪙</div><div class="p-name">Code tangalari</div></a>
+  <a href="{{ url_for('certs_bp.certificates_page') }}" class="tier2-card"><div class="p-icon">🎓</div><div class="p-name">Sertifikatlar</div></a>
+  <a href="/virtual/" class="tier2-card" style="opacity:.55;"><div class="p-icon">🌐</div><div class="p-name">Virtual olam</div><div class="muted" style="font-size:9.5px; margin-top:2px;">Tez orada</div></a>
+</div>
+
+<!-- DARAJA 3: qo'shimcha bo'limlar, kichik ro'yxat -->
+<div class="dash-section-title">{{ icon('more-horizontal',13) }} Qo'shimcha</div>
+<div class="tier3-row">
+  <a href="{{ url_for('ids_bp.my_id_page') }}" class="tier3-pill">{{ icon('hash',12) }} Mening ID</a>
+  <a href="{{ url_for('ids_bp.auction_page') }}" class="tier3-pill">{{ icon('gavel',12) }} ID Auksioni</a>
+  <a href="{{ url_for('library_bp.news') }}" class="tier3-pill">{{ icon('zap',12) }} Yangiliklar</a>
+  <a href="{{ url_for('social_bp.reels_feed') }}" class="tier3-pill">{{ icon('play',12) }} Reels</a>
+  <a href="{{ url_for('jamoa_bp.jamoa_page') }}" class="tier3-pill">{{ icon('users',12) }} Jamoa</a>
+  <a href="{{ url_for('results') }}" class="tier3-pill">{{ icon('folder',12) }} Loyihalar</a>
+  <a href="{{ url_for('profile') }}" class="tier3-pill">{{ icon('user',12) }} Profil</a>
+  <a href="{{ url_for('settings') }}" class="tier3-pill">{{ icon('settings',12) }} Sozlamalar</a>
+</div>
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+var recTypeMeta = {
+    davom_etish: {icon: '▶', color: 'var(--cs-text-primary)'},
+    takrorlash: {icon: '⚠', color: 'var(--cs-text-yellow)'},
+    yangi_yonalish: {icon: '★', color: 'var(--cs-text-cyan)'},
+    tabrik: {icon: '🎉', color: 'var(--cs-text-primary)'}
+};
+function escHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderRecs(recs) {
+    var body = document.getElementById('aiRecsBody');
+    if (!recs || !recs.length) {
+        body.innerHTML = '<p class="muted" style="font-size:12px;">Hali tavsiya yo\'q — "Yangilash" tugmasini bosing.</p>';
+        return;
+    }
+    var html = '<div style="display:flex; flex-direction:column; gap:10px;">';
+    recs.forEach(function(r) {
+        var meta = recTypeMeta[r.type] || recTypeMeta.davom_etish;
+        html += '<div style="display:flex; gap:10px; padding:10px 12px; background:rgba(255,255,255,.02); border-radius:10px; border:1px solid var(--cs-border);">' +
+            '<span style="font-size:15px;">' + meta.icon + '</span>' +
+            '<div><div style="font-size:12.5px; font-weight:700; color:var(--cs-text-white);">' + escHtml(r.title) + '</div>' +
+            '<div style="font-size:11.5px; color:var(--cs-text-muted); margin-top:2px;">' + escHtml(r.description) + '</div></div>' +
+            '</div>';
+    });
+    html += '</div>';
+    body.innerHTML = html;
+}
+
+async function loadRecs() {
+    try {
+        var r = await fetch('/api/ai/recommendations');
+        var d = await r.json();
+        if (d.success && d.data.recommendations) {
+            renderRecs(d.data.recommendations);
+            if (d.data.stale) {
+                document.getElementById('aiRecsBody').innerHTML += '<p class="muted" style="font-size:10px; margin-top:8px;">Bu tavsiyalar biroz eskirgan — "Yangilash"ni bosing.</p>';
+            }
+        } else {
+            document.getElementById('aiRecsBody').innerHTML = '<p class="muted" style="font-size:12px;">Hali tavsiya yo\'q — "Yangilash" tugmasini bosing, AI progressingizni tahlil qiladi.</p>';
+        }
+    } catch(e) {
+        document.getElementById('aiRecsBody').innerHTML = '<p class="muted" style="font-size:12px;">Yuklashda xatolik.</p>';
+    }
+}
+loadRecs();
+
+document.getElementById('aiRecsRefreshBtn').addEventListener('click', async function() {
+    var btn = this;
+    btn.disabled = true;
+    btn.innerHTML = '{{ icon("clock",11) }} Tahlil qilinmoqda...';
+    document.getElementById('aiRecsBody').innerHTML = '<p class="muted" style="font-size:12px;">AI progressingizni tahlil qilmoqda...</p>';
+    try {
+        var r = await fetch('/api/ai/recommendations/generate', { method: 'POST' });
+        var d = await r.json();
+        if (d.success) {
+            renderRecs(d.data.recommendations);
+        } else {
+            document.getElementById('aiRecsBody').innerHTML = '<p style="font-size:12px; color:#ff5555;">' + escHtml(d.error) + '</p>';
+        }
+    } catch(e) {
+        document.getElementById('aiRecsBody').innerHTML = '<p style="font-size:12px; color:#ff5555;">Ulanish xatoligi.</p>';
+    }
+    btn.disabled = false;
+    btn.innerHTML = '{{ icon("zap",11) }} Yangilash';
+});
+
+/* ============ YANGI: kod oynasi yozilish effekti (real foydalanuvchi ma'lumoti) ============ */
+(function(){
+    var d = window.__dashUserData || {};
+    function esc(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    var lines = [
+        {t:'<span class="im">import</span> { <span class="cl">UserSession</span> } <span class="im">from</span> <span class="st">\'@cybershats/core\'</span>;'},
+        {t:'&nbsp;'},
+        {t:'&lt;<span class="cl">UserSession</span>'},
+        {t:'<span class="at">ism</span>=<span class="st">"' + esc(d.ism||'') + '"</span>', pad:22},
+        {t:'<span class="at">tarif</span>=<span class="st">"' + esc(d.tarif||'') + '"</span>', pad:22},
+        {t:'<span class="at">xp</span>={<span class="nu">' + (d.xp||0) + '</span>}', pad:22},
+        {t:'<span class="at">code</span>={<span class="nu">' + (d.code||0) + '</span>}', pad:22},
+        {t:'/&gt;'}
+    ];
+    var body = document.getElementById('dashCodeBody');
+    if(body){
+        var i = 0;
+        function next(){
+            if(i >= lines.length) return;
+            var l = lines[i];
+            var div = document.createElement('div');
+            div.className = 'line';
+            if(l.pad) div.style.paddingLeft = l.pad+'px';
+            div.innerHTML = l.t;
+            body.appendChild(div);
+            requestAnimationFrame(function(){ div.style.transition='opacity .3s'; div.style.opacity=1; });
+            i++;
+            setTimeout(next, 110);
+        }
+        setTimeout(next, 300);
+    }
+
+    /* ============ YANGI: raqamlar sanog'i animatsiyasi ============ */
+    document.querySelectorAll('[data-count]').forEach(function(el){
+        var target = parseInt(el.dataset.count, 10) || 0;
+        var start = performance.now();
+        var dur = 1100;
+        function step(now){
+            var p = Math.min(1, (now-start)/dur);
+            var eased = 1 - Math.pow(1-p, 3);
+            el.textContent = Math.round(target*eased);
+            if(p < 1) requestAnimationFrame(step);
+        }
+        setTimeout(function(){ requestAnimationFrame(step); }, 500);
+    });
+})();
+</script>
+{% endblock %}

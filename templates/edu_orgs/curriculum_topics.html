@@ -1,0 +1,45 @@
+{% import "edu_orgs/_shared.html" as shared %}
+<!DOCTYPE html>
+<html lang="uz"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ grade_label }} — O'quv dasturi — SHATS CYBER EDU</title>
+</head><body{% if is_pro %} class="{{ 'pro-student-theme' if role=='student' else ('pro-teacher-theme' if role=='teacher' else '') }}"{% endif %}>
+{% include "edu_orgs/_shared.html" %}
+<div class="container">
+  <div class="top-nav">
+    <div class="brand">SHATS CYBER <span>EDU</span>{% if is_pro %} <span class="badge" style="margin-left:6px;">PRO</span>{% endif %}</div>
+    <a href="{{ url_for('edu_orgs.curriculum_grades') }}" class="btn secondary">← Sinf/kurslar</a>
+  </div>
+
+  {{ shared.flashes() }}
+
+  <div class="card">
+    <h1>{{ grade_label }} — Informatika mavzulari</h1>
+    <p style="color:#a1a1c0;">
+      {% if is_pro %}
+        Har mavzuda 5 tagacha amaliy topshiriq + rasm/diagramma tavsiyalari mavjud.
+      {% else %}
+        Har mavzuda 1 ta amaliy topshiriq mavjud.
+        <span class="badge warn">Pro tarifda +4 ta qo'shimcha amaliy va rasm tavsiyalari ochiladi</span>
+      {% endif %}
+    </p>
+
+    {% if topics %}
+      <div class="table-wrap">
+        <table>
+          <tr><th>№</th><th>Mavzu</th><th></th></tr>
+          {% for t in topics %}
+          <tr>
+            <td>{{ t['chapter_no'] }}</td>
+            <td>{{ t['title'] }}<br><span style="color:#a1a1c0;font-size:12px;">{{ t['summary'] }}</span></td>
+            <td><a href="{{ url_for('edu_orgs.curriculum_topic_detail', topic_id=t['id']) }}" class="btn secondary">Ochish</a></td>
+          </tr>
+          {% endfor %}
+        </table>
+      </div>
+    {% else %}
+      <p style="color:#a1a1c0;">Bu sinf/kurs uchun hozircha mavzu joylanmagan.</p>
+    {% endif %}
+  </div>
+</div>
+</body></html>

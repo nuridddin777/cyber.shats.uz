@@ -1,0 +1,13 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}{{ article.title }} — Xavfsizlik Zonasi{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:16px;">
+  <a href="{{ url_for('secz_bp.security_zone_page') }}" class="cs-btn cs-btn-sm">← Xavfsizlik Zonasi</a>
+</div>
+<div class="cs-card" style="max-width:800px;">
+  <div class="muted" style="font-size:11px; text-transform:uppercase; letter-spacing:1px; margin-bottom:6px;">{{ article.category }}</div>
+  <h1 style="font-size:22px; margin-bottom:14px;">{{ article.title }}</h1>
+  <div style="font-size:14px; line-height:1.9; white-space:pre-line; color:#d8d0e8;">{{ article.content }}</div>
+</div>
+{% endblock %}

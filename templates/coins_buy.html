@@ -1,0 +1,210 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}CODE sotib olish{% endblock %}
+{% block extra_head %}<style>
+.pkg-btn{
+  display:flex !important; flex-direction:column; align-items:center; gap:4px;
+  padding:14px 6px 10px !important; border-radius:14px !important; border:1px solid rgba(255,255,255,.08) !important;
+  background:linear-gradient(155deg, rgba(255,178,56,.05), rgba(10,15,26,0)) !important; position:relative; transition:.2s;
+}
+.pkg-btn:hover{ border-color:rgba(255,178,56,.4) !important; transform:translateY(-3px); }
+.pkg-btn.cs-btn-primary{ border-color:var(--cs-text-primary) !important; box-shadow:var(--cs-glow); }
+.pkg-coin{
+  width:34px; height:34px; border-radius:50%;
+  background:radial-gradient(circle at 32% 26%, #fff6d0, #ffb238 42%, #d9820f 74%, #7a4405 100%);
+  box-shadow:0 4px 10px rgba(255,178,56,.3), inset 0 2px 4px rgba(255,255,255,.5), inset 0 -3px 6px rgba(0,0,0,.3);
+  display:flex; align-items:center; justify-content:center; font-size:15px; margin-bottom:2px;
+}
+</style>{% endblock %}
+{% block app_content %}
+
+<div class="flex-between" style="margin-bottom:20px;">
+  <div>
+    <h1 style="font-size:20px;">{{ icon('zap',18) }} CODE SOTIB OLISH</h1>
+    <p class="muted" style="font-size:11.5px; margin-top:4px;">Kartadan to'lab, chek rasmini yuklang — g'azna tekshirib tasdiqlaydi.</p>
+    <p class="muted" style="font-size:11.5px; margin-top:4px;">{{ icon('repeat',11) }} Ayirboshlash kursi: 1 CODE = {{ "{:,}".format(code_to_som_rate) }} so'm</p>
+  </div>
+  <a href="{{ url_for('coins_bp.coins_page') }}" class="cs-btn cs-btn-sm">← Code Tangalar</a>
+</div>
+
+{% set has_real_provider = card_providers|selectattr('configured')|list|length > 0 %}
+{% if has_real_provider %}
+<!-- KARTA ORQALI TEZKOR TO'LOV (avtomatik, real-vaqtli) -->
+<div class="cs-card" style="margin-bottom:20px; padding:16px 18px;">
+  <h3 style="font-size:13px; margin-bottom:4px;">⚡ KARTA ORQALI TEZKOR TO'LOV</h3>
+  <p class="muted" style="font-size:11px; margin-bottom:14px;">To'lov darhol tasdiqlanadi, CODE avtomatik qo'shiladi — chek yuklash shart emas.</p>
+
+  {% if not oneid_verified %}
+  <div style="font-size:11px; margin-bottom:12px; padding:8px 10px; border-radius:6px; background:rgba(255,210,63,.06); border:1px solid rgba(255,210,63,.25);">
+    🪪 Shaxsingiz hali OneID orqali tasdiqlanmagan.
+    {{ "{:,}".format(oneid_required_above) }} so'mdan yuqori to'lovlar uchun majburiy.
+    <a href="{{ url_for('oneid.oneid_login') }}" class="cs-btn cs-btn-sm" style="margin-left:6px;">OneID orqali tasdiqlash</a>
+  </div>
+  {% else %}
+  <div style="font-size:11px; margin-bottom:12px; color:#e0393d;">✅ Shaxsingiz OneID orqali tasdiqlangan.</div>
+  {% endif %}
+
+  <form method="post" action="{{ url_for('coins_bp.coins_buy_card') }}" id="cardBuyForm">
+    <label class="muted" style="font-size:11px; display:block; margin-bottom:6px;">Karta turi</label>
+    <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:6px; margin-bottom:12px;">
+      <label class="cs-card-radio"><input type="radio" name="card_type" value="uzcard" checked> UZCARD</label>
+      <label class="cs-card-radio"><input type="radio" name="card_type" value="humo"> HUMO</label>
+      <label class="cs-card-radio"><input type="radio" name="card_type" value="visa"> VISA</label>
+      <label class="cs-card-radio"><input type="radio" name="card_type" value="mastercard"> MASTERCARD</label>
+    </div>
+
+    <label class="muted" style="font-size:11px; display:block; margin-bottom:6px;">To'lov tizimi</label>
+    <div style="display:flex; gap:8px; margin-bottom:12px; flex-wrap:wrap;">
+      {% for p in card_providers if p.configured %}
+      <label class="cs-card-radio" style="flex:1; min-width:110px;">
+        <input type="radio" name="provider" value="{{ p.key }}" {% if loop.first %}checked{% endif %}>
+        {{ p.label }}
+      </label>
+      {% endfor %}
+    </div>
+
+    <label class="muted" style="font-size:11px; display:block; margin-bottom:5px;">CODE miqdori</label>
+    <input type="number" name="amount" min="{{ min_amount }}" required
+           class="cs-input" style="margin-bottom:12px;" placeholder="masalan: 15000">
+
+    <button type="submit" class="cs-btn cs-btn-primary cs-btn-full" style="font-size:14px; padding:12px;">
+      💳 TO'LASH VA CODE OLISH
+    </button>
+  </form>
+</div>
+{% endif %}
+
+<div class="grid" style="grid-template-columns:1.2fr 1fr; gap:20px; align-items:start;">
+
+  <!-- TO'LOV FORMASI (qo'lda chek yuklash — eski usul) -->
+  <div class="cs-card">
+    <h3 style="font-size:13px; margin-bottom:14px;">🧾 CHEK YUKLAB SO'ROV YUBORISH (qo'lda tasdiqlanadi)</h3>
+    <form method="post" action="{{ url_for('coins_bp.coins_buy_submit') }}" enctype="multipart/form-data" id="buyForm">
+
+      <label class="muted" style="font-size:11px; display:block; margin-bottom:5px;">Saytdagi ID raqamingiz</label>
+      <input type="text" name="custom_id" value="{{ my_custom_id or '' }}" required
+             class="cs-input" style="margin-bottom:14px;" placeholder="masalan: 1234567">
+
+      <label class="muted" style="font-size:11px; display:block; margin-bottom:8px;">Tezkor paketlar</label>
+      <div style="display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-bottom:10px;">
+        {% for p in packages %}
+        <button type="button" class="cs-btn cs-btn-sm pkg-btn"
+                data-amount="{{ p.amount }}" data-price="{{ p.price }}">
+          <div class="pkg-coin">⚡</div>
+          <span style="font-size:12px; font-weight:700;">{{ "{:,}".format(p.amount) }}</span>
+          <span style="font-size:9px; color:var(--cs-text-yellow);">{{ "{:,}".format(p.price) }} so'm</span>
+        </button>
+        {% endfor %}
+      </div>
+
+      <label class="muted" style="font-size:11px; display:block; margin-bottom:5px;">Yoki o'zingiz miqdor kiriting (CODE)</label>
+      <input type="number" name="amount" id="amountInput" min="{{ min_amount }}" required
+             class="cs-input" style="margin-bottom:6px;" placeholder="masalan: 15000">
+      <div class="muted" style="font-size:11px; margin-bottom:14px;">
+        To'lov summasi: <strong id="priceDisplay" style="color:var(--cs-text-primary);">—</strong> so'm
+      </div>
+
+      <!-- PROMO KOD — endi xariddan chegirma emas, alohida bonus sahifasi -->
+      <div style="margin-bottom:14px; padding:10px 12px; background:rgba(37,99,235,.05); border:1px solid rgba(37,99,235,.2); border-radius:6px; text-align:center;">
+        <div class="muted" style="font-size:11px;">🎁 Promo kodingiz bormi? U CODE bonusi beradi (xariddan chegirma emas).</div>
+        <a href="{{ url_for('coins_bp.promo_page') }}" class="cs-btn cs-btn-sm" style="margin-top:8px;">Promo kodni faollashtirish →</a>
+      </div>
+
+      <div class="cs-card" style="padding:12px 14px; margin-bottom:14px; background:rgba(255,210,63,.04); border-color:rgba(255,210,63,.3);">
+        <div class="muted" style="font-size:11px; margin-bottom:6px;">💳 Karta raqamlari</div>
+        <div style="font-family:var(--cs-font-mono); font-size:13px; color:var(--cs-text-yellow); margin-bottom:3px;">UZUM BANK: {{ cards.uzum_bank }}</div>
+        <div style="font-size:11px; color:var(--cs-text-cyan); margin-top:6px;">Egasi: {{ card_holder }}</div>
+      </div>
+
+      <label class="muted" style="font-size:11px; display:block; margin-bottom:5px;">To'lov chekining rasmi (yoki PDF)</label>
+      <input type="file" name="receipt" accept=".png,.jpg,.jpeg,.gif,.webp,.pdf" required
+             style="margin-bottom:16px; font-size:12px;">
+
+      <button type="submit" class="cs-btn cs-btn-primary cs-btn-full" style="font-size:14px; padding:12px;">
+        {{ icon('send',14) }} SO'ROVNI YUBORISH
+      </button>
+      <p class="muted" style="font-size:10.5px; text-align:center; margin-top:8px;">
+        G'azna tekshirib tasdiqlagandan keyin CODE hisobingizga tushadi.
+      </p>
+    </form>
+  </div>
+
+  <!-- O'NG PANEL -->
+  <div>
+    <!-- Paket narxlari jadvali -->
+    <div class="cs-card" style="margin-bottom:14px;">
+      <h3 style="font-size:12px; margin-bottom:12px; color:var(--cs-text-yellow);">⚡ CODE PAKETLARI VA NARXLARI</h3>
+      <table class="cs-table" style="font-size:12px;">
+        <thead><tr><th>CODE miqdori</th><th style="text-align:right;">Narxi (so'm)</th></tr></thead>
+        <tbody>
+        {% for p in packages %}
+        <tr style="cursor:pointer;" onclick="selectPackage({{ p.amount }}, {{ p.price }})">
+          <td>⚡ {{ "{:,}".format(p.amount) }} Code</td>
+          <td style="text-align:right; color:var(--cs-text-yellow); font-family:monospace;">{{ "{:,}".format(p.price) }}</td>
+        </tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Oxirgi so'rovlar -->
+    {% if requests_list %}
+    <div class="cs-card">
+      <h3 style="font-size:12px; margin-bottom:10px;">📋 Oxirgi so'rovlarim</h3>
+      {% for r in requests_list[:5] %}
+      <div style="display:flex; justify-content:space-between; padding:6px 0; border-bottom:1px solid rgba(255,255,255,.05); font-size:11px;">
+        <div>
+          <div>⚡ {{ "{:,}".format(r.code_amount) }} CODE</div>
+          <div class="muted" style="font-size:10px;">{{ r.created_at|tashkent_time }}</div>
+        </div>
+        <div>
+          {% if r.status == 'approved' %}<span style="color:#e0393d;">✓ Tasdiqlandi</span>
+          {% elif r.status == 'rejected' %}<span style="color:#ff4444;">✗ Rad etildi</span>
+          {% else %}<span style="color:var(--cs-text-yellow);">⏳ Kutilmoqda</span>{% endif %}
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+{% endblock %}
+{% block scripts %}
+<script>
+var packages = {{ packages | tojson }};
+var CODE_TO_SOM_RATE = {{ code_to_som_rate }};
+
+function formatSom(n) {
+    // Brauzer lokaliga bog'liq bo'lmagan, doim vergul bilan ajratuvchi format
+    n = Math.round(n);
+    return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+// Paket tanlash
+function selectPackage(amount, price) {
+    document.getElementById('amountInput').value = amount;
+    document.getElementById('priceDisplay').textContent = formatSom(price);
+    document.querySelectorAll('.pkg-btn').forEach(function(b){
+        b.classList.toggle('cs-btn-primary', parseInt(b.dataset.amount)===amount);
+    });
+}
+
+document.querySelectorAll('.pkg-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+        selectPackage(parseInt(this.dataset.amount), parseInt(this.dataset.price));
+    });
+});
+
+document.getElementById('amountInput').addEventListener('input', function(){
+    var amount = parseInt(this.value) || 0;
+    // Avval aniq mos paket narxini qidiramiz, topilmasa AYIRBOSHLASH KURSI
+    // orqali hisoblaymiz (avval bu yerda xato bor edi: mos paket topilmasa
+    // narx = CODE sonining O'ZIGA teng bo'lib qolardi, kursga ko'paytirilmasdan).
+    var price = amount * CODE_TO_SOM_RATE;
+    packages.forEach(function(p){ if(p.amount === amount) price = p.price; });
+    document.getElementById('priceDisplay').textContent = formatSom(price);
+});
+
+</script>
+{% endblock %}

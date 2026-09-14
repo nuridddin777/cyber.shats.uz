@@ -1,0 +1,48 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Kanallar nazorati — Admin{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+  <h1 style="font-size:19px;">{{ icon('send',18) }} Kanallar nazorati</h1>
+  <div style="display:flex; gap:6px;">
+    <a href="?status=unverified" class="cs-btn cs-btn-sm {{ 'cs-btn-primary' if filter_status=='unverified' }}">Tasdiqlanmagan</a>
+    <a href="?status=flagged" class="cs-btn cs-btn-sm {{ 'cs-btn-primary' if filter_status=='flagged' }}">Belgilangan</a>
+    <a href="?status=all" class="cs-btn cs-btn-sm {{ 'cs-btn-primary' if filter_status=='all' }}">Barchasi</a>
+  </div>
+</div>
+<div style="overflow-x:auto;">
+<table class="cs-table">
+  <thead><tr><th>ID</th><th>Nomi</th><th>Egasi</th><th>Obunachilar</th><th>Soliq</th><th>Holat</th><th>Amal</th></tr></thead>
+  <tbody>
+  {% for ch in channels_list %}
+  <tr>
+    <td style="font-family:monospace; color:var(--cs-text-primary);">#{{ ch.public_id or ch.id }}</td>
+    <td>{{ ch.name }}</td>
+    <td class="muted" style="font-size:11.5px;">{{ ch.familiya }} {{ ch.ism }}<br><span style="font-size:10px;">ID #{{ ch.custom_id }}</span></td>
+    <td>{{ ch.subscriber_count }}</td>
+    <td>{{ ch.monthly_tax_code }} CODE/oy</td>
+    <td>
+      {% if ch.is_verified %}<span style="color:var(--cs-text-primary); font-size:11px;">{{ icon('check-circle',11) }} Tasdiqlangan</span>
+      {% elif ch.flagged_reason %}<span style="color:#ff5555; font-size:11px;" title="{{ ch.flagged_reason }}">{{ icon('flag',11) }} Belgilangan</span>
+      {% else %}<span class="muted" style="font-size:11px;">Kutilmoqda</span>{% endif %}
+    </td>
+    <td>
+      <div style="display:flex; gap:4px;">
+        <form method="post" action="{{ url_for('adminmod_bp.admin_channel_verify', channel_id=ch.id) }}"><button class="cs-btn cs-btn-sm" style="font-size:9.5px; padding:3px 7px;">{{ icon('check',10) }}</button></form>
+        <details>
+          <summary style="cursor:pointer; font-size:10px; color:#ff5555;">{{ icon('flag',10) }}</summary>
+          <form method="post" action="{{ url_for('adminmod_bp.admin_channel_flag', channel_id=ch.id) }}" style="margin-top:6px; display:flex; gap:4px;">
+            <input type="text" name="reason" class="cs-input" placeholder="Sabab" style="width:120px; font-size:10px;">
+            <button class="cs-btn cs-btn-sm" style="font-size:9.5px;">✓</button>
+          </form>
+        </details>
+      </div>
+    </td>
+  </tr>
+  {% else %}
+  <tr><td colspan="7" class="muted" style="text-align:center; padding:30px;">Kanallar topilmadi</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

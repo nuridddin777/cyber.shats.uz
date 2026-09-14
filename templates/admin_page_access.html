@@ -1,0 +1,88 @@
+﻿{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Sahifalar Ruxsati — CYBER SHATS{% endblock %}
+{% block app_content %}
+
+<div class="flex-between" style="margin-bottom:20px;">
+    <div>
+        <h1 style="font-size:20px;">{{ icon('lock',18) }} Sahifalar Ruxsatini Boshqarish</h1>
+        <p class="muted" style="font-size:11.5px; margin-top:4px;">Yaratilayotgan sahifalarni barchaga ochish yoki yopish</p>
+    </div>
+    <a href="{{ url_for('admindash_bp.admin_dashboard') }}" class="cs-btn outline sm">{{ icon('arrow-left',14) }} Ortga</a>
+</div>
+
+<div class="cs-card" style="margin-bottom:24px;">
+    <h3 style="font-size:14px; margin-bottom:12px; display:flex; align-items:center; gap:6px;">
+        {{ icon('plus',14) }} Yangi Sahifa Qo'shish
+    </h3>
+    <form action="{{ url_for('adminaccess_bp.admin_page_access_add') }}" method="POST" style="display:flex; gap:10px; align-items:flex-end; flex-wrap:wrap;">
+        <div style="flex:1; min-width:200px;">
+            <label class="form-label" style="font-size:11px;">Sahifa yo'li (Path)</label>
+            <input type="text" name="path" class="cs-input" placeholder="Masalan: /collection" required>
+        </div>
+        <div style="flex:1; min-width:200px;">
+            <label class="form-label" style="font-size:11px;">Sarlavha (Tushunarli nom)</label>
+            <input type="text" name="title" class="cs-input" placeholder="Masalan: Kolleksiya" required>
+        </div>
+        <div style="margin-bottom:8px;">
+            <label style="font-size:12px; display:flex; align-items:center; gap:6px; cursor:pointer;">
+                <input type="checkbox" name="is_active" value="1">
+                Barchaga ochiq (Faol)
+            </label>
+        </div>
+        <button type="submit" class="cs-btn primary sm" style="height:38px;">Qo'shish</button>
+    </form>
+</div>
+
+<div class="cs-card table-responsive">
+    <table class="cs-table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Sahifa Nomi</th>
+                <th>Yo'l (Path)</th>
+                <th>Holati</th>
+                <th>Qo'shilgan Sana</th>
+                <th style="text-align:right;">Harakat</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for page in pages %}
+            <tr>
+                <td>#{{ page.id }}</td>
+                <td><strong>{{ page.title }}</strong></td>
+                <td class="code-font muted">{{ page.path }}</td>
+                <td>
+                    {% if page.is_active %}
+                        <span class="cs-chip" style="background:rgba(0,255,100,0.1); color:#00ff64;">Faol</span>
+                    {% else %}
+                        <span class="cs-chip" style="background:rgba(255,59,59,0.1); color:#ff3b3b;">Nofaol (Cheklangan)</span>
+                    {% endif %}
+                </td>
+                <td class="muted" style="font-size:11px;">{{ page.created_at[:16] }}</td>
+                <td style="text-align:right;">
+                    <div style="display:flex; gap:8px; justify-content:flex-end;">
+                        <form action="{{ url_for('adminaccess_bp.admin_page_access_toggle', page_id=page.id) }}" method="POST">
+                            <button class="cs-btn outline sm" style="padding:0 8px;" title="Holatni O'zgartirish">
+                                {{ icon('power', 14) }}
+                            </button>
+                        </form>
+                        <form action="{{ url_for('adminaccess_bp.admin_page_access_delete', page_id=page.id) }}" method="POST" onsubmit="return confirm('Rostdan ham ushbu sahifa ruxsatnomasini o\'chirmoqchimisiz? (O\'chirilsa hammaga ochiq bo\'lib qolishi mumkin)');">
+                            <button class="cs-btn outline danger sm" style="padding:0 8px;" title="O'chirish">
+                                {{ icon('trash', 14) }}
+                            </button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6" style="text-align:center; padding:30px;" class="muted">
+                    Hozircha hech qanday sahifa qo'shilmagan.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

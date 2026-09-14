@@ -1,0 +1,11 @@
+﻿{% extends "base.html" %}
+{% block title %}405 — Ruxsat etilmagan metod{% endblock %}
+{% block content %}
+{% include 'partials/public_nav.html' %}
+<div class="section flex-center" style="min-height:60vh; flex-direction:column; text-align:center;">
+    <div class="glitch" style="font-family:var(--cs-font-display); font-size:clamp(60px,14vw,140px); color:var(--cs-text-primary);">405</div>
+    <h2>RUXSAT ETILMAGAN METOD</h2>
+    <p class="muted" style="max-width:380px; margin-bottom:20px;">Siz so'rayotgan URL manzil uchun ushbu so'rov turi (metod) ruxsat etilmagan.</p>
+    <a href="{{ url_for('index') }}" class="cs-btn cs-btn-primary">Bosh sahifaga qaytish</a>
+</div>
+{% endblock %}

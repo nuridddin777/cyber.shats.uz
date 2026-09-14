@@ -1,0 +1,327 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Amaliyot — {{ lesson.title }}{% endblock %}
+{% block app_content %}
+{% set is_web = lesson.practice_type == 'web' %}
+<div class="flex-between" style="margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+  <div>
+    <h1 style="font-size:19px; margin-bottom:4px;">{{ icon('code',18) }} Amaliy mashq</h1>
+    <p class="muted" style="font-size:12px;">«{{ lesson.title }}» — «{{ course.title }}»</p>
+  </div>
+  <div style="display:flex; gap:6px; align-items:center;">
+    {% if is_web %}
+    <span class="cs-chip solid" style="font-size:11px;">HTML / CSS / JS</span>
+    <button id="runBtn" class="cs-btn cs-btn-primary">{{ icon('eye',14) }} Ko'rish</button>
+    {% else %}
+    <span class="cs-chip solid" style="font-size:11px;">{{ languages[lesson.exercise_language].name if lesson.exercise_language in languages else 'Python 3' }}</span>
+    <button id="runBtn" class="cs-btn cs-btn-primary">{{ icon('play',14) }} Ishga tushirish</button>
+    <button id="aiCheckBtn" class="cs-btn cs-btn-secondary">{{ icon('check-circle',14) }} AI orqali tekshirish</button>
+    {% endif %}
+  </div>
+</div>
+
+<div class="cs-card" style="margin-bottom:14px; padding:16px 18px;">
+  <h3 style="font-size:12px; margin-bottom:8px;">{{ icon('flag',13) }} TOPSHIRIQ</h3>
+  <p style="font-size:13px; line-height:1.6;">{{ lesson.exercise_prompt }}</p>
+</div>
+
+<style>
+/* Bu qoidalar HAR IKKALA rejim (web va oddiy kod) uchun kerak — shartsiz joylashtirilgan */
+.code-practice-grid { display:grid; grid-template-columns:1fr 1fr; height:420px; }
+@media (max-width: 800px) {
+  .code-practice-grid { grid-template-columns: 1fr; height:auto; }
+  .code-practice-grid > div { height: 300px; }
+}
+</style>
+
+{% if is_web %}
+<!-- WEB (HTML/CSS/JS) UCH-PANELLI MUHARRIR + JONLI KO'RISH -->
+<div class="cs-card" style="padding:0; overflow:hidden; margin-bottom:14px;">
+  <div style="display:flex; border-bottom:1px solid var(--cs-border);">
+    <button class="web-tab active" data-tab="html" style="flex:1;">HTML</button>
+    <button class="web-tab" data-tab="css" style="flex:1;">CSS</button>
+    <button class="web-tab" data-tab="js" style="flex:1;">JS</button>
+  </div>
+  <textarea id="htmlInput" class="web-editor" spellcheck="false">{{ lesson.exercise_starter_html }}</textarea>
+  <textarea id="cssInput" class="web-editor" style="display:none;" spellcheck="false">{{ lesson.exercise_starter_css }}</textarea>
+  <textarea id="jsInput" class="web-editor" style="display:none;" spellcheck="false">{{ lesson.exercise_starter_js }}</textarea>
+</div>
+<div class="cs-card" style="padding:0; overflow:hidden;">
+  <div style="padding:8px 14px; border-bottom:1px solid var(--cs-border); background:var(--cs-bg-input); font-size:11px; color:var(--cs-text-muted);">
+    {{ icon('eye',12) }} JONLI KO'RISH
+  </div>
+  <iframe id="previewFrame" style="width:100%; height:280px; border:0; background:#fff;"></iframe>
+  <div id="doneRow" style="display:none; padding:10px 14px; border-top:1px solid var(--cs-border);">
+    <button id="doneBtn" class="cs-btn cs-btn-primary cs-btn-block" style="font-size:12px;">{{ icon('check',13) }} Darsni yakunlangan deb belgilash</button>
+  </div>
+</div>
+<style>
+.web-tab { background:var(--cs-bg-input); border:0; color:var(--cs-text-muted); padding:9px; font-size:11.5px; font-family:var(--cs-font-mono); cursor:pointer; border-bottom:2px solid transparent; }
+.web-tab.active { color:var(--cs-text-primary); border-bottom-color:var(--cs-text-primary); }
+.web-editor { width:100%; height:220px; resize:none; background:var(--cs-bg-input); border:0; outline:0; color:var(--cs-text-white); font-family:var(--cs-font-mono); font-size:13px; line-height:1.6; padding:12px 14px; tab-size:2; }
+</style>
+{% else %}
+<!-- ODDIY KOD MUHARRIRI (server sandbox orqali bajariladi) -->
+<div class="code-practice-grid" style="gap:14px;">
+  <div class="cs-card" style="padding:0; overflow:hidden; display:flex; flex-direction:column;">
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 14px; border-bottom:1px solid var(--cs-border); background:var(--cs-bg-input);">
+      <span style="font-size:11px; color:var(--cs-text-muted); font-family:var(--cs-font-mono);">kod muharriri</span>
+      <span class="muted" style="font-size:10px;" id="charCount">0 belgi</span>
+    </div>
+    <textarea id="codeInput" spellcheck="false"
+              style="flex:1; width:100%; resize:none; background:var(--cs-bg-input); border:0; outline:0;
+                     color:var(--cs-text-white); font-family:var(--cs-font-mono); font-size:13px;
+                     line-height:1.6; padding:12px 14px; tab-size:4;">{{ lesson.exercise_starter_code }}</textarea>
+  </div>
+
+  <div class="terminal-box" style="display:flex; flex-direction:column;">
+    <div class="term-head" style="justify-content:space-between;">
+      <div style="display:flex; gap:6px; align-items:center;">
+        <span class="term-dot"></span><span class="term-dot"></span><span class="term-dot"></span>
+        <span style="font-size:10px;">OUTPUT</span>
+      </div>
+      <span id="execTime" class="muted" style="font-size:10px;"></span>
+    </div>
+    <div id="outputBox" class="term-body" style="flex:1; max-height:none; overflow-y:auto; white-space:pre-wrap; font-size:12.5px;">
+      <span class="muted">▶ Kodni yozing va "Ishga tushirish" tugmasini bosing</span>
+    </div>
+    <div id="doneRow" style="display:none; padding:10px 14px; border-top:1px solid var(--cs-border);">
+      <button id="doneBtn" class="cs-btn cs-btn-primary cs-btn-block" style="font-size:12px;">{{ icon('check',13) }} Darsni yakunlangan deb belgilash</button>
+    </div>
+  </div>
+</div>
+{% endif %}
+
+<!-- AI YORDAMCHI -->
+<div class="cs-card" style="margin-top:14px; padding:16px 18px;">
+  <h3 style="font-size:12px; margin-bottom:10px; display:flex; align-items:center; gap:6px;">
+    {{ icon('bot',14) }} AI YORDAMCHI <span class="cs-chip" style="font-size:9.5px;">tushuntiradi, yechim bermaydi</span>
+  </h3>
+  <div id="aiThread" style="display:flex; flex-direction:column; gap:10px; margin-bottom:12px; max-height:260px; overflow-y:auto;"></div>
+  <div style="display:flex; gap:8px;">
+    <input id="aiQuestion" class="cs-input" placeholder="Masalan: nega ishlamayapti? yoki keyingi qadam nima?" style="flex:1;">
+    <button id="aiAskBtn" class="cs-btn cs-btn-secondary">{{ icon('send',13) }} So'rash</button>
+  </div>
+</div>
+
+{% if can_edit %}
+<details class="cs-card" style="margin-top:14px; padding:16px 18px;">
+  <summary style="cursor:pointer; font-size:12px; font-weight:700; display:flex; align-items:center; gap:6px;">{{ icon('edit',13) }} MASHQNI TAHRIRLASH (admin)</summary>
+  <form method="post" action="{{ url_for('courses_bp.edit_lesson_exercise', slug=course.slug, lesson_id=lesson.id) }}" style="margin-top:12px; display:flex; flex-direction:column; gap:10px;">
+    {% if is_web %}
+    <textarea name="exercise_prompt" class="cs-textarea" rows="2" placeholder="Topshiriq matni">{{ lesson.exercise_prompt }}</textarea>
+    <textarea name="exercise_starter_html" class="cs-textarea" rows="4" placeholder="Boshlang'ich HTML" style="font-family:var(--cs-font-mono);">{{ lesson.exercise_starter_html }}</textarea>
+    <textarea name="exercise_starter_css" class="cs-textarea" rows="3" placeholder="Boshlang'ich CSS" style="font-family:var(--cs-font-mono);">{{ lesson.exercise_starter_css }}</textarea>
+    <textarea name="exercise_starter_js" class="cs-textarea" rows="3" placeholder="Boshlang'ich JS" style="font-family:var(--cs-font-mono);">{{ lesson.exercise_starter_js }}</textarea>
+    {% else %}
+    <select name="exercise_language" class="cs-input">
+      {% for key, lang in languages.items() %}
+      <option value="{{ key }}" {{ 'selected' if key == lesson.exercise_language }}>{{ lang.name }}</option>
+      {% endfor %}
+    </select>
+    <textarea name="exercise_prompt" class="cs-textarea" rows="2" placeholder="Topshiriq matni">{{ lesson.exercise_prompt }}</textarea>
+    <textarea name="exercise_starter_code" class="cs-textarea" rows="4" placeholder="Boshlang'ich kod" style="font-family:var(--cs-font-mono);">{{ lesson.exercise_starter_code }}</textarea>
+    {% endif %}
+    <textarea name="exercise_hint" class="cs-textarea" rows="2" placeholder="AI uchun yashirin maslahat (talabaga ko'rinmaydi)">{{ lesson.exercise_hint }}</textarea>
+    <button type="submit" class="cs-btn cs-btn-primary" style="align-self:flex-start;">{{ icon('save',13) }} Saqlash</button>
+  </form>
+</details>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<script>
+function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+var isWeb = {{ 'true' if is_web else 'false' }};
+var currentLang = "{{ lesson.exercise_language or 'python' }}";
+var lastError = "";
+var lastRunOutput = "";
+var lastRunSuccess = null;
+
+function showDoneButton() { document.getElementById('doneRow').style.display = 'block'; }
+document.getElementById('doneBtn').addEventListener('click', function() {
+    fetch("{{ url_for('courses_bp.complete_lesson', slug=course.slug, lesson_id=lesson.id) }}", { method: 'POST' })
+        .then(function (r) { return r.json(); })
+        .then(function () {
+            var btn = document.getElementById('doneBtn');
+            btn.textContent = '✓ Belgilandi';
+            btn.disabled = true;
+        }).catch(function(){});
+});
+
+{% if is_web %}
+// ---- WEB (HTML/CSS/JS) rejimi: server kerak emas, to'g'ridan-to'g'ri iframe orqali ----
+document.querySelectorAll('.web-tab').forEach(function(tab) {
+    tab.addEventListener('click', function() {
+        document.querySelectorAll('.web-tab').forEach(function(t) { t.classList.remove('active'); });
+        document.querySelectorAll('.web-editor').forEach(function(e) { e.style.display = 'none'; });
+        tab.classList.add('active');
+        document.getElementById(tab.dataset.tab + 'Input').style.display = 'block';
+    });
+});
+
+function renderPreview() {
+    var html = document.getElementById('htmlInput').value;
+    var css = document.getElementById('cssInput').value;
+    var js = document.getElementById('jsInput').value;
+    var doc = '<!DOCTYPE html><html><head><style>' + css + '</style></head><body>' +
+              html + '<script>' + js + '<' + '/script></body></html>';
+    document.getElementById('previewFrame').srcdoc = doc;
+    showDoneButton();
+}
+document.getElementById('runBtn').addEventListener('click', renderPreview);
+renderPreview();
+
+function getCombinedWebCode() {
+    return "HTML:\n" + document.getElementById('htmlInput').value +
+           "\n\nCSS:\n" + document.getElementById('cssInput').value +
+           "\n\nJS:\n" + document.getElementById('jsInput').value;
+}
+{% else %}
+// ---- Oddiy kod rejimi: server sandbox orqali bajariladi ----
+function updateCharCount() {
+    document.getElementById('charCount').textContent = document.getElementById('codeInput').value.length.toLocaleString() + ' belgi';
+}
+document.getElementById('codeInput').addEventListener('input', updateCharCount);
+updateCharCount();
+
+document.getElementById('codeInput').addEventListener('keydown', function(e) {
+    if (e.key === 'Tab') {
+        e.preventDefault();
+        var start = this.selectionStart, end = this.selectionEnd;
+        this.value = this.value.substring(0, start) + '    ' + this.value.substring(end);
+        this.selectionStart = this.selectionEnd = start + 4;
+    }
+    if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); runCode(); }
+});
+
+async function runCode() {
+    var code = document.getElementById('codeInput').value.trim();
+    var btn = document.getElementById('runBtn');
+    var outputBox = document.getElementById('outputBox');
+    var execTime = document.getElementById('execTime');
+    if (!code) { outputBox.innerHTML = '<span style="color:#ff5555;">Kod bo\'sh</span>'; return; }
+    btn.disabled = true;
+    btn.textContent = '⏳ Bajarilmoqda...';
+    outputBox.innerHTML = '<span class="muted">Kuting...</span>';
+    try {
+        var r = await fetch('/api/code/run', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ language: currentLang, code: code })
+        });
+        var d = await r.json();
+        if (d.success) {
+            var res = d.data.result;
+            execTime.textContent = res.execution_time_ms + ' ms';
+            lastRunOutput = res.output || res.error || '';
+            lastRunSuccess = res.success;
+            if (res.success) {
+                lastError = "";
+                outputBox.innerHTML = '<span style="color:var(--cs-text-primary);">✓ Muvaffaqiyatli</span>\n\n' +
+                    (res.output ? esc(res.output) : '<span class="muted">(chiqish yo\'q)</span>');
+                showDoneButton();
+            } else {
+                lastError = res.error || '';
+                outputBox.innerHTML = '<span style="color:#ff5555;">✗ Xato</span>\n\n' + esc(res.error || 'Nomalum xato');
+            }
+        } else {
+            outputBox.innerHTML = '<span style="color:#ff5555;">✗ ' + esc(d.error) + '</span>';
+        }
+    } catch(e) {
+        outputBox.innerHTML = '<span style="color:#ff5555;">Ulanish xatoligi: ' + esc(e.message) + '</span>';
+    }
+    btn.disabled = false;
+    btn.innerHTML = '{{ icon("play",14) }} Ishga tushirish';
+}
+document.getElementById('runBtn').addEventListener('click', runCode);
+
+async function aiCheckExercise() {
+    var btn = document.getElementById('aiCheckBtn');
+    if (!lastRunOutput && lastRunSuccess === null) {
+        addAiBubble('ai', "Avval kodni 'Ishga tushirish' orqali sinab ko'ring, keyin tekshiraman.");
+        return;
+    }
+    btn.disabled = true;
+    btn.textContent = '⏳ AI tekshirmoqda...';
+    addAiBubble('user', 'AI orqali tekshirib bering');
+    addAiBubble('ai', '...');
+    try {
+        var r = await fetch('/api/code/exercise-check', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                lesson_id: {{ lesson.id }},
+                code: document.getElementById('codeInput').value,
+                run_output: lastRunOutput,
+                run_success: lastRunSuccess
+            })
+        });
+        var d = await r.json();
+        document.getElementById('aiThread').lastChild.remove();
+        if (d.success) {
+            var verdict = d.data.passed ? '✅ TO\'G\'RI — ' : '❌ Hali to\'liq emas — ';
+            addAiBubble('ai', verdict + d.data.feedback);
+            if (d.data.passed) { showDoneButton(); }
+        } else {
+            addAiBubble('ai', 'Xato: ' + d.error);
+        }
+    } catch(e) {
+        document.getElementById('aiThread').lastChild.remove();
+        addAiBubble('ai', 'Ulanish xatoligi: ' + e.message);
+    }
+    btn.disabled = false;
+    btn.innerHTML = '{{ icon("check-circle",14) }} AI orqali tekshirish';
+}
+document.getElementById('aiCheckBtn').addEventListener('click', aiCheckExercise);
+{% endif %}
+
+function addAiBubble(role, text) {
+    var thread = document.getElementById('aiThread');
+    var div = document.createElement('div');
+    div.style.cssText = role === 'user'
+        ? 'align-self:flex-end; background:var(--cs-grad-btn); color:#001a0c; padding:9px 13px; border-radius:10px; max-width:85%; font-size:12.5px;'
+        : 'align-self:flex-start; background:rgba(255,255,255,.04); border:1px solid var(--cs-border); padding:9px 13px; border-radius:10px; max-width:85%; font-size:12.5px; white-space:pre-wrap;';
+    div.textContent = text;
+    thread.appendChild(div);
+    thread.scrollTop = thread.scrollHeight;
+}
+
+async function askAi() {
+    var input = document.getElementById('aiQuestion');
+    var question = input.value.trim();
+    if (!question && !lastError) { return; }
+    addAiBubble('user', question || "Bu yerda nima xato?");
+    input.value = '';
+    var btn = document.getElementById('aiAskBtn');
+    btn.disabled = true;
+    addAiBubble('ai', '...');
+    var codeForAi = isWeb ? getCombinedWebCode() : document.getElementById('codeInput').value;
+    try {
+        var r = await fetch('/api/code/exercise-help', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({
+                lesson_id: {{ lesson.id }},
+                code: codeForAi,
+                question: question,
+                run_error: lastError
+            })
+        });
+        var d = await r.json();
+        document.getElementById('aiThread').lastChild.remove();
+        if (d.success) {
+            addAiBubble('ai', d.data.reply);
+        } else {
+            addAiBubble('ai', 'Xato: ' + d.error);
+        }
+    } catch(e) {
+        document.getElementById('aiThread').lastChild.remove();
+        addAiBubble('ai', 'Ulanish xatoligi: ' + e.message);
+    }
+    btn.disabled = false;
+}
+document.getElementById('aiAskBtn').addEventListener('click', askAi);
+document.getElementById('aiQuestion').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') { e.preventDefault(); askAi(); }
+});
+</script>
+{% endblock %}

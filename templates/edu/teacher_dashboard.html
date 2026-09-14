@@ -1,0 +1,65 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}O'qituvchi paneli — EDU{% endblock %}
+{% block app_content %}
+<style>
+.t-hero{background:linear-gradient(135deg,rgba(10,22,50,0.9),rgba(20,10,40,0.9));border:1px solid rgba(180,124,255,0.15);border-radius:14px;padding:24px;margin-bottom:20px}
+.class-card{background:rgba(10,22,45,0.8);border:1px solid rgba(30,144,255,0.12);border-radius:12px;padding:18px;transition:all .15s;text-decoration:none;display:block}
+.class-card:hover{border-color:rgba(30,144,255,0.35);transform:translateY(-2px)}
+.pending-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid rgba(30,144,255,0.08)}
+</style>
+<div class="t-hero">
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;">
+    <div>
+      <div style="font-size:12px;color:#b47cff;letter-spacing:1px;">👨‍🏫 O'QITUVCHI PANELI</div>
+      <h2 style="font-size:20px;color:#e8f4ff;margin:4px 0;">Salom, {{ user.ism }}!</h2>
+      <div style="font-size:13px;color:#5a7a9a;">{{ classes|length }} ta sinf · {{ pending|length }} ta kutayotgan ish</div>
+    </div>
+    <a href="{{ url_for('edu.teacher_create_class') }}" class="cs-btn" style="font-size:13px;">+ Yangi sinf yaratish</a>
+  </div>
+</div>
+
+<h3 style="color:#e8f4ff;font-size:16px;margin-bottom:12px;">📚 Sinflarim</h3>
+<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:24px;">
+  {% for c in classes %}
+  <a href="{{ url_for('edu.teacher_class', cid=c.id) }}" class="class-card">
+    <div style="font-size:15px;font-weight:700;color:#e8f4ff;">{{ c.name }}</div>
+    <div style="font-size:12px;color:#7ec8f8;margin-top:4px;">{{ c.school_name or '' }} · {{ c.subject or '' }}</div>
+    <div style="display:flex;gap:12px;margin-top:10px;">
+      <span style="font-size:12px;color:#00c853;">👤 {{ c.student_count }} o'quvchi</span>
+      <span style="font-size:12px;color:#1e90ff;">📋 {{ c.topic_count }} mavzu</span>
+    </div>
+  </a>
+  {% else %}
+  <div style="text-align:center;padding:40px;color:#5a7a9a;grid-column:span 3;">
+    <div style="font-size:48px;margin-bottom:8px;">📚</div>Hali sinf yo'q. Yuqoridagi tugmadan yarating.
+  </div>
+  {% endfor %}
+</div>
+
+{% if pending %}
+<h3 style="color:#e8f4ff;font-size:16px;margin-bottom:12px;">📥 Kutayotgan topshiriqlar ({{ pending|length }})</h3>
+<div style="background:rgba(10,22,45,0.8);border:1px solid rgba(255,200,0,0.15);border-radius:12px;overflow:hidden;">
+  {% for p in pending %}
+  <div class="pending-item">
+    <div style="flex:1;">
+      <div style="color:#e8f4ff;font-size:14px;font-weight:600;">{{ p.ism }} {{ p.familiya }}</div>
+      <div style="font-size:12px;color:#5a7a9a;">{{ p.lab_title }} · {{ p.submitted_at[:16] }}</div>
+    </div>
+    <div style="display:flex;gap:6px;align-items:center;">
+      <input type="number" id="score-{{ p.id }}" placeholder="Baho" min="0" max="100" style="width:60px;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:6px;color:#e8f4ff;padding:6px 8px;font-size:12px;">
+      <button class="cs-btn cs-btn-outline" style="font-size:11px;padding:5px 10px;" onclick="grade({{ p.id }})">Baholash</button>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+<script>
+function grade(id) {
+  const score = document.getElementById('score-'+id).value;
+  if(!score) return alert('Baho kiriting!');
+  fetch(`/edu/teacher/submission/${id}/grade`, {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`score=${score}`})
+  .then(r=>r.json()).then(d=>{alert(d.msg);if(d.ok)location.reload();});
+}
+</script>
+{% endblock %}

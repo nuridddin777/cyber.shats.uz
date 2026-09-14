@@ -1,0 +1,14 @@
+{% extends "app_base.html" %}
+{% block title %}Video moderatsiya — Admin{% endblock %}
+{% block app_content %}
+<h2 style="color:#e8f4ff;font-size:20px;margin-bottom:16px;">🎬 Video moderatsiya ({{ videos|length }})</h2>
+{% for v in videos %}
+<div style="display:flex;align-items:center;gap:14px;padding:14px;border-bottom:1px solid rgba(30,144,255,0.06);" id="vr-{{ v.id }}">
+  <span style="font-size:28px;">🎥</span>
+  <div style="flex:1;"><div style="color:#e8f4ff;font-weight:600;">{{ v.title }}</div><div style="font-size:12px;color:#5a7a9a;">{{ v.uploader_name }} · {{ v.created_at[:10] }}</div></div>
+  <button class="cs-btn" style="font-size:12px;padding:6px 12px;" onclick="fetch('/edu/admin/videos/{{ v.id }}/approve',{method:'POST'}).then(()=>{document.getElementById('vr-{{ v.id }}').remove();})">✓ Tasdiqlash</button>
+</div>
+{% else %}
+<div style="text-align:center;padding:40px;color:#5a7a9a;">Video yo'q</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}G'azna — Emailni tasdiqlash{% endblock %}
+{% block content %}
+
+<div style="min-height:100vh; display:flex; align-items:center; justify-content:center; padding:20px;">
+  <div class="cs-card" style="max-width:440px; width:100%; padding:36px; border-color:rgba(255,210,63,.4); box-shadow:0 0 40px rgba(255,210,63,.08);">
+    <div style="text-align:center; margin-bottom:24px;">
+      <div style="font-size:46px; color:var(--cs-text-yellow);">{{ icon('mail',46) }}</div>
+      <h2 style="font-size:20px; margin-top:8px;">Emailni tasdiqlang</h2>
+      <p class="muted" style="font-size:11.5px; margin-top:6px;">
+        <b>{{ account['email'] }}</b> manziliga 6 xonali tasdiqlash kodi yuborildi.
+      </p>
+    </div>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for category, message in messages %}
+        <div class="cs-card" style="padding:10px; margin-bottom:14px; border-color:{{ '#ff5555' if category=='error' else 'var(--cs-text-primary)' }}; font-size:12px;">
+          {{ message }}
+        </div>
+      {% endfor %}
+    {% endwith %}
+    {% if error %}
+      <div class="cs-card" style="padding:10px; margin-bottom:14px; border-color:#ff5555; font-size:12px;">{{ error }}</div>
+    {% endif %}
+
+    <form method="post" action="{{ url_for('treasury_bp.treasury_verify_email') }}">
+      <div class="form-group">
+        <label style="font-size:11.5px; color:var(--cs-text-muted);">Tasdiqlash kodi</label>
+        <input type="text" name="code" class="cs-input" placeholder="masalan: 123456" pattern="[0-9]{6}"
+               maxlength="6" inputmode="numeric" autofocus required>
+      </div>
+      <button type="submit" class="cs-btn cs-btn-primary cs-btn-full" style="margin-top:18px;">
+        {{ icon('check',14) }} Tasdiqlash
+      </button>
+    </form>
+
+    <form method="post" action="{{ url_for('treasury_bp.treasury_verify_email_resend') }}" style="margin-top:10px;">
+      <button type="submit" class="cs-btn cs-btn-secondary cs-btn-full">Kodni qayta yuborish</button>
+    </form>
+
+    <form method="post" action="{{ url_for('treasury_bp.treasury_logout') }}" style="margin-top:10px; text-align:center;">
+      <button type="submit" class="cs-btn cs-btn-secondary" style="font-size:11px;">Chiqish</button>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,91 @@
+/* ============================================================
+   CYBER SHATS — "GARAGE" (MOSHINALAR) TEMASI — EKSKLYUZIV
+   Faqat admin tomonidan alohida foydalanuvchiga BERILADI, hech kim
+   sotib ololmaydi. Asfalt-qora fon + poyga-qizil chiziqlar + xrom
+   (kumush) metall aksentlar — avtomobil ustaxonasi uslubi.
+   Haqiqiy avtomobil rasmlari ISHLATILMAYDI (mualliflik huquqi) —
+   o'rniga CSS orqali chiziqlar va xrom effektlar bilan "garaj"
+   kayfiyati yaratiladi.
+   ============================================================ */
+.exclusive-cars {
+    --cs-bg-primary: #0c0d0f;
+    --cs-bg-secondary: #131417;
+    --cs-bg-card: #1a1c20;
+    --cs-bg-glass: rgba(26, 28, 32, 0.85);
+    --cs-bg-sidebar: #131417;
+    --cs-bg-input: #1e2024;
+
+    --cs-text-primary: #e10600;
+    --cs-text-secondary: #ff3d38;
+    --cs-text-muted: #8b8d93;
+    --cs-text-cyan: #c0c2c8;
+    --cs-text-violet: #e10600;
+    --cs-text-white: #f2f3f5;
+    --cs-text-dark: #0c0d0f;
+    --cs-text-red: #e10600;
+    --cs-text-yellow: #ffcc00;
+
+    --cs-border: rgba(225, 6, 0, 0.18);
+    --cs-border-active: rgba(225, 6, 0, 0.6);
+    --cs-glow: 0 4px 18px rgba(225, 6, 0, 0.3);
+    --cs-glow-strong: 0 10px 32px rgba(225, 6, 0, 0.4);
+    --cs-glow-red: 0 4px 18px rgba(225, 6, 0, 0.4);
+    --cs-glow-cyan: 0 4px 14px rgba(192, 194, 200, 0.25);
+    --cs-glow-violet: 0 4px 18px rgba(225, 6, 0, 0.35);
+
+    --cs-grad-main: linear-gradient(180deg, #0c0d0f 0%, #131417 100%);
+    --cs-grad-card: linear-gradient(155deg, rgba(225,6,0,.05) 0%, rgba(26,28,32,0) 55%);
+    --cs-grad-btn: linear-gradient(135deg, #ff3d38 0%, #e10600 55%, #b30400 100%);
+    --cs-grad-sidebar: linear-gradient(180deg, #131417 0%, #0c0d0f 100%);
+    --cs-grad-accent: linear-gradient(90deg, #e10600, #c0c2c8, #e10600);
+}
+
+/* Poyga-chiziq — sahifa tepasida, xuddi mashina bortidagi racing stripe kabi */
+body.exclusive-cars::before {
+    content: ''; position: fixed; top: 0; left: 0; right: 0; height: 5px;
+    background: repeating-linear-gradient(90deg, #e10600 0 40px, #f2f3f5 40px 46px, #1a1c20 46px 52px);
+    z-index: 99999;
+}
+
+.exclusive-cars .logo::after {
+    content: '🏎️ GARAGE';
+    display: inline-block; margin-left: 8px; font-size: 9px; font-weight: 900; letter-spacing: 1.5px;
+    background: linear-gradient(135deg, #e10600, #ff3d38); color: #fff;
+    padding: 3px 9px; border-radius: 4px; vertical-align: middle;
+    box-shadow: 0 2px 10px rgba(225, 6, 0, 0.5);
+}
+
+.exclusive-cars .cs-btn-primary {
+    background: linear-gradient(135deg, #ff3d38, #e10600) !important; border-color: #e10600 !important;
+    text-transform: uppercase; letter-spacing: 1px;
+}
+.exclusive-cars .cs-card {
+    border-color: rgba(225,6,0,0.15) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.03);
+}
+.exclusive-cars .hex-icon {
+    background: linear-gradient(155deg, #2a2c30, #1a1c20) !important;
+    border: 2px solid rgba(192,194,200,0.25) !important;
+}
+.exclusive-cars .cs-progress { background: repeating-linear-gradient(90deg, #1e2024 0 3px, #131417 3px 6px); }
+.exclusive-cars .cs-progress > span { background: linear-gradient(90deg, #ffcc00, #e10600); }
+
+/* Original SVG mashina silueti — fon suvbelgisi (haqiqiy rasm, uchinchi
+   tomon fotosuratlaridan emas — o'zimiz chizgan original grafika,
+   mualliflik huquqi muammosisiz). Alohida qatlam sifatida, past
+   ko'rinuvchanlik bilan — matn va tugmalarga xalaqit bermaydi. */
+body.exclusive-cars { position: relative; }
+body.exclusive-cars::after {
+    content: '';
+    position: fixed; left: 0; right: 0; bottom: 0; height: 320px;
+    background-image: url('/static/img/garage-car-silhouette.svg');
+    background-repeat: no-repeat;
+    background-position: center bottom;
+    background-size: 900px auto;
+    opacity: 0.10;
+    pointer-events: none;
+    z-index: 0;
+}
+body.exclusive-cars .app-shell {
+    position: relative; z-index: 1;
+}

@@ -1,0 +1,83 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}O'qituvchilikka ariza — CYBER SHATS{% endblock %}
+{% block app_content %}
+<div style="max-width:640px; margin:0 auto;">
+  <h1 style="font-size:19px; margin-bottom:6px;">{{ icon('briefcase',18) }} O'qituvchilikka ariza berish</h1>
+  <p class="muted" style="font-size:12.5px; margin-bottom:20px;">Arizangiz Super Admin tomonidan ko'rib chiqiladi. Tasdiqlangach o'qituvchi paneli ochiladi.</p>
+
+  <form method="post" enctype="multipart/form-data" class="cs-card" style="padding:22px; display:flex; flex-direction:column; gap:16px;">
+    <div class="grid grid-2 gap-12">
+      <div class="cs-field"><label>Ism *</label><input class="cs-input" type="text" name="ism" required value="{{ current_user.ism }}"></div>
+      <div class="cs-field"><label>Familiya *</label><input class="cs-input" type="text" name="familiya" required value="{{ current_user.familiya }}"></div>
+    </div>
+
+    <div class="cs-field">
+      <label>Telefon raqam *</label>
+      <input class="cs-input" type="text" name="phone" id="phoneInput" required placeholder="+998 90 123 45 67" value="+998 ">
+    </div>
+
+    <div class="cs-field">
+      <label>Yo'nalish *</label>
+      <select class="cs-input" name="direction_id" id="directionSelect">
+        <option value="">— Ro'yxatdan tanlang —</option>
+        {% for d in directions %}
+        <option value="{{ d.id }}">{{ d.name_uz }}</option>
+        {% endfor %}
+        <option value="__custom__">Ro'yxatda yo'q — qo'lda kiritaman</option>
+      </select>
+      <input class="cs-input" type="text" name="direction_custom" id="directionCustom" placeholder="Yo'nalish nomini kiriting" style="display:none; margin-top:8px;">
+    </div>
+
+    <div class="cs-field">
+      <label>Qayerda ishlaysiz <span class="muted">(ixtiyoriy)</span></label>
+      <input class="cs-input" type="text" name="workplace" placeholder="Masalan: TATU, IT Park, mustaqil...">
+    </div>
+
+    <div class="cs-field">
+      <label>Kurs narxi (so'm) *</label>
+      <input class="cs-input" type="text" name="course_price_uzs" id="priceInput" required placeholder="1 000 000" inputmode="numeric">
+    </div>
+
+    <div class="cs-field">
+      <label>Dars yo'riqnomasi <span class="muted">(ixtiyoriy)</span></label>
+      <textarea class="cs-textarea" name="syllabus_text" rows="3" placeholder="Qisqacha dars rejasi yoki mavzular ro'yxati..."></textarea>
+      <input class="cs-input" type="file" name="syllabus_file" accept=".pdf,.doc,.docx" style="margin-top:8px;">
+      <div class="muted" style="font-size:10.5px; margin-top:4px;">PDF yoki Word fayl yuklashingiz ham mumkin (ixtiyoriy).</div>
+    </div>
+
+    <div class="cs-field">
+      <label>Sertifikatlar * <span class="muted">(kamida 1, ko'pi bilan 5 ta)</span></label>
+      <input class="cs-input" type="file" name="certificates" accept="image/png,image/jpeg,image/webp,application/pdf" multiple required>
+    </div>
+
+    <button type="submit" class="cs-btn cs-btn-primary" style="align-self:flex-start;">{{ icon('send',14) }} Arizani yuborish</button>
+  </form>
+</div>
+
+<script>
+document.getElementById('directionSelect').addEventListener('change', function() {
+    document.getElementById('directionCustom').style.display = this.value === '__custom__' ? 'block' : 'none';
+    if (this.value === '__custom__') { this.removeAttribute('name'); document.getElementById('directionCustom').setAttribute('name', 'direction_custom'); }
+    else { this.setAttribute('name', 'direction_id'); }
+});
+
+var phoneInput = document.getElementById('phoneInput');
+phoneInput.addEventListener('input', function(e) {
+    var digits = this.value.replace(/\D/g, '').replace(/^998/, '');
+    digits = digits.slice(0, 9);
+    var formatted = '+998';
+    if (digits.length > 0) formatted += ' ' + digits.slice(0, 2);
+    if (digits.length > 2) formatted += ' ' + digits.slice(2, 5);
+    if (digits.length > 5) formatted += ' ' + digits.slice(5, 7);
+    if (digits.length > 7) formatted += ' ' + digits.slice(7, 9);
+    this.value = formatted;
+});
+
+var priceInput = document.getElementById('priceInput');
+priceInput.addEventListener('input', function() {
+    var digits = this.value.replace(/\D/g, '');
+    this.value = digits.replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+});
+</script>
+{% endblock %}

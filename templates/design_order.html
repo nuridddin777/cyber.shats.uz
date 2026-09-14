@@ -1,0 +1,42 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Dizayn zakaz — CYBER SHATS{% endblock %}
+{% block app_content %}
+<h1 style="font-size:19px; margin-bottom:8px;">🎨 Dizayn zakaz berish</h1>
+<p class="muted" style="font-size:12.5px; margin-bottom:20px;">
+    Xohlagan dizayiningizni tasvirlab yozing — G'azna ko'rib chiqib, narx belgilaydi. Keyin siz to'lasangiz, buyurtma tasdiqlanadi.
+</p>
+
+<div class="cs-card" style="padding:24px; max-width:520px; margin:0 auto 24px;">
+    <form method="post">
+        <label class="muted" style="font-size:11px; display:block; margin-bottom:6px;">QANDAY DIZAYN XOHLAYSIZ?</label>
+        <textarea name="description" class="cs-textarea" rows="5" placeholder="Masalan: profil uchun maxsus fon, yoki alohida galichka dizayni, yoki boshqa g'oya..." required style="width:100%; margin-bottom:14px;"></textarea>
+        <button type="submit" class="cs-btn cs-btn-primary" style="width:100%;">Zakaz berish</button>
+    </form>
+</div>
+
+<div class="cs-card" style="padding:20px; max-width:520px; margin:0 auto;">
+    <h3 style="font-size:13px; margin-bottom:14px;">📋 Mening zakazlarim</h3>
+    {% for o in my_orders %}
+    <div style="border:1px solid var(--cs-border); border-radius:10px; padding:14px; margin-bottom:10px;">
+        <div style="font-size:12.5px; margin-bottom:8px;">{{ o.description }}</div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+            {% if o.status == 'pending' %}
+            <span class="cs-chip">Ko'rib chiqilmoqda...</span>
+            {% elif o.status == 'quoted' %}
+            <span class="cs-chip solid" style="color:var(--cs-text-yellow);">⚡ {{ "{:,}".format(o.quoted_price|int) }} CODE</span>
+            <form method="post" action="{{ url_for('coins_bp.design_order_pay', order_id=o.id) }}">
+                <button type="submit" class="cs-btn cs-btn-sm cs-btn-primary">To'lash</button>
+            </form>
+            {% elif o.status == 'paid' %}
+            <span class="cs-chip solid" style="color:var(--cs-text-primary);">{{ icon('check',10) }} To'landi</span>
+            {% elif o.status == 'rejected' %}
+            <span class="cs-chip" style="color:var(--cs-text-red);">Rad etildi</span>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    <p class="muted" style="text-align:center; padding:20px;">Hali zakaz bermagansiz.</p>
+    {% endfor %}
+</div>
+{% endblock %}

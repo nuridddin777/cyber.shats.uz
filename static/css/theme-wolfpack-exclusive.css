@@ -1,0 +1,79 @@
+/* ============================================================
+   CYBER SHATS — "QASHQIRLAR MAKONI" TEMASI — EKSKLYUZIV
+   Faqat admin tomonidan alohida foydalanuvchiga BERILADI, hech kim
+   sotib ololmaydi. Tungi, taktik, "bo'rilar galasi" kayfiyati —
+   qorong'i kulrang/qora fon + qonrang qizil aksent + po'lat kulrang.
+   DIQQAT: bu HAQIQIY kino/serial logotipi yoki suratlaridan
+   FOYDALANMAYDI (mualliflik huquqi) — faqat umumiy "bo'ri/tun/taktik"
+   mavzusi CSS orqali chizilgan.
+   ============================================================ */
+.exclusive-wolfpack {
+    --cs-bg-primary: #0a0a0c;
+    --cs-bg-secondary: #121215;
+    --cs-bg-card: #17171b;
+    --cs-bg-glass: rgba(23, 23, 27, 0.88);
+    --cs-bg-sidebar: #0d0d10;
+    --cs-bg-input: #1c1c21;
+
+    --cs-text-primary: #9a1c1c;
+    --cs-text-secondary: #c23b3b;
+    --cs-text-muted: #7a7a82;
+    --cs-text-cyan: #8b8f99;
+    --cs-text-violet: #9a1c1c;
+    --cs-text-white: #e8e8ec;
+    --cs-text-dark: #0a0a0c;
+    --cs-text-red: #c23b3b;
+    --cs-text-yellow: #b0904a;
+
+    --cs-border: rgba(154, 28, 28, 0.2);
+    --cs-border-active: rgba(154, 28, 28, 0.6);
+    --cs-glow: 0 4px 18px rgba(154, 28, 28, 0.28);
+    --cs-glow-strong: 0 10px 32px rgba(154, 28, 28, 0.38);
+    --cs-glow-red: 0 4px 18px rgba(154, 28, 28, 0.4);
+    --cs-glow-cyan: 0 4px 14px rgba(139, 143, 153, 0.25);
+    --cs-glow-violet: 0 4px 18px rgba(154, 28, 28, 0.3);
+
+    --cs-grad-main:
+        radial-gradient(1200px 700px at 50% -10%, rgba(154,28,28,.08), transparent 60%),
+        radial-gradient(900px 600px at 90% 100%, rgba(139,143,153,.05), transparent 55%),
+        linear-gradient(180deg, #0a0a0c 0%, #121215 100%);
+    --cs-grad-card: linear-gradient(155deg, rgba(154,28,28,.06) 0%, rgba(23,23,27,0) 55%);
+    --cs-grad-btn: linear-gradient(135deg, #c23b3b 0%, #9a1c1c 55%, #6e1212 100%);
+    --cs-grad-sidebar: linear-gradient(180deg, #0d0d10 0%, #0a0a0c 100%);
+    --cs-grad-accent: linear-gradient(90deg, #9a1c1c, #7a7a82, #9a1c1c);
+}
+
+/* Tepa chiziq — qonrang, xira po'lat bilan */
+body.exclusive-wolfpack::before {
+    content: ''; position: fixed; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, #6e1212, #9a1c1c, #7a7a82, #9a1c1c, #6e1212);
+    z-index: 99999;
+}
+
+/* Fon — juda xira vinyetka, tun tuyg'usi uchun */
+body.exclusive-wolfpack {
+    background-image: radial-gradient(1400px 900px at 50% 120%, rgba(0,0,0,.55), transparent 60%);
+}
+
+.exclusive-wolfpack .logo::after {
+    content: '🐺 QASHQIRLAR MAKONI';
+    display: inline-block; margin-left: 8px; font-size: 8.5px; font-weight: 900; letter-spacing: 1px;
+    background: linear-gradient(135deg, #6e1212, #9a1c1c); color: #e8e8ec;
+    padding: 3px 9px; border-radius: 3px; vertical-align: middle;
+    box-shadow: 0 2px 10px rgba(154, 28, 28, 0.5); border: 1px solid rgba(139,143,153,0.3);
+}
+
+.exclusive-wolfpack .cs-btn-primary {
+    background: linear-gradient(135deg, #c23b3b, #9a1c1c) !important; border-color: #9a1c1c !important;
+    text-transform: uppercase; letter-spacing: 1.2px; font-weight: 800;
+}
+.exclusive-wolfpack .cs-card {
+    border-color: rgba(154,28,28,0.15) !important;
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.02), 0 4px 20px rgba(0,0,0,0.4);
+}
+.exclusive-wolfpack .hex-icon {
+    background: linear-gradient(155deg, #1c1c21, #0d0d10) !important;
+    border: 2px solid rgba(154,28,28,0.35) !important;
+}
+.exclusive-wolfpack .cs-progress { background: #1c1c21; }
+.exclusive-wolfpack .cs-progress > span { background: linear-gradient(90deg, #6e1212, #c23b3b); }

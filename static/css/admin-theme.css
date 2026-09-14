@@ -1,0 +1,122 @@
+/* ============================================================
+   ADMIN TEMASI — "CIRCUIT AMBER" (original, rasm ko'chirilmagan)
+   Faqat role='admin' yoki 'super_admin' foydalanuvchilarga (tarif
+   bilan bog'liq emas — biror plan sotib olib bu tema kelmaydi).
+   Chuqur to'q fon + jonli, animatsion elektron sxema chiziqlari,
+   qizg'ish-jigarrang/oltin rangda, "zapovednik" tuyg'usi bilan.
+   ============================================================ */
+
+body.admin-theme {
+    --cs-bg-primary: #140a04;
+    --cs-bg-secondary: #1c0f05;
+    --cs-bg-card: #201206;
+    --cs-bg-glass: rgba(32, 18, 6, 0.88);
+    --cs-bg-sidebar: #180d04;
+    --cs-bg-input: #241505;
+
+    --cs-text-primary: #e8820c;
+    --cs-text-secondary: #f2a53d;
+    --cs-text-muted: #b08252;
+    --cs-text-cyan: #f2a53d;
+    --cs-text-white: #ffe3bd;
+    --cs-text-dark: #140a04;
+    --cs-text-red: #ff5a3c;
+    --cs-text-yellow: #ffb454;
+
+    --cs-border: rgba(232, 130, 12, 0.22);
+    --cs-border-active: rgba(232, 130, 12, 0.6);
+    --cs-glow: 0 4px 18px rgba(232, 130, 12, 0.22);
+    --cs-glow-strong: 0 10px 32px rgba(232, 130, 12, 0.35);
+
+    --cs-grad-btn: linear-gradient(135deg, #f2a53d 0%, #e8820c 55%, #b85e05 100%);
+    --cs-grad-sidebar: linear-gradient(180deg, #180d04 0%, #100801 100%);
+    background: radial-gradient(ellipse 140% 90% at 50% -10%, #2a1608 0%, #140a04 55%), #0d0602 !important;
+    background-attachment: fixed !important;
+    position: relative;
+}
+
+/* Elektron sxema chiziqlari — SVG asosida, position:fixed orqa fonda,
+   sekin harakatlanuvchi, zarrachalar tarqalgan tuyg'u beradi */
+body.admin-theme::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.55;
+    background-image:
+        repeating-linear-gradient(115deg, transparent 0px, transparent 68px, rgba(232,130,12,.10) 69px, transparent 71px),
+        repeating-linear-gradient(25deg, transparent 0px, transparent 94px, rgba(242,165,61,.07) 95px, transparent 97px);
+    animation: admin-circuit-drift 22s linear infinite;
+}
+body.admin-theme::after {
+    content: '';
+    position: fixed;
+    inset: -20% -20%;
+    z-index: 0;
+    pointer-events: none;
+    opacity: 0.35;
+    background:
+        radial-gradient(3px 3px at 12% 22%, #f2a53d 0%, transparent 100%),
+        radial-gradient(2px 2px at 78% 15%, #e8820c 0%, transparent 100%),
+        radial-gradient(2.5px 2.5px at 34% 68%, #ffb454 0%, transparent 100%),
+        radial-gradient(2px 2px at 88% 74%, #f2a53d 0%, transparent 100%),
+        radial-gradient(3px 3px at 55% 40%, #e8820c 0%, transparent 100%),
+        radial-gradient(2px 2px at 20% 88%, #ffb454 0%, transparent 100%);
+    animation: admin-particles-float 14s ease-in-out infinite;
+}
+@keyframes admin-circuit-drift {
+    0% { background-position: 0 0, 0 0; }
+    100% { background-position: 400px 200px, -300px 250px; }
+}
+@keyframes admin-particles-float {
+    0%, 100% { transform: translateY(0) translateX(0); opacity: 0.3; }
+    50% { transform: translateY(-14px) translateX(8px); opacity: 0.5; }
+}
+@media (prefers-reduced-motion: reduce) {
+    body.admin-theme::before, body.admin-theme::after { animation: none !important; }
+}
+
+body.admin-theme .app-topbar,
+body.admin-theme .app-sidebar {
+    background: var(--cs-grad-sidebar) !important;
+    border-color: var(--cs-border) !important;
+    position: relative;
+    z-index: 1;
+}
+body.admin-theme .cs-card {
+    background: linear-gradient(155deg, rgba(232,130,12,.06) 0%, rgba(32,18,6,.9) 60%) !important;
+    border: 1px solid var(--cs-border) !important;
+    position: relative;
+    z-index: 1;
+}
+body.admin-theme .cs-card:hover {
+    border-color: var(--cs-border-active) !important;
+    box-shadow: var(--cs-glow);
+}
+body.admin-theme .cs-btn-primary {
+    background: var(--cs-grad-btn) !important;
+    color: #140a04 !important;
+    font-weight: 800;
+    border: none !important;
+    box-shadow: var(--cs-glow);
+}
+body.admin-theme .cs-nav-item.active {
+    background: linear-gradient(90deg, rgba(232,130,12,.14), transparent);
+    border-left: 3px solid var(--cs-text-primary);
+    color: var(--cs-text-primary) !important;
+}
+body.admin-theme a { color: var(--cs-text-primary); }
+body.admin-theme .main-content { position: relative; z-index: 1; }
+
+/* Admin nishoni — "🛡️ ADMIN CIRCUIT" belgisi profil/sidebar joylarida */
+.admin-circuit-badge {
+    background: linear-gradient(135deg, #f2a53d, #b85e05);
+    color: #140a04 !important;
+    padding: 3px 10px;
+    border-radius: var(--cs-radius-pill, 20px);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .5px;
+    display: inline-block;
+}

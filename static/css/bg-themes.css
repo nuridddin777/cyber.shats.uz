@@ -1,0 +1,166 @@
+/* ============================================================
+   CYBER SHATS — FON RASMLAR, 3D TILT VA THREAT-RANG TIZIMI
+   ============================================================ */
+
+/* ---------- Umumiy fon-rasm konteyner ---------- */
+.bg-scene {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 0;
+}
+.bg-scene img {
+    position: absolute;
+    top: 50%;
+    right: -8%;
+    width: 68%;
+    max-width: 980px;
+    min-width: 480px;
+    transform: translateY(-50%) translateZ(0);
+    opacity: 0.9;
+    filter: saturate(1.15) contrast(1.05);
+    will-change: transform;
+    transition: transform 0.15s ease-out;
+    perspective: 1200px;
+}
+/* Matnni o'qish uchun chapdan qorong'ilashtirish */
+.bg-scene::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg,
+        var(--scene-fade, #030810) 0%,
+        var(--scene-fade, #030810) 28%,
+        rgba(3, 8, 16, 0.55) 50%,
+        transparent 78%);
+    z-index: 1;
+}
+.bg-scene::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, transparent 60%, var(--scene-fade, #030810) 100%);
+    z-index: 1;
+}
+
+/* Ambient variant — pastki (threat) bo'limlarda har bir juftlik uchun mustaqil,
+   o'z ichiga sig'adigan, boshqa bo'limga "sizib chiqmaydigan" fon */
+.bg-scene.bg-scene-ambient img {
+    top: 0; right: 50%; left: auto;
+    transform: translate(50%, -12%);
+    width: 44%; max-width: 620px; min-width: 320px;
+    opacity: 0.32;
+}
+.bg-scene.bg-scene-ambient::before {
+    background: radial-gradient(ellipse at 50% 0%, transparent 0%, var(--scene-fade, #030810) 72%);
+}
+.bg-scene.bg-scene-ambient::after {
+    background: linear-gradient(180deg, transparent 0%, transparent 55%, var(--scene-fade, #030810) 96%);
+}
+.bg-scene-wrap { position: relative; overflow: hidden; }
+.bg-scene-wrap > .bg-scene { position: absolute; inset: 0; z-index: 0; }
+.bg-scene-wrap > .container { position: relative; z-index: 1; }
+
+/* ---------- To'liq ekran fon (Kirish / Ro'yxatdan o'tish kabi markazlashgan sahifalar) ---------- */
+.bg-fullscreen {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    overflow: hidden;
+}
+.bg-fullscreen img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0.5;
+    filter: saturate(1.15) contrast(1.05);
+}
+.bg-fullscreen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 42%, transparent 0%, var(--scene-fade, #030810) 88%);
+}
+.bg-fullscreen::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(180deg, var(--scene-fade, #030810) 0%, transparent 18%, transparent 82%, var(--scene-fade, #030810) 100%);
+}
+
+/* ---------- Rang variantlari (bg-scene va bg-fullscreen uchun umumiy) ---------- */
+.bg-green   { --scene-fade: #030810; }
+.bg-blue    { --scene-fade: #030816; }
+.bg-gold    { --scene-fade: #0a0700; }
+.bg-red     { --scene-fade: #0a0202; }
+.bg-teal    { --scene-fade: #020c0a; }
+
+/* ---------- 3D tilt uchun sahna wrapper ---------- */
+.tilt-scene { perspective: 1400px; }
+.tilt-layer {
+    transition: transform 0.2s ease-out;
+    transform-style: preserve-3d;
+}
+
+/* ---------- 3D hover — kartalar ---------- */
+.tilt-card { transition: transform .35s cubic-bezier(.2,.8,.3,1), box-shadow .35s; transform-style: preserve-3d; }
+.tilt-card:hover { transform: translateY(-6px) rotateX(4deg) rotateY(-4deg) scale(1.015); }
+
+/* ============================================================
+   THREAT-ZONE — pastroq bo'limlar uchun "xavf darajasi oshdi"
+   effekti (Foydalanuvchilar Loyihalari / Yangiliklar / Kitoblar / Narxlar)
+   ============================================================ */
+#threatZone {
+    position: relative;
+    transition: background-color 1.2s ease;
+}
+#threatZone::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at 50% 0%, rgba(255, 0, 0, 0), transparent 70%);
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    pointer-events: none;
+    z-index: 0;
+}
+body.threat-high #threatZone::before { opacity: 1; background: radial-gradient(ellipse at 50% 0%, rgba(255,30,30,0.10), transparent 70%); }
+body.threat-high #threatZone { background-color: rgba(20, 2, 2, 0.35); }
+body.threat-high .section-title { text-shadow: 0 0 20px rgba(255,60,60,0.35); }
+
+/* HUD threat rang almashinuvi */
+.hud-line .hud-dynamic { transition: color .8s ease; }
+body.threat-high .hud-line .hud-dynamic { color: rgba(255,60,60,0.75) !important; }
+body.threat-high .dot-live { background: #ff3b3b; box-shadow: 0 0 10px rgba(255,59,59,0.7); }
+body.threat-high .hud-tl::before,
+body.threat-high .hud-tr::before,
+body.threat-high .hud-bl::before,
+body.threat-high .hud-br::before { border-color: #ff3b3b !important; }
+
+/* Threat-zone ichidagi barcha muhim raqam/matnlar uchun BIR XIL rang */
+.tz-accent { color: #ffc94d; text-shadow: 0 0 14px rgba(255,193,7,0.3); }
+
+/* ---------- HUD sahifa mavzusi (login=ko'k, register/dashboard=oltin) ---------- */
+.hud-overlay.hud-theme-blue .green,
+.hud-overlay.hud-theme-blue .hud-dynamic { color: rgba(56,150,255,0.8) !important; }
+.hud-overlay.hud-theme-blue .dot-live { background: #3896ff; box-shadow: 0 0 10px rgba(56,150,255,0.6); }
+.hud-overlay.hud-theme-blue .hud-tl::before,
+.hud-overlay.hud-theme-blue .hud-tr::before,
+.hud-overlay.hud-theme-blue .hud-bl::before,
+.hud-overlay.hud-theme-blue .hud-br::before { border-color: #3896ff !important; }
+
+.hud-overlay.hud-theme-gold .green,
+.hud-overlay.hud-theme-gold .hud-dynamic { color: rgba(255,193,7,0.85) !important; }
+.hud-overlay.hud-theme-gold .dot-live { background: #ffc107; box-shadow: 0 0 10px rgba(255,193,7,0.6); }
+.hud-overlay.hud-theme-gold .hud-tl::before,
+.hud-overlay.hud-theme-gold .hud-tr::before,
+.hud-overlay.hud-theme-gold .hud-bl::before,
+.hud-overlay.hud-theme-gold .hud-br::before { border-color: #ffc107 !important; }
+
+@media (max-width: 900px) {
+    .bg-scene img { width: 100%; right: -20%; opacity: 0.45; }
+}

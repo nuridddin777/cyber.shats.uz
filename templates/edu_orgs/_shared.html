@@ -1,0 +1,240 @@
+{# ============================================================
+   SHATS CYBER EDU — mustaqil dizayn tizimi
+   ============================================================
+   Bu uslub asosiy SHATS CYBER saytining "hacker/matrix" mavzusidan
+   ATAYLAB farqli — Edu qismi ta'lim muassasalari (maktab, texnikum,
+   o'quv markazi) uchun alohida, tinch va ishonchli ko'rinishga ega
+   "mustaqil sayt" taassurotini beradi.
+
+   Qurilmalarga moslashuv (responsive):
+     - Telefon (< 480px)
+     - Planshet (481–1024px)
+     - Noutbuk/kompyuter (1025–1599px)
+     - Katta ekranlar: elektron doska / televizor (>= 1600px) —
+       matn va tugmalar avtomatik kattalashadi (uzoqdan ko'rish uchun)
+   Barcha tugma/input elementlari kamida 44px balandlikda — bu
+   planshet, interaktiv doska va TV pult/barmoq bilan boshqarish
+   uchun qulay minimal maqsad hajmi (accessibility standarti).
+#}
+<style>
+  :root {
+    --edu-bg: #0b1220;
+    --edu-bg-soft: #111b2e;
+    --edu-card: #13203a;
+    --edu-border: #1f2f4d;
+    --edu-text: #e8f0fb;
+    --edu-text-dim: #8ea2c0;
+    --edu-accent: #2dd4bf;       /* teal — bilim/o'sish ramzi */
+    --edu-accent-dark: #14a898;
+    --edu-accent-2: #38bdf8;     /* moviy — ikkinchi urg'u rangi */
+    --edu-warn: #fbbf24;
+    --edu-danger: #f87171;
+    --edu-success-bg: #0f2e28;
+    --edu-error-bg: #3a1414;
+    --edu-radius: 16px;
+    --edu-tap: 46px;             /* minimal tegish/bosish nishoni balandligi */
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(45,212,191,0.08), transparent 60%),
+      radial-gradient(1000px 500px at 100% 0%, rgba(56,189,248,0.06), transparent 55%),
+      var(--edu-bg);
+    color: var(--edu-text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, system-ui, sans-serif;
+    margin: 0;
+    padding: clamp(14px, 3vw, 28px);
+    line-height: 1.6;
+    font-size: clamp(15px, 1.05vw + 10px, 17px);
+    min-height: 100vh;
+  }
+
+  .container { max-width: 1040px; margin: 0 auto; width: 100%; }
+
+  .card {
+    background: var(--edu-card);
+    border: 1px solid var(--edu-border);
+    border-radius: var(--edu-radius);
+    padding: clamp(18px, 2.5vw, 28px);
+    margin-bottom: 20px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+  }
+
+  h1, h2, h3 { color: #ffffff; margin-top: 0; letter-spacing: 0.2px; }
+  h1 { font-size: clamp(20px, 1.6vw + 14px, 30px); }
+  h2 { font-size: clamp(17px, 1.2vw + 12px, 22px); }
+  p  { color: var(--edu-text); }
+  a  { color: var(--edu-accent); }
+  code { background: rgba(45,212,191,0.12); color: var(--edu-accent); padding: 2px 6px; border-radius: 6px; }
+
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    background: var(--edu-accent); color: #04201c; border: none;
+    padding: 12px 20px; min-height: var(--edu-tap);
+    border-radius: 10px; font-size: 15px; font-weight: 700; cursor: pointer;
+    text-decoration: none; transition: transform .08s ease, background .15s ease;
+    touch-action: manipulation;
+  }
+  .btn:hover { background: var(--edu-accent-dark); }
+  .btn:active { transform: scale(0.98); }
+  .btn:focus-visible { outline: 3px solid var(--edu-accent-2); outline-offset: 2px; }
+  .btn.secondary { background: var(--edu-bg-soft); color: var(--edu-text); border: 1px solid var(--edu-border); }
+  .btn.secondary:hover { background: #182742; }
+  .btn.danger { background: var(--edu-danger); color: #2a0a0a; }
+
+  input, select {
+    width: 100%; padding: 12px 14px; margin: 6px 0 16px 0;
+    min-height: var(--edu-tap);
+    border-radius: 10px; border: 1px solid var(--edu-border);
+    background: var(--edu-bg-soft); color: #fff; font-size: 16px; /* 16px+ — mobil brauzer avto-zoom oldini oladi */
+  }
+  input:focus, select:focus {
+    outline: none; border-color: var(--edu-accent);
+    box-shadow: 0 0 0 3px rgba(45,212,191,0.2);
+  }
+  label { font-size: 13px; color: var(--edu-text-dim); font-weight: 600; }
+
+  .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  table { width: 100%; border-collapse: collapse; margin-top: 12px; min-width: 480px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--edu-border); font-size: 14px; }
+  th { color: var(--edu-text-dim); font-weight: 700; white-space: nowrap; }
+  tr:hover td { background: rgba(45,212,191,0.03); }
+
+  .badge {
+    display: inline-block; padding: 4px 12px; border-radius: 999px; font-size: 12px; font-weight: 700;
+    background: rgba(45,212,191,0.12); color: var(--edu-accent);
+  }
+  .badge.warn { background: rgba(251,191,36,0.12); color: var(--edu-warn); }
+  .badge.locked { background: rgba(248,113,113,0.12); color: var(--edu-danger); }
+
+  .flash { padding: 14px 18px; border-radius: 10px; margin-bottom: 16px; font-size: 14px; font-weight: 600; }
+  .flash.success { background: var(--edu-success-bg); color: #a7f3d0; border: 1px solid rgba(45,212,191,0.25); }
+  .flash.error { background: var(--edu-error-bg); color: #fecaca; border: 1px solid rgba(248,113,113,0.25); }
+
+  .top-nav {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 22px; flex-wrap: wrap; gap: 10px; padding-bottom: 14px;
+    border-bottom: 1px solid var(--edu-border);
+  }
+  .top-nav .brand {
+    font-weight: 800; font-size: clamp(18px, 1.2vw + 14px, 22px);
+    display: flex; align-items: center; gap: 8px; color: #fff;
+  }
+  .top-nav .brand::before { content: "🎓"; font-size: 1.1em; }
+  .top-nav .brand span { color: var(--edu-accent); }
+  .top-nav a { text-decoration: none; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 720px) {
+    .grid-2 { grid-template-columns: 1fr; }
+    .top-nav { flex-direction: column; align-items: flex-start; }
+  }
+
+  /* ---- Planshet / kichik noutbuk ---- */
+  @media (min-width: 721px) and (max-width: 1024px) {
+    .container { max-width: 100%; }
+  }
+
+  /* ---- Katta ekranlar: interaktiv doska / televizor ---- */
+  /* Uzoqdan ko'rish uchun matn, tugma va bo'shliqlar avtomatik kattalashadi. */
+  @media (min-width: 1600px) {
+    body { font-size: 19px; padding: 40px; }
+    .container { max-width: 1280px; }
+    .btn { font-size: 17px; padding: 14px 26px; }
+    input, select { font-size: 18px; padding: 14px 16px; }
+    .card { padding: 34px; }
+  }
+  @media (min-width: 2200px) {
+    body { font-size: 23px; }
+    .container { max-width: 1600px; }
+    .btn { font-size: 20px; padding: 16px 30px; }
+  }
+
+  /* ---- Juda kichik telefonlar ---- */
+  @media (max-width: 380px) {
+    body { padding: 10px; }
+    .card { padding: 16px; border-radius: 12px; }
+  }
+
+  /* ================================================================
+     PRO MAVZULAR — "Markaz Pro" tarif sotib olinganda BARCHA
+     o'qituvchi va o'quvchilarga avtomatik qo'llanadi (org_id orqali
+     aniqlanadi, foydalanuvchi darajasida emas — edu_curriculum.py).
+     ================================================================ */
+
+  /* O'QUVCHI (PRO): oltin + qora — yorqin, bayramona */
+  body.pro-student-theme {
+    --edu-bg: #0a0805; --edu-bg-soft: #171208; --edu-card: #1c1710;
+    --edu-border: #4a3a14; --edu-text: #fdf3d8; --edu-text-dim: #cbb073;
+    --edu-accent: #ffd54a; --edu-accent-dark: #e0ab00; --edu-accent-2: #ffb800;
+    --edu-warn: #ffb800;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(255,213,74,0.10), transparent 60%),
+      radial-gradient(1000px 500px at 100% 0%, rgba(255,184,0,0.08), transparent 55%),
+      #0a0805;
+  }
+  body.pro-student-theme .card { border: 1px solid rgba(255,213,74,0.28); box-shadow: 0 8px 26px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,213,74,0.06) inset; }
+  body.pro-student-theme .badge { background: rgba(255,213,74,0.16); color: #ffd54a; }
+  body.pro-student-theme h1, body.pro-student-theme h2, body.pro-student-theme h3 {
+    background: linear-gradient(90deg,#fff3cf,#ffd54a); -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+
+  /* O'QITUVCHI (PRO): muzdek, ko'zni charchatmaydigan sovuq ranglar */
+  body.pro-teacher-theme {
+    --edu-bg: #10181f; --edu-bg-soft: #16212a; --edu-card: #182530;
+    --edu-border: #24313c; --edu-text: #cfe3ea; --edu-text-dim: #7f97a3;
+    --edu-accent: #7fd8d0; --edu-accent-dark: #5cb6ae; --edu-accent-2: #8fb4c9;
+    --edu-warn: #d9c98a;
+    background:
+      radial-gradient(1200px 600px at 15% -10%, rgba(127,216,208,0.05), transparent 60%),
+      radial-gradient(1000px 500px at 100% 0%, rgba(143,180,201,0.05), transparent 55%),
+      #10181f;
+  }
+  body.pro-teacher-theme .card { border: 1px solid rgba(127,216,208,0.14); box-shadow: 0 6px 18px rgba(0,0,0,0.25); }
+  body.pro-teacher-theme .badge { background: rgba(127,216,208,0.10); color: #7fd8d0; }
+
+  /* ---- PWA "Ilovani o'rnatish" tugmasi (butun Edu bo'limida suzuvchi) ---- */
+  #edu-install-btn {
+    display: none; position: fixed; right: 16px; bottom: 16px; z-index: 999;
+    box-shadow: 0 6px 20px rgba(0,0,0,0.35);
+  }
+  #edu-install-btn.show { display: inline-flex; }
+</style>
+<link rel="manifest" href="{{ url_for('edu_orgs.edu_manifest') }}">
+<meta name="theme-color" content="#2dd4bf">
+
+<button type="button" id="edu-install-btn" class="btn" onclick="eduInstallApp()">📲 Ilovani o'rnatish</button>
+
+<script>
+  // ---- PWA o'rnatish (telefonga/kompyuterga "ilova" sifatida qo'shish) ----
+  if ("serviceWorker" in navigator) {
+    window.addEventListener("load", function () {
+      navigator.serviceWorker.register("{{ url_for('edu_orgs.edu_service_worker') }}").catch(function () {});
+    });
+  }
+  let __eduDeferredPrompt = null;
+  window.addEventListener("beforeinstallprompt", function (e) {
+    e.preventDefault();
+    __eduDeferredPrompt = e;
+    document.querySelectorAll("#edu-install-btn").forEach(function (btn) { btn.classList.add("show"); });
+  });
+  function eduInstallApp() {
+    if (!__eduDeferredPrompt) return;
+    __eduDeferredPrompt.prompt();
+    __eduDeferredPrompt.userChoice.finally(function () { __eduDeferredPrompt = null; });
+  }
+  window.addEventListener("appinstalled", function () {
+    document.querySelectorAll("#edu-install-btn").forEach(function (btn) { btn.classList.remove("show"); });
+  });
+</script>
+<script src="/static/js/auto-refresh.js"></script>
+
+{% macro flashes() %}
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% for category, message in messages %}
+      <div class="flash {{ category }}">{{ message }}</div>
+    {% endfor %}
+  {% endwith %}
+{% endmacro %}

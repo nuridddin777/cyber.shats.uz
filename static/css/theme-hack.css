@@ -1,0 +1,19 @@
+/* MAXSUS (HACKER) TEMA — Elite/eksklyuziv, binafsha aksent bilan
+   (butun saytda "MAXSUS" belgilari #a855f7 rangida — shu bilan izchil) */
+:root {
+    --cs-bg-primary:#0a0710; --cs-bg-secondary:#0d0a14;
+    --cs-bg-card:#120e1c; --cs-bg-sidebar:#0d0a14; --cs-bg-input:#150f22;
+    --cs-text-primary:#a855f7; --cs-text-secondary:#c084fc;
+    --cs-text-muted:#6b5b8a; --cs-text-cyan:#c084fc;
+    --cs-text-white:#f1eaff; --cs-text-red:#ff3b3b; --cs-text-accent:#a855f7;
+    --cs-border:rgba(168,85,247,0.2); --cs-border-active:rgba(168,85,247,0.6);
+    --cs-glow:0 0 15px rgba(168,85,247,0.4);
+}
+body::before{content:'';position:fixed;top:0;left:0;right:0;height:3px;
+  background:linear-gradient(90deg,#a855f7,#3a1a5c,#a855f7);z-index:99999;}
+body{font-family:'JetBrains Mono',monospace!important;}
+.cs-btn-primary{background:linear-gradient(135deg,#7c3aed,#a855f7)!important;border-color:#a855f7!important;color:#fff!important;}
+.cs-card{background:#120e1c!important;border-color:rgba(168,85,247,0.2)!important;}
+.cs-nav-item.active,.cs-nav-item:hover{background:rgba(168,85,247,0.1)!important;color:#a855f7!important;}
+/* MAXSUS belgisi sarlavhada */
+.logo span{background:linear-gradient(135deg,#a855f7,#c084fc)!important;-webkit-background-clip:text!important;-webkit-text-fill-color:transparent!important;}

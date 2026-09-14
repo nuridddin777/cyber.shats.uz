@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+{% block title %}Questlar — Virtual Olam{% endblock %}
+{% block extra_head %}
+<style>
+.vw-header{background:linear-gradient(135deg,#050a18,#1a0a08);padding:28px 0 20px;margin-bottom:24px;border-bottom:1px solid rgba(255,100,0,0.15)}
+.quest-card{background:rgba(10,22,45,0.9);border:1px solid rgba(30,144,255,0.12);border-radius:12px;padding:16px;margin-bottom:12px;display:flex;align-items:center;gap:14px;transition:all .15s}
+.quest-card:hover{border-color:rgba(30,144,255,0.3)}
+.quest-card.completed{opacity:0.5;border-color:rgba(0,200,83,0.2)}
+.quest-icon{width:50px;height:50px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:24px;flex-shrink:0}
+.q-daily{background:rgba(30,144,255,0.1);border:1px solid rgba(30,144,255,0.2)}
+.q-weekly{background:rgba(180,124,255,0.1);border:1px solid rgba(180,124,255,0.2)}
+.q-one_time{background:rgba(255,200,0,0.1);border:1px solid rgba(255,200,0,0.2)}
+.reward-chip{display:inline-flex;align-items:center;gap:3px;font-size:11px;border-radius:6px;padding:2px 8px;margin-right:6px}
+.rc-coin{background:rgba(0,200,83,0.1);color:#00c853}.rc-xp{background:rgba(30,144,255,0.1);color:#7ec8f8}
+</style>
+{% endblock %}
+{% block content %}
+<div class="vw-header">
+  <div class="container">
+    <nav style="font-size:13px;color:#5a7a9a;margin-bottom:4px;">
+      <a href="{{ url_for('virtual.world_home') }}" style="color:#5a7a9a;">Virtual Olam</a> / <span style="color:#ff8c00;">Questlar</span>
+    </nav>
+    <h1 style="font-size:22px;font-weight:700;color:#e8f4ff;margin:0;">⚔️ Questlar</h1>
+    <div style="color:#5a7a9a;font-size:13px;margin-top:4px;">Topshiriqlarni bajaring va mukofot oling!</div>
+  </div>
+</div>
+<div class="container" style="max-width:700px;">
+  {% for q in quests %}
+  <div class="quest-card {% if q.status == 'completed' %}completed{% endif %}">
+    <div class="quest-icon q-{{ q.quest_type }}">
+      {% if q.quest_type == 'daily' %}📋{% elif q.quest_type == 'weekly' %}🗓️{% else %}🌟{% endif %}
+    </div>
+    <div style="flex:1;">
+      <div style="color:#e8f4ff;font-weight:600;font-size:14px;margin-bottom:4px;">
+        {{ q.title }}
+        {% if q.status == 'completed' %}<span style="color:#00c853;font-size:12px;">✓ Bajarilgan</span>{% endif %}
+      </div>
+      <div style="font-size:12px;color:#5a7a9a;margin-bottom:6px;">{{ q.description }}</div>
+      <div>
+        <span class="reward-chip rc-coin">🪙 +{{ q.reward_coins }}</span>
+        <span class="reward-chip rc-xp">✨ +{{ q.reward_xp }} XP</span>
+        <span style="font-size:10px;color:#5a7a9a;text-transform:uppercase;">{{ q.quest_type }}</span>
+      </div>
+    </div>
+    {% if q.status != 'completed' %}
+    <button class="cs-btn" style="font-size:12px;padding:8px 14px;" onclick="completeQuest({{ q.id }})">Bajarish</button>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+<script>
+function completeQuest(id) {
+  fetch(`/virtual/quests/complete/${id}`, {method:'POST'})
+  .then(r => r.json())
+  .then(d => { alert(d.msg); if(d.ok) location.reload(); });
+}
+</script>
+{% endblock %}

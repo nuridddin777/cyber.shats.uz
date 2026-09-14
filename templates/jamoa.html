@@ -1,0 +1,148 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Jamoa — CYBER SHATS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:20px;">{{ icon('users',18) }} Jamoa</h1>
+</div>
+
+{% if not team %}
+<!-- JAMOA YO'Q — YARATISH YOKI QO'SHILISH -->
+<div class="grid grid-2" style="gap:16px;">
+  <div class="cs-card">
+    <h3 style="font-size:13px; margin-bottom:10px;">{{ icon('plus',14) }} YANGI JAMOA YARATISH</h3>
+    <p class="muted" style="font-size:11.5px; margin-bottom:12px;">
+      Jamoa ochish uchun oylik soliq to'lanadi: sizning tarifingiz bo'yicha taxminan
+      <strong style="color:var(--cs-text-primary);">{{ tax_preview }} CODE/oy</strong>
+      (MAXSUS foydalanuvchilar uchun dastlabki oylar bepul).
+    </p>
+    <form method="post" action="{{ url_for('jamoa_bp.jamoa_create') }}">
+      <label class="muted" style="font-size:11px; display:block; margin-bottom:5px;">Jamoa nomi</label>
+      <input type="text" name="name" required class="cs-input" style="margin-bottom:10px;" placeholder="masalan: Night Coders">
+      <label class="muted" style="font-size:11px; display:block; margin-bottom:5px;">Tavsif (ixtiyoriy)</label>
+      <textarea name="description" class="cs-input" rows="3" style="margin-bottom:12px;" placeholder="Jamoangiz haqida qisqacha"></textarea>
+      <button type="submit" class="cs-btn cs-btn-primary cs-btn-full">{{ icon('plus',13) }} Jamoa yaratish</button>
+    </form>
+  </div>
+
+  <div class="cs-card">
+    <h3 style="font-size:13px; margin-bottom:10px;">{{ icon('send',14) }} TAKLIF ORQALI QO'SHILISH</h3>
+    <p class="muted" style="font-size:11.5px; margin-bottom:12px;">Jamoa liderining taklif kodini kiriting.</p>
+    <form method="post" action="{{ url_for('jamoa_bp.jamoa_join') }}">
+      <input type="text" name="invite_code" required class="cs-input" style="margin-bottom:12px; text-transform:uppercase;" placeholder="masalan: A1B2C3D4">
+      <button type="submit" class="cs-btn cs-btn-primary cs-btn-full">{{ icon('log-in',13) }} Qo'shilish</button>
+    </form>
+  </div>
+</div>
+
+{% else %}
+<!-- MAVJUD JAMOA -->
+
+{% if team.status == 'frozen' %}
+<div class="cs-card" style="background:rgba(255,68,68,.08); border-color:rgba(255,68,68,.4); margin-bottom:16px;">
+  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px;">
+    <div>
+      <strong style="color:#ff4444;">⚠️ Jamoa muzlatilgan!</strong>
+      <div class="muted" style="font-size:12px; margin-top:4px;">Oylik soliq to'lanmagan. To'lamaguningizcha jamg'arma va boshqa amallar cheklangan.</div>
+    </div>
+    {% if team.role == 'leader' %}
+    <form method="post" action="{{ url_for('jamoa_bp.jamoa_pay_tax') }}">
+      <button class="cs-btn cs-btn-danger">{{ icon('zap',13) }} Soliqni to'lash</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+{% elif billing and billing.charged %}
+<div class="cs-card" style="background:rgba(255,59,59,.06); border-color:rgba(255,59,59,.3); margin-bottom:16px; font-size:12px;">
+  {{ icon('check',13) }} Oylik soliq avtomatik to'landi ({{ billing.amount }} CODE).
+</div>
+{% endif %}
+
+<div class="flex-between" style="margin-bottom:16px; flex-wrap:wrap; gap:10px;">
+  <div>
+    <h2 style="font-size:18px;">{{ team.name }} <span class="muted" style="font-size:12px;">#{{ team.custom_id }}</span></h2>
+    {% if team.description %}<p class="muted" style="font-size:12px; margin-top:4px;">{{ team.description }}</p>{% endif %}
+  </div>
+  <div style="display:flex; gap:8px; flex-wrap:wrap;">
+    {% if team.role == 'leader' %}
+    <form method="post" action="{{ url_for('jamoa_bp.jamoa_invite_create') }}">
+      <button class="cs-btn cs-btn-sm">{{ icon('send',12) }} Taklif kodi yaratish</button>
+    </form>
+    <form method="post" action="{{ url_for('jamoa_bp.jamoa_dissolve') }}" onsubmit="return confirm('Jamoani butunlay tarqatasizmi? Jamg\'armadagi CODE a\\'zolarga qaytariladi.');">
+      <button class="cs-btn cs-btn-sm cs-btn-danger">{{ icon('x',12) }} Jamoani tarqatish</button>
+    </form>
+    {% else %}
+    <form method="post" action="{{ url_for('jamoa_bp.jamoa_leave') }}" onsubmit="return confirm('Jamoadan chiqasizmi?');">
+      <button class="cs-btn cs-btn-sm cs-btn-danger">{{ icon('logout',12) }} Chiqish</button>
+    </form>
+    {% endif %}
+  </div>
+</div>
+
+<div class="grid" style="grid-template-columns:1.3fr 1fr; gap:16px;">
+  <!-- A'ZOLAR -->
+  <div class="cs-card">
+    <h3 style="font-size:13px; margin-bottom:12px;">{{ icon('users',14) }} A'ZOLAR ({{ members|length }})</h3>
+    {% for m in members %}
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid rgba(255,255,255,.05);">
+      <div>
+        <span style="font-size:13px; font-weight:600;">{{ m.familiya }} {{ m.ism }}</span>
+        <span class="muted" style="font-size:11px;"> #{{ m.custom_id }}</span>
+      </div>
+      <span class="cs-chip solid" style="font-size:10px;">{{ {'leader':'👑 Lider','moderator':'Moderator','member':"A'zo"}.get(m.role, m.role) }}</span>
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- JAMG'ARMA -->
+  <div class="cs-card">
+    <h3 style="font-size:13px; margin-bottom:6px; color:#ffd700;">{{ icon('zap',14) }} JAMOA JAMG'ARMASI</h3>
+    <div style="font-size:32px; font-weight:900; font-family:var(--cs-font-display); color:var(--cs-text-primary); margin:8px 0;">
+      ⚡ {{ "{:,}".format(treasury.balance if treasury else 0) }}
+    </div>
+    <form method="post" action="{{ url_for('jamoa_bp.jamoa_contribute') }}" style="display:flex; gap:8px; margin-bottom:14px;">
+      <input type="number" name="amount" min="1" required class="cs-input" style="font-size:12px;" placeholder="Miqdor">
+      <button class="cs-btn cs-btn-primary cs-btn-sm" style="white-space:nowrap;">{{ icon('plus',12) }} Qo'shish</button>
+    </form>
+
+    {% if team.role in ('leader','moderator') %}
+    <div style="border-top:1px solid rgba(255,255,255,.06); padding-top:12px; margin-top:6px;">
+      <div class="muted" style="font-size:11px; margin-bottom:8px;">A'zoga versiya sovg'a qilish:</div>
+      <form method="post" action="{{ url_for('jamoa_bp.jamoa_gift') }}" style="display:flex; flex-direction:column; gap:8px;">
+        <select name="target_user_id" class="cs-input" style="font-size:12px;" required>
+          <option value="">A'zoni tanlang</option>
+          {% for m in members %}
+          <option value="{{ m.user_id }}">{{ m.familiya }} {{ m.ism }} (#{{ m.custom_id }})</option>
+          {% endfor %}
+        </select>
+        <select name="plan_key" class="cs-input" style="font-size:12px;" required>
+          <option value="pro">Pro versiya</option>
+          <option value="cyber_pro">Cyber Pro</option>
+          <option value="vip">SHATS CYBER PRO</option>
+        </select>
+        <button class="cs-btn cs-btn-sm" style="background:linear-gradient(135deg,#ffd700,#b8860b); color:#1a1200; font-weight:700;">
+          {{ icon('gift',12) }} Sovg'a qilish
+        </button>
+      </form>
+    </div>
+    {% endif %}
+  </div>
+</div>
+
+<!-- TARIX -->
+<div class="cs-card" style="margin-top:16px;">
+  <h3 style="font-size:13px; margin-bottom:10px;">{{ icon('clock',14) }} JAMG'ARMA TARIXI</h3>
+  {% for l in treasury_log %}
+  <div style="display:flex; justify-content:space-between; padding:7px 0; border-bottom:1px solid rgba(255,255,255,.05); font-size:12px;">
+    <span>{{ l.ism or 'Tizim' }} {{ l.familiya or '' }} — {{ l.reason }}{% if l.note %} ({{ l.note }}){% endif %}</span>
+    <span style="color:{{ '#e0393d' if l.direction=='in' else '#ff5555' }};">
+      {{ '+' if l.direction=='in' else '-' }}{{ "{:,}".format(l.amount) }} CODE
+    </span>
+  </div>
+  {% else %}
+  <p class="muted" style="text-align:center; padding:20px;">Hali harakatlar yo'q</p>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

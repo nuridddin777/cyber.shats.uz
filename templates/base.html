@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>{% block title %}CYBER SHATS — Barcha IT yo'nalishlari bir joyda{% endblock %}</title>
+<meta name="description" content="{% block meta_description %}CYBER SHATS — Web dasturlash, Python, Cyber Security, Mobil dasturlash va boshqa 12 IT yo'nalishi bo'yicha onlayn ta'lim platformasi.{% endblock %}">
+<meta name="keywords" content="IT ta'lim, dasturlash kurslari, cyber security, python, web dasturlash, o'zbekiston IT, cyber shats">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="https://{{ site_domain }}{{ request.path }}">
+<meta property="og:title" content="{{ self.title() }}">
+<meta property="og:description" content="{{ self.meta_description() }}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CYBER SHATS">
+<meta property="og:url" content="https://{{ site_domain }}{{ request.path }}">
+<meta name="theme-color" content="#000010">
+<meta name="csrf-token" content="{{ csrf_token() }}">
+<!-- PWA — Admin va G'azna panellarini "ilova sifatida o'rnatish" imkoniyati.
+     Faqat shu ikki bo'limda ko'rsatiladi (oddiy foydalanuvchi sahifalarida
+     emas), chunki bular tez-tez, parol so'ralmasdan kirish uchun mo'ljallangan. -->
+{% if request.path.startswith('/admin') %}
+<link rel="manifest" href="{{ url_for('static', filename='manifest-admin.json') }}">
+<meta name="theme-color" content="#00FF6A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CS Admin">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/pwa-icon-192.png') }}">
+{% elif request.path.startswith('/treasury') %}
+<link rel="manifest" href="{{ url_for('static', filename='manifest-treasury.json') }}">
+<meta name="theme-color" content="#B38728">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="CS G'azna">
+<link rel="apple-touch-icon" href="{{ url_for('static', filename='img/pwa-icon-treasury-192.png') }}">
+{% endif %}
+<script>
+if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function() {
+        navigator.serviceWorker.register('/sw.js').catch(function(){});
+    });
+}
+</script>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 24 24%22><rect width=%2224%22 height=%2224%22 fill=%22%23000010%22/><text x=%2212%22 y=%2217%22 font-size=%2214%22 text-anchor=%22middle%22 fill=%22%2300ff41%22>C</text></svg>">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='css/variables.css') }}">
+<!-- ============================================================
+     CSS YUKLASH TARTIBI — QASDDAN SHU KETMA-KETLIKDA (keyingi fayl oldingisini bosib o'tadi):
+     1. variables.css   — YAGONA MANBA HAQIQAT: barcha --cs-* tokenlar shu yerda aniqlanadi
+     2. theme-{X}.css   — Admin tanlagan MAVSUMIY/BAYRAM mavzu (masalan futbol/navrus) — tokenlarni almashtiradi
+     3. base/sidebar/components/pages.css — struktura, tokenlardan foydalanadi, qattiq rang yozmaydi
+     4. cyber-pro/vip-theme/hacker-theme.css — FOYDALANUVCHI TARIFIGA qarab yakuniy aksent qatlami
+     Yangi sahifa yozganda: HECH QACHON shu yerda qattiq rang (#hex) yozmang — faqat var(--cs-*) ishlating.
+     ============================================================ -->
+{% set active_theme = site_settings.get('site_theme', 'none') if site_settings else 'none' %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/theme-' ~ active_theme ~ '.css') }}" id="themeStylesheet">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/base.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/sidebar.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/components.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pages.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/pro-theme.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/cyber-pro.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/vip-theme.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/hacker-theme.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/teacher-theme.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/theme-cars-exclusive.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/theme-wolfpack-exclusive.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/admin-theme.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/bg-themes.css') }}">
+{% block extra_head %}{% endblock %}
+{% if current_user %}
+<style id="userThemeVars">/* Foydalanuvchi shaxsiy temasi yuklanmoqda... */</style>
+<script>
+(function(){
+    fetch('/api/user/theme',{credentials:'same-origin'})
+        .then(function(r){return r.json();})
+        .then(function(d){
+            if(!d.success || !d.data.has_theme) return;
+            var t = d.data.theme;
+            var css = ':root{' +
+                '--cs-text-primary:' + t.primary_color + ';' +
+                '--cs-text-secondary:' + t.secondary_color + ';' +
+                '--cs-text-yellow:' + t.accent_color + ';' +
+                '--cs-bg-primary:' + t.bg_color + ';' +
+                '--cs-bg-card:' + t.card_bg + ';' +
+                '--cs-border:' + t.border_color + ';' +
+            '}';
+            if(t.font_style === 'sans'){
+                css += 'body,p,span,div{font-family:system-ui,sans-serif!important;}';
+            }
+            var glow_map = {low:'2px',medium:'6px',high:'12px',off:'0'};
+            var glow = glow_map[t.glow_intensity] || '6px';
+            css += '.pulse-glow{box-shadow:0 0 ' + glow + ' ' + t.primary_color + '!important;}';
+            document.getElementById('userThemeVars').textContent = css;
+            document.body.style.backgroundColor = t.bg_color;
+        }).catch(function(){});
+})();
+</script>
+{% endif %}
+</head>
+<body class="{% block body_class %}{% endblock %} {{ 'pro-theme' if current_user and current_user.plan == 'pro' }} {{ 'cyber-pro-theme' if current_user and current_user.plan == 'cyber_pro' }} {{ 'vip-theme' if current_user and current_user.plan == 'vip' }} {{ 'hacker-theme' if current_user and current_user.plan == 'hacker' }} {{ 'exclusive-cars' if current_user and current_user.exclusive_theme == 'cars' }} {{ 'exclusive-wolfpack' if current_user and current_user.exclusive_theme == 'wolfpack' }} {{ 'admin-theme' if current_user and current_user.plan == 'admin' }} {{ 'treasury-session' if not current_user and session.get('treasury_account_id') }}">
+
+<script>
+// ============================================================
+// XAVFSIZLIK: CSRF token — barcha POST formalar va fetch() so'rovlariga
+// avtomatik qo'shiladi. Har bir alohida shablonni qo'lda o'zgartirish
+// shart emas: forma yuborilishidan oldin yashirin maydon qo'shiladi,
+// fetch() esa global ravishda o'ralib, X-CSRFToken sarlavhasi bilan
+// jo'natiladi (faqat o'z saytimizga — boshqa domenlarga emas).
+(function(){
+    var meta = document.querySelector('meta[name="csrf-token"]');
+    var token = meta ? meta.getAttribute('content') : '';
+
+    function addTokenToForm(form){
+        if (!token) return;
+        var method = (form.getAttribute('method') || 'GET').toUpperCase();
+        if (method !== 'POST') return;
+        if (form.querySelector('input[name="csrf_token"]')) return;
+        var inp = document.createElement('input');
+        inp.type = 'hidden';
+        inp.name = 'csrf_token';
+        inp.value = token;
+        form.appendChild(inp);
+    }
+
+    // Sahifadagi mavjud formalarga darhol qo'shamiz
+    document.addEventListener('DOMContentLoaded', function(){
+        document.querySelectorAll('form').forEach(addTokenToForm);
+    });
+    // Ba'zi formalar JS orqali keyinroq DOMga qo'shilishi mumkin —
+    // shuning uchun har bir "submit" hodisasida ham tekshiramiz.
+    document.addEventListener('submit', function(e){
+        if (e.target && e.target.tagName === 'FORM') addTokenToForm(e.target);
+    }, true);
+
+    // fetch() so'rovlariga X-CSRFToken sarlavhasini avtomatik qo'shish
+    // (faqat holat o'zgartiruvchi so'rovlar: POST/PUT/PATCH/DELETE,
+    // va faqat o'zimizning saytimizga — tashqi domenlarga token
+    // yubormaslik uchun nisbiy/bir xil-origin URL tekshiriladi).
+    var origFetch = window.fetch;
+    if (typeof origFetch === 'function') {
+        window.fetch = function(input, init){
+            init = init || {};
+            var method = (init.method || 'GET').toUpperCase();
+            var isStateChanging = ['POST','PUT','PATCH','DELETE'].indexOf(method) !== -1;
+            var url = (typeof input === 'string') ? input : (input && input.url) || '';
+            var sameOrigin = true;
+            try {
+                sameOrigin = new URL(url, window.location.href).origin === window.location.origin;
+            } catch(err) { sameOrigin = true; }
+
+            if (isStateChanging && sameOrigin && token) {
+                if (init.headers instanceof Headers) {
+                    init.headers.set('X-CSRFToken', token);
+                } else {
+                    init.headers = Object.assign({}, init.headers, {'X-CSRFToken': token});
+                }
+            }
+            return origFetch.call(this, input, init);
+        };
+    }
+})();
+</script>
+
+{% set is_edgy_dark_theme = current_user and (current_user.plan == 'hacker' or current_user.exclusive_theme in ('cars', 'wolfpack')) %}
+{% if is_edgy_dark_theme %}
+<canvas id="matrix-canvas"></canvas>
+<div class="scanline"></div>
+<div class="crt-overlay"></div>
+{% include 'partials/hud.html' %}
+{% endif %}
+<!-- DIQQAT: yuqoridagi "hacker terminal" fon effektlari (matritsa yomg'iri,
+     skanerlash chizig'i, IP/THREAT/FIREWALL burchak ko'rsatkichlari) endi
+     FAQAT MAXSUS (hacker) tarifi va eksklyuziv qorong'i temalar (Garage,
+     Qashqirlar Makoni) uchun ko'rsatiladi. Yangi toza, Muzli ko'k dizaynga
+     bu "eski" elementlar mos kelmasdi — shuning uchun standart tema uchun
+     butunlay olib tashlandi (rangini o'zgartirish emas, TO'LIQ olib
+     tashlash so'ralgan edi). -->
+{% include 'partials/flash.html' %}
+
+{% block content %}{% endblock %}
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="{{ url_for('static', filename='js/globe-core.js') }}"></script>
+<script src="{{ url_for('static', filename='js/globe-mini.js') }}"></script>
+<script src="{{ url_for('static', filename='js/crypto-cube.js') }}"></script>
+<script src="{{ url_for('static', filename='js/matrix-rain.js') }}"></script>
+<script src="{{ url_for('static', filename='js/hud.js') }}"></script>
+<script src="{{ url_for('static', filename='js/scene-fx.js') }}"></script>
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
+{% if current_user or session.get('treasury_account_id') %}
+<script src="{{ url_for('static', filename='js/push-notifications.js') }}"></script>
+<script src="{{ url_for('static', filename='js/voice-notifications.js') }}"></script>
+<script src="{{ url_for('static', filename='js/auto-refresh.js') }}"></script>
+{% endif %}
+{% block scripts %}{% endblock %}
+</body>
+</html>

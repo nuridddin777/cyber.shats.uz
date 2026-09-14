@@ -1,0 +1,119 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}AI Yordamchi — CYBER SHATS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:14px;">
+    <h1 style="font-size:19px;">{{ icon('bot',18) }} AI Yordamchi</h1>
+    <div style="display:flex; gap:8px; align-items:center;">
+        <a href="{{ url_for('ai_bp.ai_history') }}" class="cs-btn cs-btn-sm cs-btn-secondary">{{ icon('archive',13) }} Suhbatlar arxivi</a>
+        {% if not ai_configured %}
+        <span class="cs-chip" style="border-color: rgba(255,210,63,.4); color: var(--cs-text-yellow);">{{ icon('help-circle',12) }} DEMO REJIM — API kalit o'rnatilmagan</span>
+        {% else %}
+        <span class="cs-chip solid">{{ icon('zap',12) }} LIVE — {{ ai_provider_name }} faol</span>
+        {% endif %}
+    </div>
+</div>
+
+{% if not ai_configured %}
+<div class="cs-card" style="padding:10px 14px; margin-bottom:14px; border-color:rgba(255,210,63,.4); font-size:11.5px; color:var(--cs-text-muted);">
+    {{ icon('info',13) }} AI hozircha demo rejimda. Tekin, haqiqiy javob olish uchun administrator
+    <a href="https://aistudio.google.com/apikey" target="_blank" rel="noopener" style="color:var(--cs-text-primary);">aistudio.google.com/apikey</a>
+    orqali tekin Gemini kaliti olib, uni <code>.env</code> fayliga <code>GEMINI_API_KEY</code> sifatida qo'shishi kerak.
+</div>
+{% endif %}
+
+{% if is_unlimited_ai %}
+<div class="cs-card" style="padding:10px 14px; margin-bottom:14px; border-color:rgba(255,59,59,.3); font-size:11.5px; color:var(--cs-text-muted);">
+    {{ icon('check-circle',13) }} Sizda AI'dan <strong style="color:var(--cs-text-primary);">cheksiz va bepul</strong> foydalanish huquqi bor.
+</div>
+{% else %}
+<div class="cs-card" style="padding:12px 14px; margin-bottom:14px; border-color:rgba(255,178,56,.4); background:rgba(255,178,56,.05); font-size:12px;">
+    {{ icon('zap',13) }} Oddiy savol-javob uchun bugun yana <strong style="color:var(--cs-text-yellow);">{{ remaining_today }} ta bepul</strong> so'rovingiz qoldi (kuniga 3 ta).
+    Kod mashqlarida AI yordami — har bir so'rov <strong>{{ ai_code_help_price }} CODE</strong>.
+    Pro rejada — ikkalasi ham cheksiz bepul.
+    <div style="margin-top:8px; display:flex; gap:8px; flex-wrap:wrap;">
+        <form method="post" action="{{ url_for('ai_bp.ai_buy_boost', multiplier=2) }}"><button type="submit" class="cs-btn cs-btn-sm cs-btn-secondary">{{ icon('zap',11) }} Limitni 2x oshirish — 5 CODE</button></form>
+        <form method="post" action="{{ url_for('ai_bp.ai_buy_boost', multiplier=5) }}"><button type="submit" class="cs-btn cs-btn-sm cs-btn-secondary">{{ icon('zap',11) }} Limitni 5x oshirish — 25 CODE</button></form>
+    </div>
+</div>
+{% endif %}
+
+<div class="chat-shell">
+    <div class="chat-side">
+        {% for t in ai_types %}
+        <a href="{{ url_for('ai_bp.ai_assistant', type=t.id) }}" class="ai-item {{ 'active' if t.id==active_type }}">{{ icon(t.icon,15) }} {{ t.name }}</a>
+        {% endfor %}
+        <div style="margin-top:14px; padding-top:14px; border-top:1px solid var(--cs-border);">
+            <button type="button" id="imgGenToggle" class="ai-item" style="width:100%; text-align:left; background:none; border:1px solid var(--cs-border); cursor:pointer;">{{ icon('image',15) }} Rasm yaratish</button>
+        </div>
+    </div>
+    <div class="chat-main">
+        <div id="imgGenPanel" class="cs-card" style="display:none; margin-bottom:12px; padding:16px;">
+            <h3 style="font-size:12px; margin-bottom:10px;">{{ icon('image',13) }} AI RASM YARATISH</h3>
+            <div style="display:flex; gap:8px; margin-bottom:10px;">
+                <input id="imgPrompt" class="cs-input" placeholder="Masalan: futuristik shahar, kiber-neon uslubda..." style="flex:1;" maxlength="500">
+                <button id="imgGenBtn" class="cs-btn cs-btn-primary">{{ icon('zap',13) }} Yaratish</button>
+            </div>
+            <div id="imgGenResult"></div>
+        </div>
+        <div class="chat-msgs" data-chat-msgs>
+            {% if not history %}
+            <div class="msg bot">Salom! Men {{ ai_types|selectattr('id','equalto',active_type)|map(attribute='name')|first }} man. Sizga qanday yordam bera olaman?</div>
+            {% endif %}
+            {% for m in history %}
+            <div class="msg {{ 'user' if m.role=='user' else 'bot' }}">{{ m.content }}</div>
+            {% endfor %}
+        </div>
+        <div data-chat-image-preview class="chat-image-preview" style="display:none;"></div>
+        <form class="chat-input-row" data-chat-form>
+            <input type="hidden" data-chat-type value="{{ active_type }}">
+            <input type="file" accept="image/png,image/jpeg,image/gif,image/webp" data-chat-image-input style="display:none;">
+            <button type="button" data-chat-image-btn title="Rasm yuklash">{{ icon('image',16) }}</button>
+            <input type="text" data-chat-input placeholder="Savolingizni yozing yoki rasm biriktiring..." autocomplete="off">
+            <button type="submit">{{ icon('send',16) }}</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/ai-chat.js') }}"></script>
+<script>
+(function(){
+    var box = document.querySelector('[data-chat-msgs]');
+    if (box) box.scrollTop = box.scrollHeight;
+})();
+
+document.getElementById('imgGenToggle').addEventListener('click', function() {
+    var panel = document.getElementById('imgGenPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+});
+
+document.getElementById('imgGenBtn').addEventListener('click', async function() {
+    var prompt = document.getElementById('imgPrompt').value.trim();
+    var resultBox = document.getElementById('imgGenResult');
+    if (!prompt) { resultBox.innerHTML = '<p style="color:#ff5555; font-size:12px;">Ta\'rif kiriting.</p>'; return; }
+    var btn = this;
+    btn.disabled = true;
+    btn.textContent = '⏳ Yaratilmoqda...';
+    resultBox.innerHTML = '<p class="muted" style="font-size:12px;">AI rasm yaratmoqda, biroz kuting...</p>';
+    try {
+        var r = await fetch('/api/ai/generate-image', {
+            method: 'POST', headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ prompt: prompt })
+        });
+        var d = await r.json();
+        if (d.success && d.data.image_base64) {
+            var src = 'data:' + d.data.mime_type + ';base64,' + d.data.image_base64;
+            resultBox.innerHTML = '<img src="' + src + '" style="max-width:100%; border-radius:12px; border:1px solid var(--cs-border);">' +
+                '<a href="' + src + '" download="cyber-shats-ai.png" class="cs-btn cs-btn-sm cs-btn-secondary" style="margin-top:8px; display:inline-block;">⬇ Yuklab olish</a>';
+        } else {
+            resultBox.innerHTML = '<p style="color:#ff5555; font-size:12px;">' + (d.error || 'Xatolik yuz berdi') + '</p>';
+        }
+    } catch(e) {
+        resultBox.innerHTML = '<p style="color:#ff5555; font-size:12px;">Ulanish xatoligi.</p>';
+    }
+    btn.disabled = false;
+    btn.innerHTML = '{{ icon("zap",13) }} Yaratish';
+});
+</script>
+{% endblock %}

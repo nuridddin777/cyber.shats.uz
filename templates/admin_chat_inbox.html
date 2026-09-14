@@ -1,0 +1,26 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Admin Chat murojaatlari{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:19px;">{{ icon('message',18) }} MAXSUS FOYDALANUVCHILAR MUROJAATLARI</h1>
+  <a href="{{ url_for('admindash_bp.admin_dashboard') }}" class="cs-btn cs-btn-sm">← Admin Panel</a>
+</div>
+<div class="cs-card">
+  {% for t in threads %}
+  <a href="{{ url_for('adminchat_bp.admin_chat_thread', user_id=t.user_id) }}" style="text-decoration:none;">
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid rgba(255,255,255,.05);">
+      <span style="color:#e8e0f5; font-size:13px;">{{ t.familiya }} {{ t.ism }} <span class="muted">#{{ t.custom_id }}</span></span>
+      <div style="display:flex; align-items:center; gap:10px;">
+        {% if t.unread and t.unread > 0 %}
+        <span class="cs-chip solid" style="background:#ff5555; border-color:#ff5555; color:#fff;">{{ t.unread }}</span>
+        {% endif %}
+        <span class="muted" style="font-size:11px;">{{ t.last_at | tashkent_time }}</span>
+      </div>
+    </div>
+  </a>
+  {% else %}
+  <p class="muted" style="text-align:center; padding:30px;">Hali murojaat yo'q</p>
+  {% endfor %}
+</div>
+{% endblock %}

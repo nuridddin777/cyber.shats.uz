@@ -1,0 +1,30 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Test natijasi — Xavfsizlik Zonasi{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:16px;">
+  <h1 style="font-size:20px;">{{ icon('award',18) }} Test natijasi</h1>
+  <a href="{{ url_for('secz_bp.security_zone_page') }}" class="cs-btn cs-btn-sm">← Xavfsizlik Zonasi</a>
+</div>
+
+<div class="cs-card" style="max-width:700px; text-align:center; padding:32px; margin-bottom:20px;">
+  <div style="font-size:48px; font-weight:900; font-family:var(--cs-font-display); color:var(--cs-text-primary);">
+    {{ result.score }}/{{ result.total }}
+  </div>
+  <div class="hacker-badge" style="margin-top:12px; font-size:13px; padding:6px 18px;">{{ result.level }} ({{ result.pct }}%)</div>
+</div>
+
+<div class="cs-card" style="max-width:700px;">
+  <h3 style="font-size:13px; margin-bottom:14px;">Batafsil natija</h3>
+  {% for d in result.details %}
+  <div style="margin-bottom:14px; padding-bottom:12px; border-bottom:1px solid rgba(255,255,255,.06);">
+    <div style="font-size:13px; font-weight:600; margin-bottom:6px;">
+      {{ '✅' if d.correct else '❌' }} {{ d.question.question }}
+    </div>
+    {% if not d.correct %}
+    <div class="muted" style="font-size:11.5px;">{{ d.question.explanation }}</div>
+    {% endif %}
+  </div>
+  {% endfor %}
+</div>
+{% endblock %}

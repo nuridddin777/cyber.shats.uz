@@ -1,0 +1,44 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Freelance Bozori — MAXSUS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:20px;">{{ icon('briefcase',18) }} Freelance Bozori</h1>
+</div>
+
+<div class="cs-card" style="max-width:520px; margin-bottom:20px;">
+  <h3 style="font-size:13px; margin-bottom:10px;">{{ icon('plus',14) }} E'LON JOYLASH</h3>
+  <form method="post" action="{{ url_for('freelance_bp.freelance_create') }}">
+    <select name="gig_type" class="cs-input" style="margin-bottom:8px;">
+      <option value="offer">Men xizmat taklif qilaman</option>
+      <option value="request">Menga xizmat kerak</option>
+    </select>
+    <input type="text" name="title" required class="cs-input" style="margin-bottom:8px;" placeholder="Sarlavha">
+    <textarea name="description" required class="cs-input" rows="3" style="margin-bottom:8px;" placeholder="Tavsif"></textarea>
+    <input type="number" name="price_code" class="cs-input" style="margin-bottom:10px;" placeholder="Narx (CODE, ixtiyoriy)">
+    <button class="cs-btn cs-btn-primary cs-btn-full">{{ icon('send',13) }} Joylash</button>
+  </form>
+</div>
+
+<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:14px;">
+  {% for g in gigs %}
+  <div class="cs-card">
+    <div class="flex-between">
+      <span class="cs-chip solid" style="background:{{ 'rgba(255,59,59,.15)' if g.gig_type=='offer' else 'rgba(255,193,7,.15)' }}; color:{{ '#e0393d' if g.gig_type=='offer' else '#ffc107' }}; border-color:{{ '#e0393d' if g.gig_type=='offer' else '#ffc107' }};">
+        {{ 'Xizmat taklifi' if g.gig_type=='offer' else 'Xizmat izlash' }}
+      </span>
+      {% if g.price_code %}<span style="font-weight:700; color:var(--cs-text-primary); font-size:12px;">{{ g.price_code }} CODE</span>{% endif %}
+    </div>
+    <h3 style="font-size:14px; margin:8px 0 4px;">{{ g.title }}</h3>
+    <p class="muted" style="font-size:12px; margin-bottom:8px;">{{ g.description }}</p>
+    <div class="muted" style="font-size:11px; margin-bottom:10px;">{{ g.familiya }} {{ g.ism }} #{{ g.custom_id }}</div>
+    <form method="post" action="{{ url_for('freelance_bp.freelance_respond', gig_id=g.id) }}" style="display:flex; gap:6px;">
+      <input type="text" name="message" required class="cs-input" style="font-size:11px;" placeholder="Javob yozing...">
+      <button class="cs-btn cs-btn-sm">{{ icon('send',11) }}</button>
+    </form>
+  </div>
+  {% else %}
+  <p class="muted" style="grid-column:1/-1; text-align:center; padding:30px;">Hali e'lon yo'q</p>
+  {% endfor %}
+</div>
+{% endblock %}

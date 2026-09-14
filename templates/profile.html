@@ -1,0 +1,190 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Profil — CYBER SHATS{% endblock %}
+{% block app_content %}
+<style>
+.profile-grid { display:grid; grid-template-columns: 280px 1fr; gap:20px; align-items:flex-start; }
+@media (max-width: 800px) {
+  .profile-grid { grid-template-columns: 1fr; }
+}
+.profile-code-card {
+  display:flex; align-items:center; justify-content:space-between; width:100%;
+  background: rgba(255,178,56,.08); border:1px solid rgba(255,178,56,.3); border-radius: var(--cs-radius-sm);
+  padding: 12px 16px; margin-top:14px; text-decoration:none;
+}
+.profile-code-card .val { font-family: var(--cs-font-display); font-size:20px; font-weight:800; color: var(--cs-text-yellow); }
+.profile-code-card .lbl { font-size:10px; color: var(--cs-text-muted); text-transform:uppercase; letter-spacing:.5px; }
+
+/* Profil kartochkasi endi "yassi" emas — chegarasi porlaydi, orqa fonda
+   sekin aylanuvchi nurli halqa bor, hikoya bo'lsa ham/bo'lmasa ham
+   avatar atrofida chiroyli effekt beriladi. */
+.profile-hero-card {
+  position: relative; overflow: hidden;
+  border: 1px solid var(--cs-border-active) !important;
+  box-shadow: 0 0 0 1px rgba(255,255,255,.03), var(--cs-glow-strong);
+}
+.profile-hero-card::before {
+  content: ''; position: absolute; inset: -50%;
+  background: conic-gradient(from 0deg, transparent, var(--cs-text-primary), transparent 30%);
+  animation: profile-hero-spin 6s linear infinite;
+  opacity: .12; pointer-events: none;
+}
+@keyframes profile-hero-spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .profile-hero-card::before { animation: none; } }
+.profile-hero-inner { position: relative; z-index: 1; }
+.profile-avatar-ring {
+  position: relative; display: inline-block; margin-bottom: 14px;
+}
+.profile-avatar-ring::after {
+  content: ''; position: absolute; inset: -6px; border-radius: 50%;
+  border: 2px solid var(--cs-text-primary); opacity: .35;
+  animation: profile-ring-pulse 2.2s ease-in-out infinite;
+  pointer-events: none;
+}
+@keyframes profile-ring-pulse {
+  0%, 100% { transform: scale(1); opacity: .35; }
+  50% { transform: scale(1.08); opacity: .1; }
+}
+</style>
+
+<div class="profile-grid">
+  <div class="cs-card flex-center profile-hero-card" style="flex-direction:column; text-align:center;">
+    <div class="profile-hero-inner" style="display:flex; flex-direction:column; align-items:center;">
+    <div class="profile-avatar-ring" style="{{ frame.css_style if frame else '' }} {{ 'border-radius:50%;' if frame }}">
+      {% if my_active_stories %}
+      <a href="{{ url_for('social_bp.stories_view_user', target_user_id=current_user.id) }}" title="Hikoyangizni ko'rish" style="display:block; padding:3px; border-radius:50%; background:conic-gradient(from 0deg, var(--cs-text-primary), var(--cs-text-violet), var(--cs-text-cyan), var(--cs-text-primary));">
+        {% if current_user.avatar_path %}
+        <img src="{{ current_user.avatar_path }}" style="width:78px;height:78px;border-radius:50%;object-fit:cover;border:3px solid var(--cs-bg-card); display:block;">
+        {% else %}
+        <div class="avatar-fallback flex-center" style="width:78px;height:78px;border-radius:50%;background:rgba(255,59,59,.1); color:var(--cs-text-primary); font-family:var(--cs-font-display); font-size:28px; display:flex; border:3px solid var(--cs-bg-card);">{{ current_user.ism[0]|upper }}</div>
+        {% endif %}
+      </a>
+      {% else %}
+      {% if current_user.avatar_path %}
+      <img src="{{ current_user.avatar_path }}" style="width:84px;height:84px;border-radius:50%;object-fit:cover;border:2px solid var(--cs-border-active);">
+      {% else %}
+      <div class="avatar-fallback flex-center" style="width:84px;height:84px;border-radius:50%;background:rgba(255,59,59,.1); color:var(--cs-text-primary); font-family:var(--cs-font-display); font-size:30px; display:flex; border:2px solid var(--cs-border-active);">{{ current_user.ism[0]|upper }}</div>
+      {% endif %}
+      {% endif %}
+      <label for="avatarInput" style="cursor:pointer; position:absolute; bottom:0; right:-2px; background:var(--cs-text-primary); color:#001a0c; border-radius:50%; width:26px; height:26px; display:flex; align-items:center; justify-content:center; border:2px solid var(--cs-bg-card);" title="Rasmni almashtirish">{{ icon('edit',12) }}</label>
+      <form method="post" enctype="multipart/form-data" id="avatarForm" style="display:none;">
+        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+        <input type="file" id="avatarInput" name="avatar" accept="image/png,image/jpeg,image/webp" onchange="document.getElementById('avatarForm').submit();">
+      </form>
+    </div>
+    {% if not current_user.active_frame %}
+    <div style="margin-top:6px;">
+      <a href="{{ url_for('shop.frames_shop_page') }}" class="cs-chip" style="font-size:9.5px; color:var(--cs-text-muted);">🖼️ Ramka tanlash</a>
+    </div>
+    {% endif %}
+    <div style="margin-bottom:10px; margin-top:8px;">
+      <a href="{{ url_for('social_bp.stories_feed') }}" class="cs-chip" style="font-size:10.5px;">{{ icon('image',10) }} + Hikoya qo'shish</a>
+    </div>
+    <h2 style="font-size:16px;">{{ current_user.familiya }} {{ current_user.ism }}</h2>
+    <p class="muted" style="font-size:12px;">{{ current_user.email }}</p>
+    <div class="cs-tag-level cyan" style="margin-top:8px;">{{ current_user.role|upper }} · {{ current_user.plan|upper }}</div>
+
+    <!-- CODE tanga balansi — aniq ko'rinadigan joyda -->
+    <a href="{{ url_for('coins_bp.coins_page') }}" class="profile-code-card">
+      <div style="display:flex; align-items:center; gap:8px;">
+        <span style="font-size:22px;">⚡</span>
+        <div style="text-align:left;">
+          <div class="val">{{ current_user.code_balance|default(0)|int }}</div>
+          <div class="lbl">CODE tanga</div>
+        </div>
+      </div>
+      <span class="muted" style="font-size:11px;">To'ldirish →</span>
+    </a>
+
+    <div class="grid grid-2 gap-8" style="width:100%; margin-top:14px;">
+        <div class="stat-card"><div class="num" style="font-size:18px;">{{ current_user.level }}</div><div class="label">Daraja</div></div>
+        <div class="stat-card"><div class="num" style="font-size:18px;">{{ current_user.xp }}</div><div class="label">XP</div></div>
+    </div>
+    <div class="cs-progress" style="margin-top:14px;"><span style="width:{{ (current_user.xp % 500) / 500 * 100 }}%;"></span></div>
+    <div class="muted" style="font-size:10.5px; margin-top:6px;">{{ current_user.level * 500 - current_user.xp }} XP keyingi darajagacha</div>
+
+    {% if locked_direction %}
+    <div style="width:100%; margin-top:16px; padding-top:16px; border-top:1px solid var(--cs-border); text-align:left;">
+      <div class="muted" style="font-size:10px; text-transform:uppercase; letter-spacing:.5px; margin-bottom:6px;">Yo'nalishingiz</div>
+      <div style="display:flex; align-items:center; gap:8px; font-size:13px; font-weight:700;">{{ icon(locked_direction.icon or 'layers', 15) }} {{ locked_direction.name_uz }}</div>
+      <a href="{{ url_for('choose_direction') }}" style="font-size:10.5px; color:var(--cs-text-muted); text-decoration:underline;">Almashtirish</a>
+    </div>
+    {% else %}
+    <!-- Yo'nalish tanlanmagan — AI yordamchi taklif qiladi -->
+    <div style="width:100%; margin-top:16px; padding-top:16px; border-top:1px solid var(--cs-border); text-align:left;">
+      <div class="muted" style="font-size:10px; text-transform:uppercase; letter-spacing:.5px; margin-bottom:8px;">{{ icon('bot',11) }} Yo'nalish tanlanmagan</div>
+      <a href="{{ url_for('choose_direction') }}" class="cs-btn cs-btn-sm cs-btn-primary" style="width:100%; text-align:center; justify-content:center;">Yo'nalish tanlash</a>
+    </div>
+    {% endif %}
+
+    {% if test_summary and test_summary.taken %}
+    <div style="width:100%; margin-top:14px; padding-top:14px; border-top:1px solid var(--cs-border); text-align:left;">
+      <div class="muted" style="font-size:10px; text-transform:uppercase; letter-spacing:.5px;">Test natijalari</div>
+      <div style="font-size:13px; margin-top:4px;">{{ test_summary.taken }} ta test · o'rtacha <b style="color:var(--cs-text-primary);">{{ test_summary.avg_pct|round|int }}%</b></div>
+    </div>
+    {% endif %}
+
+    <!-- O'QITUVCHI ARIZASI -->
+    <div style="width:100%; margin-top:14px; padding-top:14px; border-top:1px solid var(--cs-border); text-align:left;">
+      {% if current_user.is_teacher %}
+      <a href="{{ url_for('teacher_bp.teacher_dashboard') }}" class="cs-btn cs-btn-sm cs-btn-primary" style="width:100%; text-align:center; justify-content:center;">{{ icon('briefcase',12) }} O'qituvchi panelini ochish</a>
+      {% elif teacher_app and teacher_app.status == 'pending' %}
+      <div class="cs-chip solid" style="width:100%; justify-content:center; padding:8px;">{{ icon('clock',11) }} Ariza ko'rib chiqilmoqda</div>
+      {% elif teacher_app and teacher_app.status == 'rejected' %}
+      <div class="muted" style="font-size:11px; margin-bottom:6px;">Oldingi ariza rad etilgan{{ ': ' + teacher_app.review_note if teacher_app.review_note else '' }}</div>
+      <a href="{{ url_for('teacher_apply') }}" class="cs-btn cs-btn-sm cs-btn-secondary" style="width:100%; text-align:center; justify-content:center;">{{ icon('edit',12) }} Qayta ariza yuborish</a>
+      {% else %}
+      <a href="{{ url_for('teacher_apply') }}" class="cs-btn cs-btn-sm cs-btn-secondary" style="width:100%; text-align:center; justify-content:center;">{{ icon('briefcase',12) }} O'qituvchilikka ariza berish</a>
+      {% endif %}
+    </div>
+    </div>
+  </div>
+
+  <div>
+    <!-- AI YORDAMCHI — yo'nalish/qidiruv bo'yicha yordam -->
+    <div class="cs-card" style="margin-bottom:20px; background:linear-gradient(135deg, rgba(255,59,59,.06), rgba(255,178,56,.03));">
+      <div style="display:flex; align-items:flex-start; gap:12px;">
+        <div class="hex-icon" style="flex-shrink:0;">{{ icon('bot',20) }}</div>
+        <div style="flex:1;">
+          <h3 style="font-size:13px; margin-bottom:6px;">AI YORDAMCHIDAN SO'RANG</h3>
+          <p class="muted" style="font-size:12px; margin-bottom:10px;">Yo'nalish tanlashda qiynalyapsizmi, kerakli bo'limni topa olmayapsizmi yoki savolingiz bormi — AI yordamchi sizga yo'l ko'rsatadi.</p>
+          <a href="{{ url_for('ai_bp.ai_assistant') }}" class="cs-btn cs-btn-sm cs-btn-secondary">{{ icon('message',12) }} AI bilan suhbatlashish</a>
+        </div>
+      </div>
+    </div>
+
+    <div class="cs-card" style="margin-bottom:20px;">
+        <h3 style="font-size:13px; margin-bottom:16px;">{{ icon('edit',14) }} PROFILNI TAHRIRLASH</h3>
+        <form method="post">
+            <div class="grid grid-2 gap-12">
+                <div class="cs-field"><label>Ism</label><input class="cs-input" type="text" name="ism" value="{{ current_user.ism }}"></div>
+                <div class="cs-field"><label>Familiya</label><input class="cs-input" type="text" name="familiya" value="{{ current_user.familiya }}"></div>
+            </div>
+            <div class="cs-field"><label>Bio</label><textarea class="cs-textarea" name="bio" rows="3" placeholder="O'zingiz haqingizda qisqacha...">{{ current_user.bio }}</textarea></div>
+            <button type="submit" class="cs-btn cs-btn-primary">{{ icon('check',14) }} Saqlash</button>
+        </form>
+    </div>
+    <div class="cs-card" style="margin-bottom:20px;">
+        <h3 style="font-size:13px; margin-bottom:14px;">{{ icon('book',14) }} KURSLARIM ({{ enrollments|length }})</h3>
+        {% for e in enrollments %}
+        <a href="{{ url_for('courses_bp.course_detail', slug=e.slug) }}" class="course-row" style="margin-bottom:8px; text-decoration:none;">
+            <div class="meta"><h4>{{ e.title }}</h4><div class="cs-progress"><span style="width:{{ e.progress_percent }}%;"></span></div></div>
+            <div class="muted" style="font-size:11px;">{{ e.progress_percent }}%</div>
+        </a>
+        {% else %}
+        <p class="muted" style="font-size:12px;">Hali birorta kursga yozilmagansiz.</p>
+        {% endfor %}
+    </div>
+    <div class="cs-card">
+        <h3 style="font-size:13px; margin-bottom:14px;">{{ icon('award',14) }} YUTUQLAR</h3>
+        <div class="grid grid-4">
+            {% for b in badges %}
+            <div class="flex-center" style="flex-direction:column;"><div class="badge-icon">{{ icon(b.icon,20) }}</div><div style="font-size:10px; text-align:center;">{{ b.name }}</div></div>
+            {% else %}
+            <p class="muted" style="font-size:12px;">Hali yutuqlar yo'q — kurslarni davom ettiring!</p>
+            {% endfor %}
+        </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

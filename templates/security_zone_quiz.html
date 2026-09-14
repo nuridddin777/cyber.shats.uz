@@ -1,0 +1,24 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Xavfsizlik Testi — MAXSUS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:16px;">
+  <h1 style="font-size:20px;">{{ icon('award',18) }} Xavfsizlik Balingiz Testi</h1>
+  <a href="{{ url_for('secz_bp.security_zone_page') }}" class="cs-btn cs-btn-sm">← Orqaga</a>
+</div>
+
+<form method="post" class="cs-card" style="max-width:700px;">
+  {% for q in questions %}
+  <div style="margin-bottom:22px; padding-bottom:18px; border-bottom:1px solid rgba(255,255,255,.06);">
+    <div style="font-size:14px; font-weight:700; margin-bottom:10px;">{{ loop.index }}. {{ q.question }}</div>
+    {% for opt_key, opt_val in [('a', q.option_a), ('b', q.option_b), ('c', q.option_c), ('d', q.option_d)] %}
+    <label style="display:flex; align-items:center; gap:8px; padding:6px 0; font-size:13px; cursor:pointer;">
+      <input type="radio" name="q_{{ q.id }}" value="{{ opt_key }}" required>
+      {{ opt_val }}
+    </label>
+    {% endfor %}
+  </div>
+  {% endfor %}
+  <button type="submit" class="cs-btn cs-btn-primary cs-btn-full">{{ icon('send',14) }} Testni yakunlash</button>
+</form>
+{% endblock %}

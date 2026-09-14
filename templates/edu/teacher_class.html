@@ -1,0 +1,75 @@
+{% extends "app_base.html" %}
+{% block title %}{{ cls.name }} — O'qituvchi{% endblock %}
+{% block app_content %}
+<a href="{{ url_for('edu.teacher_dashboard') }}" style="color:#5a7a9a;font-size:13px;">← Orqaga</a>
+<h2 style="color:#e8f4ff;font-size:20px;margin:12px 0;">{{ cls.name }}</h2>
+
+<div style="display:flex;gap:8px;margin-bottom:20px;">
+  <button class="cs-btn" onclick="document.getElementById('topicModal').style.display='flex'">+ Mavzu qo'shish</button>
+  <button class="cs-btn cs-btn-outline" onclick="document.getElementById('studentModal').style.display='flex'">+ O'quvchi qo'shish</button>
+</div>
+
+<h3 style="color:#e8f4ff;font-size:15px;margin-bottom:10px;">📋 Mavzular ({{ topics|length }})</h3>
+{% for t in topics %}
+<div style="background:rgba(10,22,45,0.8);border:1px solid rgba(30,144,255,0.1);border-radius:10px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;gap:12px;">
+  <span style="font-size:13px;color:#5a7a9a;width:28px;">{{ loop.index }}.</span>
+  <div style="flex:1;">
+    <div style="color:#e8f4ff;font-weight:600;font-size:14px;">{{ t.title }}</div>
+    <div style="font-size:11px;color:#5a7a9a;">{% if t.is_approved %}✅ Tasdiqlangan{% else %}⏳ Kutilmoqda{% endif %}</div>
+  </div>
+  <button class="cs-btn cs-btn-outline" style="font-size:11px;padding:4px 10px;" onclick="addLab({{ t.id }})">+ Lab</button>
+</div>
+{% endfor %}
+
+<h3 style="color:#e8f4ff;font-size:15px;margin:20px 0 10px;">👤 O'quvchilar ({{ students|length }})</h3>
+{% for s in students %}
+<div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid rgba(30,144,255,0.06);font-size:13px;">
+  <span style="color:#e8f4ff;font-weight:600;">{{ s.ism }} {{ s.familiya }}</span>
+  <span style="color:#5a7a9a;">{{ s.email }}</span>
+  <span style="margin-left:auto;color:#00c853;">{{ s.completed_topics }}/{{ topics|length }} mavzu</span>
+</div>
+{% endfor %}
+
+<!-- Modals -->
+<div id="topicModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#0d1b2e;border:1px solid rgba(30,144,255,0.3);border-radius:16px;padding:28px;width:450px;max-width:95vw;">
+    <h3 style="color:#e8f4ff;margin:0 0 16px;">+ Yangi mavzu</h3>
+    <input type="text" id="topicTitle" placeholder="Mavzu nomi" style="width:100%;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px;font-size:14px;margin-bottom:10px;box-sizing:border-box;">
+    <textarea id="topicContent" placeholder="Mavzu matni (HTML qo'llab quvvatlanadi)" rows="4" style="width:100%;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px;font-size:14px;margin-bottom:14px;box-sizing:border-box;resize:none;"></textarea>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="cs-btn cs-btn-outline" onclick="this.closest('[id]').style.display='none'">Bekor</button>
+      <button class="cs-btn" onclick="saveTopic()">Saqlash</button>
+    </div>
+  </div>
+</div>
+<div id="studentModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#0d1b2e;border:1px solid rgba(30,144,255,0.3);border-radius:16px;padding:28px;width:400px;max-width:95vw;">
+    <h3 style="color:#e8f4ff;margin:0 0 16px;">+ O'quvchi qo'shish</h3>
+    <input type="email" id="studentEmail" placeholder="O'quvchi emaili" style="width:100%;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px;font-size:14px;margin-bottom:14px;box-sizing:border-box;">
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="cs-btn cs-btn-outline" onclick="this.closest('[id]').style.display='none'">Bekor</button>
+      <button class="cs-btn" onclick="addStudent()">Qo'shish</button>
+    </div>
+  </div>
+</div>
+<script>
+function saveTopic(){
+  const t=document.getElementById('topicTitle').value, c=document.getElementById('topicContent').value;
+  if(!t)return alert('Nom kerak!');
+  fetch('/edu/teacher/class/{{ cls.id }}/topic/add',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`title=${encodeURIComponent(t)}&content=${encodeURIComponent(c)}`})
+  .then(r=>r.json()).then(d=>{alert(d.msg);if(d.ok)location.reload();});
+}
+function addStudent(){
+  const e=document.getElementById('studentEmail').value;
+  if(!e)return alert('Email kerak!');
+  fetch('/edu/teacher/class/{{ cls.id }}/student/add',{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`email=${encodeURIComponent(e)}`})
+  .then(r=>r.json()).then(d=>{alert(d.msg);if(d.ok)location.reload();});
+}
+function addLab(tid){
+  const t=prompt('Lab nomi:');if(!t)return;
+  const d=prompt('Tavsif:');
+  fetch(`/edu/teacher/topic/${tid}/lab/add`,{method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body:`title=${encodeURIComponent(t)}&description=${encodeURIComponent(d||'')}`})
+  .then(r=>r.json()).then(d2=>{alert(d2.msg);if(d2.ok)location.reload();});
+}
+</script>
+{% endblock %}

@@ -1,0 +1,173 @@
+{# Scratch uslubidagi blok-dasturlash simulyatori — saytdan chiqmasdan ishlaydi #}
+<div class="card">
+  <h2>🧩 Amaliyot simulyatori — Blok dasturlash</h2>
+  <p style="color:#a1a1c0;font-size:13px;">
+    Quyidagi bloklarni bosib, dastur tuzing (masalan "Yur 10", "Buril 90"ni bir necha marta bosing),
+    so'ng "▶ Ishga tushirish" tugmasini bosing va sprayt (uchburchak) qanday harakatlanishini kuzating.
+  </p>
+
+  <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:14px;">
+    <div style="flex:1; min-width:260px;">
+      <div style="display:flex; gap:8px; flex-wrap:wrap; margin-bottom:10px;">
+        <button type="button" class="btn secondary sim-block-btn" data-block="move10" style="background:#2563eb;color:#fff;">Yur 10</button>
+        <button type="button" class="btn secondary sim-block-btn" data-block="move50" style="background:#2563eb;color:#fff;">Yur 50</button>
+        <button type="button" class="btn secondary sim-block-btn" data-block="turn90" style="background:#7c3aed;color:#fff;">Buril 90°</button>
+        <button type="button" class="btn secondary sim-block-btn" data-block="turn120" style="background:#7c3aed;color:#fff;">Buril 120°</button>
+        <button type="button" class="btn secondary sim-block-btn" data-block="repeat4start" style="background:#d97706;color:#fff;">🔁 Repeat 4 boshlanishi</button>
+        <button type="button" class="btn secondary sim-block-btn" data-block="repeatend" style="background:#d97706;color:#fff;">🔁 Repeat oxiri</button>
+      </div>
+      <div id="sim-program-list" style="background:var(--edu-bg-soft); border:1px solid var(--edu-border); border-radius:10px; padding:12px; min-height:160px; font-family:monospace; font-size:13px;">
+        <span style="color:#8ea2c0;">(Dasturingiz shu yerda ko'rinadi — yuqoridagi bloklarni bosing)</span>
+      </div>
+      <div style="display:flex; gap:8px; margin-top:10px;">
+        <button type="button" class="btn" id="sim-run-btn">▶ Ishga tushirish</button>
+        <button type="button" class="btn secondary" id="sim-reset-btn">↺ Tozalash</button>
+      </div>
+    </div>
+    <div style="flex:0 0 auto;">
+      <canvas id="sim-canvas" width="280" height="280" style="background:#fff; border-radius:10px; border:1px solid var(--edu-border);"></canvas>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var program = [];
+  var listEl = document.getElementById('sim-program-list');
+  var canvas = document.getElementById('sim-canvas');
+  var ctx = canvas.getContext('2d');
+  var runBtn = document.getElementById('sim-run-btn');
+  var resetBtn = document.getElementById('sim-reset-btn');
+
+  var labels = {
+    move10: 'Yur 10 qadam', move50: 'Yur 50 qadam',
+    turn90: 'Buril 90°', turn120: 'Buril 120°',
+    repeat4start: 'Repeat 4 marta {', repeatend: '}'
+  };
+
+  document.querySelectorAll('.sim-block-btn').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      program.push(btn.dataset.block);
+      renderProgram();
+    });
+  });
+
+  function renderProgram(){
+    if (program.length === 0){
+      listEl.innerHTML = '<span style="color:#8ea2c0;">(Dasturingiz shu yerda ko\'rinadi — yuqoridagi bloklarni bosing)</span>';
+      return;
+    }
+    var indent = 0;
+    var lines = program.map(function(b){
+      var line = labels[b];
+      if (b === 'repeatend') indent = Math.max(0, indent - 1);
+      var pad = '&nbsp;'.repeat(indent * 4);
+      if (b === 'repeat4start') indent += 1;
+      return pad + line;
+    });
+    listEl.innerHTML = lines.join('<br>');
+  }
+
+  resetBtn.addEventListener('click', function(){
+    program = [];
+    renderProgram();
+    drawSprite(140, 140, 0);
+  });
+
+  function drawSprite(x, y, angleDeg){
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // panjara chizish (fon)
+    ctx.strokeStyle = '#eee';
+    for (var i = 0; i <= canvas.width; i += 20){
+      ctx.beginPath(); ctx.moveTo(i, 0); ctx.lineTo(i, canvas.height); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, i); ctx.lineTo(canvas.width, i); ctx.stroke();
+    }
+    ctx.save();
+    ctx.translate(x, y);
+    ctx.rotate(angleDeg * Math.PI / 180);
+    ctx.fillStyle = '#2dd4bf';
+    ctx.beginPath();
+    ctx.moveTo(14, 0);
+    ctx.lineTo(-10, -9);
+    ctx.lineTo(-10, 9);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function runProgram(){
+    var x = 140, y = 140, angle = 0;
+    var path = [[x, y]];
+    var i = 0;
+    while (i < program.length){
+      var b = program[i];
+      if (b === 'move10' || b === 'move50'){
+        var dist = b === 'move10' ? 10 : 50;
+        x += dist * Math.cos(angle * Math.PI / 180);
+        y += dist * Math.sin(angle * Math.PI / 180);
+        path.push([x, y]);
+        i++;
+      } else if (b === 'turn90'){
+        angle += 90; i++;
+      } else if (b === 'turn120'){
+        angle += 120; i++;
+      } else if (b === 'repeat4start'){
+        // ichidagi bloklarni topamiz
+        var depth = 1, j = i + 1, inner = [];
+        while (j < program.length && depth > 0){
+          if (program[j] === 'repeat4start') depth++;
+          else if (program[j] === 'repeatend') depth--;
+          if (depth > 0) inner.push(program[j]);
+          j++;
+        }
+        for (var r = 0; r < 4; r++){
+          for (var k = 0; k < inner.length; k++){
+            var ib = inner[k];
+            if (ib === 'move10'){ x += 10*Math.cos(angle*Math.PI/180); y += 10*Math.sin(angle*Math.PI/180); path.push([x,y]); }
+            else if (ib === 'move50'){ x += 50*Math.cos(angle*Math.PI/180); y += 50*Math.sin(angle*Math.PI/180); path.push([x,y]); }
+            else if (ib === 'turn90'){ angle += 90; }
+            else if (ib === 'turn120'){ angle += 120; }
+          }
+        }
+        i = j;
+      } else {
+        i++;
+      }
+    }
+    // animatsiya: chiziqni bosqichma-bosqich chizish
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    drawSprite(140, 140, 0);
+    var step = 0;
+    var timer = setInterval(function(){
+      step++;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.strokeStyle = '#eee';
+      for (var g = 0; g <= canvas.width; g += 20){
+        ctx.beginPath(); ctx.moveTo(g, 0); ctx.lineTo(g, canvas.height); ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(0, g); ctx.lineTo(canvas.width, g); ctx.stroke();
+      }
+      ctx.strokeStyle = '#2dd4bf'; ctx.lineWidth = 2;
+      ctx.beginPath();
+      for (var p = 0; p < Math.min(step, path.length); p++){
+        if (p === 0) ctx.moveTo(path[p][0], path[p][1]);
+        else ctx.lineTo(path[p][0], path[p][1]);
+      }
+      ctx.stroke();
+      var lastIdx = Math.min(step, path.length - 1);
+      var lastAngle = 0;
+      drawDotAt(path[lastIdx][0], path[lastIdx][1]);
+      if (step >= path.length) clearInterval(timer);
+    }, 120);
+  }
+
+  function drawDotAt(x, y){
+    ctx.fillStyle = '#ffb800';
+    ctx.beginPath();
+    ctx.arc(x, y, 5, 0, Math.PI*2);
+    ctx.fill();
+  }
+
+  runBtn.addEventListener('click', runProgram);
+  drawSprite(140, 140, 0);
+})();
+</script>

@@ -1,0 +1,9 @@
+from typing import Protocol
+
+from fastapi_app.domain.teacher.entities import TeacherChannel, TeacherGroup
+
+
+class TeacherRepository(Protocol):
+    def is_teacher(self, user_id: int) -> bool: ...
+    def list_my_groups(self, user_id: int) -> list[TeacherGroup]: ...
+    def list_my_channels(self, user_id: int) -> list[TeacherChannel]: ...

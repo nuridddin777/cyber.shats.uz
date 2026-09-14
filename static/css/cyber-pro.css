@@ -1,0 +1,130 @@
+/* ============================================================
+   CYBER PRO TEMASI — "NEON PULSE"
+   Elektr-qizil + elektr-ko'k, qora fon — kiber-sport/hacker-elite
+   ruhi. Avval bu tema faqat 3-4 ta o'zgaruvchini belgilardi, qolgan
+   hammasi asosiy (endi oq+ko'k) temadan "sizib" chiqib, aralash
+   ko'rinish yaratardi — endi TO'LIQ, mustaqil dizayin tizimi.
+   Faqat plan='cyber_pro' foydalanuvchilarga (body class="cyber-pro-theme").
+   ============================================================ */
+
+body.cyber-pro-theme {
+    --cs-bg-primary: #08080f;
+    --cs-bg-secondary: #0d0d16;
+    --cs-bg-card: #12121d;
+    --cs-bg-glass: rgba(255, 51, 102, 0.05);
+    --cs-bg-sidebar: #0a0a12;
+    --cs-bg-input: #15151f;
+
+    --cs-text-primary: #ff3366;
+    --cs-text-secondary: #4d7fff;
+    --cs-text-muted: #7a7a95;
+    --cs-text-cyan: #4d7fff;
+    --cs-text-white: #eef0fc;
+    --cs-text-dark: #08080f;
+    --cs-text-red: #ff3366;
+    --cs-text-yellow: #ffb238;
+
+    --cs-border: rgba(255, 51, 102, 0.22);
+    --cs-border-active: rgba(255, 51, 102, 0.65);
+    --cs-glow: 0 0 14px rgba(255, 51, 102, 0.32);
+    --cs-glow-strong: 0 0 30px rgba(77, 127, 255, 0.4);
+    --cs-glow-red: 0 0 16px rgba(255, 51, 102, 0.4);
+    --cs-glow-cyan: 0 0 16px rgba(77, 127, 255, 0.35);
+
+    --cs-grad-main: linear-gradient(135deg, #08080f 0%, #0d0d16 50%, #0a0a12 100%);
+    --cs-grad-card: linear-gradient(155deg, rgba(255,51,102,0.05) 0%, #12121d 60%);
+    --cs-grad-btn: linear-gradient(135deg, #ff3366 0%, #c2185b 55%, #4d7fff 100%);
+    --cs-grad-sidebar: linear-gradient(180deg, #0a0a12 0%, #08080f 100%);
+
+    --cyber-pro-gradient: linear-gradient(135deg, #ff3366 0%, #4d7fff 100%);
+}
+
+body.cyber-pro-theme { background: var(--cs-grad-main); }
+body.cyber-pro-theme .app-shell { background: var(--cs-grad-main); }
+
+body.cyber-pro-theme .cs-btn-primary {
+    background: var(--cyber-pro-gradient);
+    background-size: 200% 100%;
+    border-color: transparent;
+    color: #fff;
+    font-weight: 700;
+    box-shadow: var(--cs-glow);
+    animation: cp-pulse 3.5s ease-in-out infinite;
+}
+@keyframes cp-pulse {
+    0%, 100% { box-shadow: 0 0 14px rgba(255, 51, 102, 0.32); }
+    50% { box-shadow: 0 0 26px rgba(77, 127, 255, 0.45); }
+}
+@media (prefers-reduced-motion: reduce) {
+    body.cyber-pro-theme .cs-btn-primary { animation: none; }
+}
+
+body.cyber-pro-theme .cs-btn-primary:hover {
+    filter: brightness(1.15);
+    box-shadow: 0 0 30px rgba(255, 51, 102, 0.5);
+}
+
+body.cyber-pro-theme .cs-nav-item.active {
+    background: linear-gradient(90deg, rgba(255,51,102,.16), transparent);
+    border-left: 3px solid var(--cs-text-primary);
+}
+
+body.cyber-pro-theme .cs-chip.solid {
+    background: var(--cyber-pro-gradient);
+    color: #fff;
+    border-color: transparent;
+    font-weight: 700;
+}
+
+body.cyber-pro-theme .stat-card .num,
+body.cyber-pro-theme .cs-card-title h3 {
+    color: var(--cs-text-primary);
+}
+
+body.cyber-pro-theme a { color: var(--cs-text-secondary); }
+
+body.cyber-pro-theme .cs-card {
+    border-color: var(--cs-border);
+    background: var(--cs-grad-card);
+}
+body.cyber-pro-theme .cs-card:hover {
+    box-shadow: var(--cs-glow);
+    border-color: var(--cs-border-active);
+}
+
+body.cyber-pro-theme .sidebar,
+body.cyber-pro-theme .app-sidebar {
+    border-color: var(--cs-border);
+    background: var(--cs-grad-sidebar);
+}
+
+body.cyber-pro-theme .cs-input {
+    background: var(--cs-bg-input);
+    border-color: var(--cs-border);
+    color: var(--cs-text-white);
+}
+body.cyber-pro-theme .cs-input:focus {
+    border-color: var(--cs-text-primary);
+    box-shadow: 0 0 0 2px rgba(255, 51, 102, 0.2);
+}
+
+body.cyber-pro-theme h1,
+body.cyber-pro-theme h2 {
+    background: var(--cyber-pro-gradient);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* CYBER PRO badge */
+.cyber-pro-badge {
+    background: linear-gradient(135deg, #ff3366 0%, #4d7fff 100%);
+    color: #fff !important;
+    padding: 3px 10px;
+    border-radius: var(--cs-radius-pill);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    display: inline-block;
+    box-shadow: 0 0 14px rgba(255, 51, 102, 0.35);
+}

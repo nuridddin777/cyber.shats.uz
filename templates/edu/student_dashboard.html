@@ -1,0 +1,61 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}EDU — O'quvchi paneli{% endblock %}
+{% block app_content %}
+<style>
+.edu-hero{background:linear-gradient(135deg,rgba(10,22,50,0.9),rgba(5,30,15,0.9));border:1px solid rgba(0,200,83,0.15);border-radius:14px;padding:24px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px}
+.progress-ring{width:80px;height:80px;position:relative}
+.progress-ring svg{transform:rotate(-90deg)}
+.progress-ring .pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:800;color:#00c853}
+.topic-list{display:flex;flex-direction:column;gap:8px}
+.topic-item{display:flex;align-items:center;gap:12px;background:rgba(10,22,45,0.8);border:1px solid rgba(30,144,255,0.1);border-radius:10px;padding:14px 16px;transition:all .15s;text-decoration:none}
+.topic-item:hover{border-color:rgba(30,144,255,0.3);transform:translateX(4px)}
+.topic-item.done{border-color:rgba(0,200,83,0.2);opacity:0.7}
+.topic-num{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0}
+.num-pending{background:rgba(30,144,255,0.1);color:#1e90ff;border:1px solid rgba(30,144,255,0.2)}
+.num-done{background:rgba(0,200,83,0.15);color:#00c853;border:1px solid rgba(0,200,83,0.25)}
+.coin-widget{background:rgba(0,200,83,0.05);border:1px solid rgba(0,200,83,0.2);border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:10px}
+</style>
+
+{% if cls %}
+<div class="edu-hero">
+  <div>
+    <div style="font-size:12px;color:#5a7a9a;letter-spacing:1px;">🎓 EDU PANELI</div>
+    <h2 style="font-size:20px;color:#e8f4ff;margin:4px 0;">{{ cls.name }}</h2>
+    <div style="font-size:13px;color:#7ec8f8;">{{ cls.school_name or '' }} · {{ cls.subject or '' }}</div>
+  </div>
+  <div style="display:flex;gap:16px;align-items:center;">
+    <div class="coin-widget">
+      <span style="font-size:24px;">🪙</span>
+      <div><div style="font-size:18px;font-weight:800;color:#00c853;">{{ coin_balance }}</div><div style="font-size:10px;color:#5a7a9a;">EDU Coin</div></div>
+    </div>
+    <div class="progress-ring">
+      <svg width="80" height="80"><circle cx="40" cy="40" r="34" fill="none" stroke="rgba(30,144,255,0.1)" stroke-width="6"/><circle cx="40" cy="40" r="34" fill="none" stroke="#00c853" stroke-width="6" stroke-linecap="round" stroke-dasharray="{{ (progress_pct * 213.6 / 100)|round }} 213.6"/></svg>
+      <div class="pct">{{ progress_pct }}%</div>
+    </div>
+  </div>
+</div>
+
+<h3 style="font-size:16px;color:#e8f4ff;margin-bottom:12px;">📋 Mavzular ({{ topics|length }})</h3>
+<div class="topic-list">
+  {% for t in topics %}
+  <a href="{{ url_for('edu.student_topic', tid=t.id) }}" class="topic-item {% if t.completed %}done{% endif %}">
+    <div class="topic-num {% if t.completed %}num-done{% else %}num-pending{% endif %}">
+      {% if t.completed %}✓{% else %}{{ loop.index }}{% endif %}
+    </div>
+    <div style="flex:1;">
+      <div style="color:#e8f4ff;font-weight:600;font-size:14px;">{{ t.title }}</div>
+      <div style="font-size:11px;color:#5a7a9a;margin-top:2px;">+{{ t.coin_reward }} 🪙 · +{{ t.xp_reward }} XP</div>
+    </div>
+    {% if t.completed %}<span style="font-size:11px;color:#00c853;">✓ Tugatilgan</span>{% endif %}
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div style="text-align:center;padding:60px 20px;">
+  <div style="font-size:64px;margin-bottom:16px;">🎓</div>
+  <h2 style="color:#e8f4ff;font-size:20px;">Sinfga qo'shilmagan</h2>
+  <p style="color:#5a7a9a;font-size:14px;margin-top:8px;">O'qituvchingizdan sinfga qo'shilishni so'rang yoki ro'yxatdan o'tishda maktab tanlang.</p>
+</div>
+{% endif %}
+{% endblock %}

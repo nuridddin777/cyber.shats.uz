@@ -1,0 +1,286 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Sandiqlar — CYBER SHATS
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    const highlight = params.get('highlight');
+    if (highlight) {
+      const card = document.getElementById('card-' + highlight);
+      if (card) {
+        card.classList.add('highlight-chest');
+        setTimeout(() => {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
+    }
+  });
+</script>
+
+{% endblock %}
+
+<style>
+@keyframes highlightGlow {
+  0% { box-shadow: 0 0 0px 0px rgba(255, 178, 56, 0); border-color: rgba(255,255,255,.05); transform: scale(1); }
+  50% { box-shadow: 0 0 30px 10px rgba(255, 178, 56, 0.4); border-color: rgba(255,178,56,1); transform: scale(1.02); z-index: 10; position: relative; }
+  100% { box-shadow: 0 0 10px 2px rgba(255, 178, 56, 0.2); border-color: rgba(255,178,56,0.5); transform: scale(1); }
+}
+.highlight-chest {
+  animation: highlightGlow 2s ease-out;
+  border-color: rgba(255,178,56,0.5) !important;
+}
+</style>
+{% block app_content %}
+<h1 style="font-size:19px; margin-bottom:8px;">📦 Sandiqlar</h1>
+<p class="muted" style="font-size:12.5px; margin-bottom:20px;">
+    Chiptalar sotib oling, sandiqlarni oching — kalitlar va katta yutuqlar kuting!
+</p>
+
+<div style="display:flex; gap:14px; margin-bottom:24px; flex-wrap:wrap;">
+    <div class="cs-chip solid">⚡ {{ "{:,}".format(balance|int) }} CODE</div>
+    <div class="cs-chip solid" style="color:#d97706;">🔑 {{ state.chest_keys|default(0) }} kalit</div>
+    <div class="cs-chip solid">🎫 Tarif chiptasi: {{ state.chest_tickets_tariff|default(0) }}</div>
+    <div class="cs-chip solid">🎫 ID chiptasi: {{ state.chest_tickets_id|default(0) }}</div>
+</div>
+
+<!-- TARIFLAR SANDIG'I -->
+<div class="cs-card" id="card-tariff" style="padding:24px; margin-bottom:24px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+        <div>
+            <h3 style="font-size:15px; margin-bottom:0;">🏆 Tariflar Sandig'i</h3>
+            <p class="muted" style="font-size:11.5px;">Umumiy ochganingiz: <strong>{{ state.tariff_chest_opens|default(0) }}</strong> marta</p>
+            <div style="margin-top:10px; font-size:11px; color:var(--cs-text-muted);">
+                {% set opens = state.tariff_chest_opens|default(0) %}
+                {% for threshold, kind, val, label in tariff_milestones %}
+                <div style="{{ 'color:var(--cs-text-primary); font-weight:700;' if opens < threshold }}">
+                    {{ '✅' if opens >= threshold else '○' }} {{ threshold }} marta → {{ label }}
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div style="text-align:center;">
+            <div id="tariffChestBox" class="chest-box">📦</div>
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:12px;">
+                <button id="openTariffBtn" class="cs-btn cs-btn-primary" onclick="openChest('tariff', 1)" {{ 'disabled' if state.chest_tickets_tariff|default(0) < 1 }}>
+                    Ochish (1 chipta)
+                </button>
+                <button id="openTariffBtn5" class="cs-btn cs-btn-secondary" onclick="openChest('tariff', 5)" {{ 'disabled' if state.chest_tickets_tariff|default(0) < 5 }}>
+                    5 tadan ochish
+                </button>
+            </div>
+        </div>
+    </div>
+    <div style="border-top:1px solid var(--cs-border); margin-top:16px; padding-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
+        <form method="post" action="{{ url_for('shop.chests_buy_tickets') }}">
+            <input type="hidden" name="chest_type" value="tariff"><input type="hidden" name="qty" value="1">
+            <button type="submit" class="cs-btn cs-btn-sm">1 chipta — {{ ticket_prices.tariff['1'] }} CODE</button>
+        </form>
+        <form method="post" action="{{ url_for('shop.chests_buy_tickets') }}">
+            <input type="hidden" name="chest_type" value="tariff"><input type="hidden" name="qty" value="10">
+            <button type="submit" class="cs-btn cs-btn-sm">10 chipta — {{ ticket_prices.tariff['10'] }} CODE</button>
+        </form>
+    </div>
+</div>
+
+<!-- ID SANDIG'I -->
+<div class="cs-card" id="card-id" style="padding:24px; margin-bottom:24px;">
+    <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:16px;">
+        <div>
+            <h3 style="font-size:15px; margin-bottom:0;">🔢 ID Sandig'i</h3>
+            <p class="muted" style="font-size:11.5px;">Chiroyli ID tushish imkoniyati bor — qanchalik nodir, shunchalik kamdan-kam tushadi.</p>
+        </div>
+        <div style="text-align:center;">
+            <div id="idChestBox" class="chest-box">🎁</div>
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:12px;">
+                <button id="openIdBtn" class="cs-btn cs-btn-primary" onclick="openChest('id', 1)" {{ 'disabled' if state.chest_tickets_id|default(0) < 1 }}>
+                    Ochish (1 chipta)
+                </button>
+                <button id="openIdBtn5" class="cs-btn cs-btn-secondary" onclick="openChest('id', 5)" {{ 'disabled' if state.chest_tickets_id|default(0) < 5 }}>
+                    5 tadan ochish
+                </button>
+            </div>
+        </div>
+    </div>
+    <div style="border-top:1px solid var(--cs-border); margin-top:16px; padding-top:14px; display:flex; gap:8px; flex-wrap:wrap;">
+        <form method="post" action="{{ url_for('shop.chests_buy_tickets') }}">
+            <input type="hidden" name="chest_type" value="id"><input type="hidden" name="qty" value="1">
+            <button type="submit" class="cs-btn cs-btn-sm">1 chipta — {{ ticket_prices.id['1'] }} CODE</button>
+        </form>
+        <form method="post" action="{{ url_for('shop.chests_buy_tickets') }}">
+            <input type="hidden" name="chest_type" value="id"><input type="hidden" name="qty" value="10">
+            <button type="submit" class="cs-btn cs-btn-sm">10 chipta — {{ ticket_prices.id['10'] }} CODE</button>
+        </form>
+    </div>
+</div>
+
+<!-- MAXSUS SANDIQ — TEZ KUNDA -->
+<div class="cs-card" style="padding:24px; margin-bottom:24px; opacity:.6; position:relative; overflow:hidden;">
+    <div style="position:absolute; top:14px; right:14px; background:rgba(217,119,6,.15); color:#d97706; font-size:10px; font-weight:800; padding:4px 12px; border-radius:20px; letter-spacing:1px;">TEZ KUNDA</div>
+    <h3 style="font-size:15px; margin-bottom:0;">✨ Maxsus Sandig'i</h3>
+    <p class="muted" style="font-size:11.5px;">Yaqinda qo'shiladi — kuzatib boring!</p>
+</div>
+
+<!-- DO'STGA CHIPTA SOVG'A QILISH -->
+<div class="cs-card" style="padding:24px; margin-bottom:24px;">
+    <h3 style="font-size:15px; margin-bottom:0;">🎁 Do'stga chipta sovg'a qilish</h3>
+    <p class="muted" style="font-size:11.5px; margin-bottom:14px;">Faqat do'stlaringizga sovg'a qila olasiz.</p>
+    <form method="post" action="{{ url_for('shop.chests_gift_tickets') }}" style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <select name="friend_id" class="cs-input" required style="flex:1; min-width:160px;">
+            <option value="">Do'st tanlang...</option>
+            {% for f in my_friends %}
+            <option value="{{ f.id }}">{{ f.familiya }} {{ f.ism }} (#{{ f.custom_id }})</option>
+            {% endfor %}
+        </select>
+        <select name="chest_type" class="cs-input" required style="width:140px;">
+            <option value="tariff">Tarif chiptasi</option>
+            <option value="id">ID chiptasi</option>
+        </select>
+        <input type="number" name="qty" class="cs-input" placeholder="Soni" min="1" max="50" required style="width:90px;">
+        <button type="submit" class="cs-btn cs-btn-primary">Yuborish</button>
+    </form>
+    {% if not my_friends %}
+    <p class="muted" style="font-size:11px; margin-top:10px;">Hali do'stingiz yo'q — <a href="{{ url_for('friends.friends_page') }}">Do'stlar</a> sahifasidan qo'shing.</p>
+    {% endif %}
+</div>
+
+<!-- NATIJA MODAL -->
+<div id="chestResultOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:9999; align-items:center; justify-content:center;">
+    <div class="cs-card" style="padding:32px; max-width:340px; text-align:center; animation:chestResultPop .4s cubic-bezier(.34,1.56,.64,1);">
+        <div id="chestResultIcon" style="font-size:56px; margin-bottom:12px;">🎉</div>
+        <div id="chestResultTitle" style="font-size:16px; font-weight:800; margin-bottom:8px;"></div>
+        <div id="chestResultBody" style="font-size:13px; color:var(--cs-text-muted); margin-bottom:18px;"></div>
+        <button class="cs-btn cs-btn-primary" onclick="location.reload();">Yopish</button>
+    </div>
+</div>
+
+<style>
+.chest-box {
+    font-size:64px; width:110px; height:110px; display:flex; align-items:center; justify-content:center;
+    filter: drop-shadow(0 6px 16px rgba(0,0,0,.25)); cursor:default; user-select:none;
+}
+.chest-box.shaking { animation: chestShake .12s ease-in-out infinite; }
+.chest-box.opening { animation: chestOpen .5s cubic-bezier(.34,1.56,.64,1) forwards; }
+@keyframes chestShake {
+    0%,100% { transform: rotate(0deg) scale(1); }
+    25% { transform: rotate(-6deg) scale(1.03); }
+    75% { transform: rotate(6deg) scale(1.03); }
+}
+@keyframes chestOpen {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.3) rotate(-4deg); }
+    100% { transform: scale(1); }
+}
+@keyframes chestResultPop {
+    0% { transform: scale(.7); opacity: 0; }
+    100% { transform: scale(1); opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .chest-box.shaking, .chest-box.opening { animation: none; }
+}
+</style>
+
+<script>
+function openChest(type, qty = 1) {
+    var boxId = type === 'tariff' ? 'tariffChestBox' : 'idChestBox';
+    var btnId = type === 'tariff' ? 'openTariffBtn' : 'openIdBtn';
+    var btn5Id = type === 'tariff' ? 'openTariffBtn5' : 'openIdBtn5';
+    var box = document.getElementById(boxId);
+    var btn = document.getElementById(btnId);
+    var btn5 = document.getElementById(btn5Id);
+    if(btn) btn.disabled = true;
+    if(btn5) btn5.disabled = true;
+    box.classList.add('shaking');
+
+    var url = type === 'tariff' ? '{{ url_for("shop.api_chests_open_tariff") }}' : '{{ url_for("shop.api_chests_open_id") }}';
+
+    setTimeout(function() {
+        fetch(url, {
+            method: 'POST', credentials: 'same-origin',
+            headers: {
+                'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({qty: qty})
+        })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+            box.classList.remove('shaking');
+            box.classList.add('opening');
+            setTimeout(function() {
+                box.classList.remove('opening');
+                if(btn) btn.disabled = false;
+                if(btn5) btn5.disabled = false;
+                if (!d.success) { alert(d.error || 'Xatolik yuz berdi.'); return; }
+                showChestResult(type, d.data);
+            }, 500);
+        })
+        .catch(function() {
+            box.classList.remove('shaking');
+            if(btn) btn.disabled = false;
+            if(btn5) btn5.disabled = false;
+        });
+    }, 900);
+}
+
+function showChestResult(type, data) {
+    var icon = document.getElementById('chestResultIcon');
+    var title = document.getElementById('chestResultTitle');
+    var body = document.getElementById('chestResultBody');
+
+    if (data.multiple) {
+        icon.textContent = type === 'tariff' ? '🏆' : '🎁';
+        title.innerHTML = 'JAMI: <span style="color:#ffb238;">' + data.total_keys + '</span> kalit!';
+        
+        let html = '<div style="text-align:left; background:rgba(0,0,0,0.2); padding:12px; border-radius:8px; margin-bottom:14px; display:flex; flex-direction:column; gap:8px;">';
+        data.results.forEach((r, idx) => {
+            if (type === 'tariff') {
+                if (r.milestone_hit) {
+                    html += '<div style="margin-bottom:0; color:#ffb238; font-weight:700;">#' + (idx+1) + ': ' + r.milestone_label + ' + ' + r.keys_won + ' kalit</div>';
+                } else {
+                    html += '<div style="margin-bottom:0; font-size:12px;">#' + (idx+1) + ': +' + r.keys_won + ' kalit (' + (r.next_milestone ? (r.next_milestone - r.total_opens) + ' qoldi' : 'tugadi') + ')</div>';
+                }
+            } else {
+                html += '<div style="margin-bottom:0; font-size:12px;">#' + (idx+1) + ': <b>#' + r.custom_id + '</b> (' + r.id_tier + ') + ' + r.keys_won + ' kalit</div>';
+            }
+        });
+        html += '</div>';
+        body.innerHTML = html;
+    } else {
+        if (type === 'tariff') {
+            if (data.milestone_hit) {
+                icon.textContent = '🏆';
+                title.textContent = 'KATTA YUTUQ!';
+                body.textContent = data.milestone_label + ' + ' + data.keys_won + ' kalit';
+            } else {
+                icon.textContent = '🔑';
+                title.textContent = '+' + data.keys_won + ' kalit';
+                body.textContent = 'Keyingi katta yutuqqa: ' + (data.next_milestone ? (data.next_milestone - data.total_opens) + ' ochish qoldi' : 'hammasi olindi!');
+            }
+        } else {
+            icon.textContent = '🆔';
+            title.textContent = '#' + data.custom_id;
+            body.textContent = data.id_tier + ' ID + ' + data.keys_won + ' kalit tushdi!';
+        }
+    }
+    
+    document.getElementById('chestResultOverlay').style.display = 'flex';
+}
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const params = new URLSearchParams(window.location.search);
+    const highlight = params.get('highlight');
+    if (highlight) {
+      const card = document.getElementById('card-' + highlight);
+      if (card) {
+        card.classList.add('highlight-chest');
+        setTimeout(() => {
+          card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
+      }
+    }
+  });
+</script>
+
+{% endblock %}

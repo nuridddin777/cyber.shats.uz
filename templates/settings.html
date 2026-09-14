@@ -1,0 +1,328 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Sozlamalar — CYBER SHATS{% endblock %}
+{% block app_content %}
+<h1 style="font-size:20px; margin-bottom:16px;">{{ icon('settings',18) }} Sozlamalar</h1>
+
+<!-- TAB TUGMALARI -->
+<div class="settings-tabs" role="tablist">
+    <button class="settings-tab active" data-tab="umumiy" type="button">{{ icon('bell',13) }} Umumiy</button>
+    <button class="settings-tab" data-tab="korinish" type="button">{{ icon('sun',13) }} Ko'rinish</button>
+    <button class="settings-tab" data-tab="xavfsizlik" type="button">{{ icon('lock',13) }} Xavfsizlik</button>
+    {% if current_user.plan == 'hacker' %}
+    <button class="settings-tab" data-tab="maxsus" type="button" style="color:#a855f7;">{{ icon('key',13) }} MAXSUS</button>
+    {% endif %}
+</div>
+
+<!-- ===== TAB: UMUMIY (bildirishnomalar) ===== -->
+<div class="settings-panel" id="tab-umumiy">
+    {% if current_user.role == 'student' %}
+    <div class="cs-card" style="margin-bottom:20px; max-width:560px; display:flex; justify-content:space-between; align-items:center; gap:12px; flex-wrap:wrap;">
+        <div>
+            <h3 style="font-size:13px; margin-bottom:4px;">{{ icon('target',14) }} O'QUV YO'NALISHI</h3>
+            <div class="muted" style="font-size:11.5px;">Joriy yo'nalishingiz: <b style="color:var(--cs-text-primary);">{{ direction_name or 'tanlanmagan' }}</b></div>
+        </div>
+        <a href="{{ url_for('choose_direction') }}" class="cs-btn cs-btn-secondary" style="white-space:nowrap;">Almashtirish</a>
+    </div>
+    {% endif %}
+    <div class="cs-card" style="margin-bottom:20px; max-width:560px;">
+        <h3 style="font-size:13px; margin-bottom:14px;">{{ icon('bell',14) }} BILDIRISHNOMA SOZLAMALARI</h3>
+        <label class="cs-checkbox" style="margin-bottom:10px;"><input type="checkbox" checked> Yangi darslar haqida xabar</label>
+        <label class="cs-checkbox" style="margin-bottom:10px;"><input type="checkbox" checked> Forum javoblari haqida xabar</label>
+        <label class="cs-checkbox"><input type="checkbox"> Email orqali bildirishnomalar</label>
+    </div>
+
+    <div class="cs-card" style="max-width:560px;">
+        <h3 style="font-size:13px; margin-bottom:10px;">{{ icon('wifi',14) }} QURILMA BILDIRISHNOMALARI (PUSH)</h3>
+        <p class="muted" style="font-size:11.5px; margin-bottom:14px;">
+            Yoqsangiz, saytdan chiqib ketgan bo'lsangiz ham (brauzer yopiq bo'lsa ham)
+            qurilmangizga muhim bildirishnomalar keladi — masalan CODE qo'shilganda,
+            sertifikat tasdiqlanganda yoki yangi e'lon bo'lganda.
+        </p>
+        <div id="pushStatus" class="muted" style="font-size:11.5px; margin-bottom:10px;">Holat tekshirilmoqda...</div>
+        <button id="pushEnableBtn" class="cs-btn cs-btn-primary" style="display:none;">
+            {{ icon('bell',14) }} Qurilma bildirishnomalarini yoqish
+        </button>
+        <button id="pushTestBtn" class="cs-btn" style="display:none; margin-left:8px;">
+            {{ icon('send',14) }} Sinov xabar yuborish
+        </button>
+        <button id="pushDisableBtn" class="cs-btn cs-btn-danger" style="display:none;">
+            {{ icon('x',14) }} O'chirish
+        </button>
+    </div>
+</div>
+
+<!-- ===== TAB: KO'RINISH (vizual/tema) ===== -->
+<div class="settings-panel" id="tab-korinish" style="display:none;">
+    {% set is_unlimited_theme = current_user.role in ('admin','mentor','super_admin') or current_user.plan in ('cyber_pro','vip','shats_cyber_pro','shats_pro','pro','hacker') %}
+    {% set next_theme_price = 0 if is_unlimited_theme else (7 if not current_user.personal_theme_changes else 10) %}
+    <div class="cs-card" style="max-width:560px; border-color:rgba(217,119,6,.3);">
+      <h3 style="font-size:13px; margin-bottom:8px;">{{ icon('sun',14) }} SHAXSIY DIZAYN</h3>
+      {% if is_unlimited_theme %}
+      <div class="cs-chip solid" style="margin-bottom:14px; color:var(--cs-text-primary);">{{ icon('check-circle',11) }} Rejangiz bo'yicha — bepul va cheksiz</div>
+      {% else %}
+      <div class="cs-chip solid" style="margin-bottom:14px; color:var(--cs-text-yellow);">
+        ⚡ {{ 'Birinchi marta' if not current_user.personal_theme_changes else 'Keyingi o\'zgartirish' }}: {{ next_theme_price }} CODE
+      </div>
+      <p class="muted" style="font-size:10.5px; margin-bottom:14px;">Ranglarni saqlaganingizda avtomatik CODE yechiladi. Pro+ rejalarda — bepul va cheksiz.</p>
+      {% endif %}
+      <form method="post" id="themeForm">
+        <input type="hidden" name="action" value="save_theme">
+        <div class="grid grid-3" style="gap:10px; margin-bottom:14px;">
+          <div>
+            <label class="muted" style="font-size:10px; display:block; margin-bottom:4px;">Asosiy rang</label>
+            <input type="color" name="primary_color" value="{{ user_theme.primary_color if user_theme else '#ff3b3b' }}" class="color-inp">
+            <div class="muted" style="font-size:9px;">Tugmalar, sarlavhalar</div>
+          </div>
+          <div>
+            <label class="muted" style="font-size:10px; display:block; margin-bottom:4px;">Ikkilamchi rang</label>
+            <input type="color" name="secondary_color" value="{{ user_theme.secondary_color if user_theme else '#00b8d9' }}" class="color-inp">
+            <div class="muted" style="font-size:9px;">Havolalar, dekorativ</div>
+          </div>
+          <div>
+            <label class="muted" style="font-size:10px; display:block; margin-bottom:4px;">Aksent</label>
+            <input type="color" name="accent_color" value="{{ user_theme.accent_color if user_theme else '#ffd23f' }}" class="color-inp">
+            <div class="muted" style="font-size:9px;">Belgilar, CODE</div>
+          </div>
+          <div>
+            <label class="muted" style="font-size:10px; display:block; margin-bottom:4px;">Fon rangi</label>
+            <input type="color" name="bg_color" value="{{ user_theme.bg_color if user_theme else '#0a0a0a' }}" class="color-inp">
+            <div class="muted" style="font-size:9px;">Sahifa foni</div>
+          </div>
+          <div>
+            <label class="muted" style="font-size:10px; display:block; margin-bottom:4px;">Karta foni</label>
+            <input type="color" name="card_bg" value="{{ user_theme.card_bg if user_theme else '#111111' }}" class="color-inp">
+            <div class="muted" style="font-size:9px;">Karta, panel foni</div>
+          </div>
+          <div>
+            <label class="muted" style="font-size:10px; display:block; margin-bottom:4px;">Chegara</label>
+            <input type="color" name="border_color" value="{{ user_theme.border_color if user_theme else '#1a1a1a' }}" class="color-inp">
+            <div class="muted" style="font-size:9px;">Karta chegarasi</div>
+          </div>
+        </div>
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+          <div>
+            <label class="muted" style="font-size:10.5px; display:block; margin-bottom:6px;">Shrift uslubi</label>
+            <select name="font_style" class="cs-input">
+              <option value="mono" {{ 'selected' if not user_theme or user_theme.font_style=='mono' }}>Monospace (standart)</option>
+              <option value="sans" {{ 'selected' if user_theme and user_theme.font_style=='sans' }}>Sans-serif (zamonaviy)</option>
+            </select>
+          </div>
+          <div>
+            <label class="muted" style="font-size:10.5px; display:block; margin-bottom:6px;">Glow intensivligi</label>
+            <select name="glow_intensity" class="cs-input">
+              <option value="off" {{ 'selected' if user_theme and user_theme.glow_intensity=='off' }}>O'chirilgan</option>
+              <option value="low" {{ 'selected' if user_theme and user_theme.glow_intensity=='low' }}>Past</option>
+              <option value="medium" {{ 'selected' if not user_theme or user_theme.glow_intensity=='medium' }}>O'rta</option>
+              <option value="high" {{ 'selected' if user_theme and user_theme.glow_intensity=='high' }}>Yuqori</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="muted" style="font-size:10.5px; margin-bottom:8px;">Tayyor temalar:</div>
+        <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:16px;">
+          <button type="button" class="cs-btn cs-btn-sm" onclick="applyPreset('green')" style="background:rgba(255,59,59,.1); border-color:rgba(255,59,59,.4);">🟢 Standart</button>
+          <button type="button" class="cs-btn cs-btn-sm" onclick="applyPreset('blue')" style="background:rgba(0,150,255,.1); border-color:rgba(0,150,255,.4);">🔵 Ko'k</button>
+          <button type="button" class="cs-btn cs-btn-sm" onclick="applyPreset('red')" style="background:rgba(255,50,50,.1); border-color:rgba(255,50,50,.4);">🔴 Qizil</button>
+          <button type="button" class="cs-btn cs-btn-sm" onclick="applyPreset('purple')" style="background:rgba(150,50,255,.1); border-color:rgba(150,50,255,.4);">🟣 Binafsha</button>
+          <button type="button" class="cs-btn cs-btn-sm" onclick="applyPreset('gold')" style="background:rgba(255,180,0,.1); border-color:rgba(255,180,0,.4);">🟡 Oltin</button>
+          <button type="button" class="cs-btn cs-btn-sm" onclick="applyPreset('white')" style="background:rgba(255,255,255,.1); border-color:rgba(255,255,255,.3);">⚪ Yorug'</button>
+        </div>
+
+        <button type="submit" class="cs-btn cs-btn-primary">{{ icon('save',13) }} Saqlash{{ ' (' ~ next_theme_price ~ ' CODE)' if next_theme_price }}</button>
+        <button type="button" class="cs-btn cs-btn-sm" style="margin-left:8px;" onclick="applyPreset('blue')">{{ icon('refresh-cw',12) }} Asl holat</button>
+      </form>
+    </div>
+</div>
+
+<!-- ===== TAB: XAVFSIZLIK (parol, hisobni o'chirish) ===== -->
+<div class="settings-panel" id="tab-xavfsizlik" style="display:none;">
+    <div class="cs-card" style="margin-bottom:20px; max-width:560px;">
+        <h3 style="font-size:13px; margin-bottom:14px;">{{ icon('lock',14) }} PAROLNI O'ZGARTIRISH</h3>
+        <form method="post">
+            <input type="hidden" name="action" value="change_password">
+            <div class="cs-field"><label>Joriy parol</label><input class="cs-input" type="password" name="old_password" required></div>
+            <div class="cs-field"><label>Yangi parol</label><input class="cs-input" type="password" name="new_password" minlength="6" required></div>
+            <button type="submit" class="cs-btn cs-btn-primary">{{ icon('check',14) }} Yangilash</button>
+        </form>
+    </div>
+
+    <div class="cs-card" style="max-width:560px; border-color: rgba(255,68,68,.3);">
+        <h3 style="font-size:13px; margin-bottom:10px; color: var(--cs-text-red);">{{ icon('x',14) }} XAVFLI HUDUD</h3>
+        <p class="muted" style="font-size:12px; margin-bottom:14px;">Hisobingizni o'chirish qaytarib bo'lmaydigan amal. Barcha progress, sertifikat va ma'lumotlar yo'qoladi.</p>
+        <form method="post" onsubmit="return confirm('Hisobingizni rostdan ham o\'chirmoqchimisiz?');">
+            <input type="hidden" name="action" value="delete_account">
+            <button type="submit" class="cs-btn cs-btn-danger">{{ icon('x',14) }} Hisobni o'chirish</button>
+        </form>
+    </div>
+</div>
+
+<!-- ===== TAB: MAXSUS (faqat hacker) ===== -->
+{% if current_user.plan == 'hacker' %}
+<div class="settings-panel" id="tab-maxsus" style="display:none;">
+    <div class="cs-card" style="max-width:560px; border-color:rgba(168,85,247,.35);">
+      <h3 style="font-size:13px; margin-bottom:12px; color:#a855f7;">{{ icon('key',14) }} MAXSUS SOZLAMALAR</h3>
+      <div style="margin-bottom:16px;">
+        <div class="muted" style="font-size:11px; margin-bottom:6px;">Dasturchilar uchun API kalit</div>
+        {% if api_key %}
+        <input type="text" readonly value="{{ api_key.api_key }}" class="cs-input" style="font-family:monospace; font-size:11px; margin-bottom:6px;">
+        <form method="post" action="{{ url_for('sozlamalar_bp.api_key_revoke') }}">
+          <button class="cs-btn cs-btn-sm cs-btn-danger">{{ icon('x',12) }} Bekor qilish</button>
+        </form>
+        {% else %}
+        <form method="post" action="{{ url_for('sozlamalar_bp.api_key_generate') }}">
+          <button class="cs-btn cs-btn-sm">{{ icon('zap',12) }} API kalit yaratish</button>
+        </form>
+        {% endif %}
+      </div>
+      <div>
+        <div class="muted" style="font-size:11px; margin-bottom:6px;">Shaxsiy ma'lumotlaringizni eksport qilish</div>
+        <a href="{{ url_for('sozlamalar_bp.export_my_data') }}" class="cs-btn cs-btn-sm">{{ icon('download',12) }} JSON yuklab olish</a>
+      </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block scripts %}
+<style>
+.color-inp {
+    width: 100%;
+    height: 40px;
+    border: 1px solid var(--cs-border);
+    border-radius: 6px;
+    padding: 2px;
+    background: var(--cs-bg-input);
+    cursor: pointer;
+    margin-bottom: 4px;
+}
+.settings-tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--cs-border);
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.settings-tab {
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    color: var(--cs-text-muted);
+    font-size: 12.5px;
+    font-weight: 600;
+    padding: 10px 16px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: all .15s;
+}
+.settings-tab:hover { color: var(--cs-text-white); }
+.settings-tab.active { color: var(--cs-text-primary); border-bottom-color: var(--cs-text-primary); }
+</style>
+<script>
+document.querySelectorAll('.settings-tab').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+        document.querySelectorAll('.settings-tab').forEach(b => b.classList.remove('active'));
+        document.querySelectorAll('.settings-panel').forEach(p => p.style.display = 'none');
+        btn.classList.add('active');
+        var panel = document.getElementById('tab-' + btn.dataset.tab);
+        if (panel) panel.style.display = 'block';
+    });
+});
+</script>
+<script>
+var PRESETS = {
+    light:  {primary:'#2563eb',secondary:'#0ea5e9',accent:'#d97706',bg:'#F0F8FF',card:'#ffffff',border:'#e2e8f0'},
+    blue:   {primary:'#0096ff',secondary:'#00d9ff',accent:'#ffd23f',bg:'#050a10',card:'#0a1018',border:'#0f1e2a'},
+    red:    {primary:'#ff3232',secondary:'#ff6060',accent:'#ffd23f',bg:'#0a0505',card:'#140a0a',border:'#2a0f0f'},
+    purple: {primary:'#9632ff',secondary:'#c060ff',accent:'#ff3b3b',bg:'#080510',card:'#100a18',border:'#200a30'},
+    gold:   {primary:'#ffb400',secondary:'#ffd23f',accent:'#ff3b3b',bg:'#0a0800',card:'#141000',border:'#2a2000'},
+    dark:   {primary:'#e0e0e0',secondary:'#b0c8ff',accent:'#ffd23f',bg:'#1a1a1a',card:'#242424',border:'#333333'},
+};
+
+function applyPreset(name) {
+    var p = PRESETS[name];
+    if (!p) return;
+    var form = document.getElementById('themeForm');
+    form.querySelector('[name=primary_color]').value = p.primary;
+    form.querySelector('[name=secondary_color]').value = p.secondary;
+    form.querySelector('[name=accent_color]').value = p.accent;
+    form.querySelector('[name=bg_color]').value = p.bg;
+    form.querySelector('[name=card_bg]').value = p.card;
+    form.querySelector('[name=border_color]').value = p.border;
+    var el = document.getElementById('userThemeVars');
+    if (el) el.textContent =
+        ':root{--cs-text-primary:'+p.primary+';--cs-text-secondary:'+p.secondary+
+        ';--cs-bg-primary:'+p.bg+';--cs-bg-card:'+p.card+';--cs-border:'+p.border+';}';
+}
+
+document.addEventListener('input', function(e) {
+    if (e.target.type !== 'color') return;
+    var form = document.getElementById('themeForm');
+    if (!form) return;
+    var css = ':root{' +
+        '--cs-text-primary:' + form.querySelector('[name=primary_color]').value + ';' +
+        '--cs-text-secondary:' + form.querySelector('[name=secondary_color]').value + ';' +
+        '--cs-bg-primary:' + form.querySelector('[name=bg_color]').value + ';' +
+        '--cs-bg-card:' + form.querySelector('[name=card_bg]').value + ';' +
+        '--cs-border:' + form.querySelector('[name=border_color]').value + ';' +
+    '}';
+    var el = document.getElementById('userThemeVars');
+    if (el) el.textContent = css;
+});
+</script>
+<script>
+(function() {
+    var statusEl = document.getElementById('pushStatus');
+    var enableBtn = document.getElementById('pushEnableBtn');
+    var testBtn = document.getElementById('pushTestBtn');
+    var disableBtn = document.getElementById('pushDisableBtn');
+
+    function refreshStatus() {
+        if (!window.CyberShatsPush || !window.CyberShatsPush.isSupported) {
+            statusEl.textContent = "Bu brauzer qurilma bildirishnomalarini qo'llab-quvvatlamaydi.";
+            return;
+        }
+        if (Notification.permission === 'denied') {
+            statusEl.textContent = "Bildirishnomalar brauzer sozlamalarida bloklangan. Brauzer sozlamalaridan ruxsat bering.";
+            return;
+        }
+        navigator.serviceWorker.ready.then(function(reg) {
+            reg.pushManager.getSubscription().then(function(sub) {
+                if (sub) {
+                    statusEl.innerHTML = '<span style="color:var(--cs-text-primary);">✓ Yoqilgan — saytdan chiqib ketsangiz ham xabar olasiz</span>';
+                    enableBtn.style.display = 'none';
+                    testBtn.style.display = 'inline-block';
+                    disableBtn.style.display = 'inline-block';
+                } else {
+                    statusEl.textContent = "Hozircha o'chirilgan.";
+                    enableBtn.style.display = 'inline-block';
+                    testBtn.style.display = 'none';
+                    disableBtn.style.display = 'none';
+                }
+            });
+        });
+    }
+
+    enableBtn.addEventListener('click', function() {
+        window.CyberShatsPush.subscribe().then(function(ok) {
+            if (ok) refreshStatus();
+            else alert("Yoqib bo'lmadi. Brauzer ruxsatini tekshiring.");
+        });
+    });
+
+    disableBtn.addEventListener('click', function() {
+        window.CyberShatsPush.unsubscribe().then(refreshStatus);
+    });
+
+    testBtn.addEventListener('click', function() {
+        fetch('/api/push/test', { method: 'POST', credentials: 'same-origin' })
+            .then(function() { location.reload(); });
+    });
+
+    setTimeout(refreshStatus, 800);
+})();
+</script>
+{% endblock %}

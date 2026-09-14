@@ -1,0 +1,193 @@
+{% extends "app_base.html" %}
+{% block title %}Bejik va QR — SHATS CYBER{% endblock %}
+{% block app_content %}
+<style>
+.badge-wrap{display:flex;gap:32px;justify-content:center;flex-wrap:wrap;padding:20px 0}
+.badge-card{width:340px;height:500px;border-radius:16px;position:relative;overflow:hidden;box-shadow:0 0 40px rgba(0,100,255,0.15),0 0 80px rgba(0,0,0,0.5)}
+/* Matrix BG */
+.badge-card::before{content:'';position:absolute;inset:0;background:
+  repeating-linear-gradient(0deg,transparent,transparent 18px,rgba(0,150,255,0.03) 18px,rgba(0,150,255,0.03) 19px),
+  repeating-linear-gradient(90deg,transparent,transparent 18px,rgba(0,150,255,0.03) 18px,rgba(0,150,255,0.03) 19px);
+  z-index:0;pointer-events:none}
+.badge-front{background:linear-gradient(160deg,#080c18 0%,#0a1020 40%,#100820 100%);border:1.5px solid;border-image:linear-gradient(135deg,rgba(0,150,255,0.6),rgba(255,50,100,0.4)) 1}
+.badge-back{background:linear-gradient(160deg,#080c18 0%,#0a1020 40%,#100820 100%);border:1.5px solid;border-image:linear-gradient(135deg,rgba(255,50,100,0.4),rgba(0,150,255,0.6)) 1}
+
+/* Matrix rain overlay */
+.matrix-rain{position:absolute;inset:0;overflow:hidden;opacity:0.08;z-index:0;pointer-events:none;font-family:'Courier New';font-size:10px;color:var(--cs-text-primary);line-height:1.2}
+
+/* Circuit pattern */
+.circuit{position:absolute;bottom:0;right:0;width:140px;height:140px;opacity:0.1;z-index:0}
+.circuit path{stroke:#0af;fill:none;stroke-width:1.5}
+
+/* Front side */
+.bf-header{position:relative;z-index:1;padding:18px 20px 0;display:flex;justify-content:space-between;align-items:flex-start}
+.bf-logo{font-size:28px;font-weight:900;letter-spacing:2px}
+.bf-logo .s1{color:#fff}
+.bf-logo .s2{background:linear-gradient(135deg,#00c8ff,#00ff88);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.bf-code{font-size:24px;color:#00ff88;opacity:0.8}
+.bf-slogan{position:relative;z-index:1;text-align:center;font-size:11px;letter-spacing:3px;margin-top:2px;padding:0 20px}
+.bf-slogan span{background:linear-gradient(90deg,#00c8ff,#fff,#ff3366);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+.bf-fields{position:relative;z-index:1;padding:16px 20px 0;display:flex;gap:10px}
+.bf-icons{display:flex;flex-direction:column;gap:10px;padding-top:4px}
+.bf-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;border:1px solid rgba(150,50,255,0.3);background:rgba(150,50,255,0.08)}
+.bf-icon:nth-child(2){border-color:rgba(0,200,255,0.3);background:rgba(0,200,255,0.08)}
+.bf-icon:nth-child(3){border-color:rgba(255,50,150,0.3);background:rgba(255,50,150,0.08)}
+.bf-icon:nth-child(4){border-color:rgba(0,200,200,0.3);background:rgba(0,200,200,0.08)}
+.bf-icon:nth-child(5){border-color:rgba(255,80,80,0.3);background:rgba(255,80,80,0.08)}
+
+.bf-data{flex:1;display:flex;flex-direction:column;gap:8px}
+.bf-field{border-bottom:1.5px solid rgba(100,100,255,0.2);padding:4px 0 6px}
+.bf-field:nth-child(2) {border-color:rgba(0,200,255,0.25)}
+.bf-field:nth-child(3) {border-color:rgba(200,50,255,0.25)}
+.bf-field:nth-child(4) {border-color:rgba(0,180,200,0.25)}
+.bf-field:nth-child(5) {border-color:rgba(255,80,80,0.25)}
+.bf-label{font-size:10px;color:#6a7a9a;letter-spacing:1.5px;font-weight:700;margin-bottom:3px}
+.bf-value{font-size:14px;color:#e8f4ff;font-weight:600}
+
+.bf-footer{position:absolute;bottom:12px;right:16px;z-index:1;font-size:11px;color:#4a6a8a;letter-spacing:2px;border:1px solid rgba(100,150,200,0.2);border-radius:4px;padding:2px 10px;background:rgba(0,20,40,0.5)}
+
+/* Back side */
+.bb-content{position:relative;z-index:1;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px}
+.bb-shield{width:160px;height:160px;margin-bottom:16px;position:relative;display:flex;align-items:center;justify-content:center}
+.bb-shield-bg{position:absolute;inset:0;background:radial-gradient(circle,rgba(0,100,255,0.15),transparent 70%);filter:blur(20px)}
+.bb-shield svg{position:relative;z-index:1}
+.bb-slogan{font-size:12px;letter-spacing:4px;margin:12px 0 20px}
+.bb-slogan .c{color:#00ff88}.bb-slogan .s{color:#fff}.bb-slogan .d{color:#ff3366}
+.bb-qr{width:140px;height:140px;border:2px dashed rgba(100,150,200,0.3);border-radius:12px;display:flex;align-items:center;justify-content:center;background:rgba(0,10,20,0.6)}
+
+/* Actions */
+.badge-actions{display:flex;gap:12px;justify-content:center;margin-top:24px;flex-wrap:wrap}
+.ba-btn{background:rgba(10,20,40,0.8);border:1px solid rgba(0,150,255,0.2);border-radius:10px;padding:10px 20px;color:#c9c9d1;font-size:13px;cursor:pointer;transition:all .2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.ba-btn:hover{background:rgba(0,150,255,0.1);border-color:rgba(0,150,255,0.4)}
+</style>
+
+<h2 style="text-align:center;color:#fff;font-size:20px;margin-bottom:4px;">📛 Bejik va QR Kod</h2>
+<p style="text-align:center;color:#5a7a9a;font-size:13px;margin-bottom:24px;">Kartani chop etish yoki QR kodni yuklash mumkin</p>
+
+<div class="badge-wrap">
+  <!-- OLD TOMON -->
+  <div class="badge-card badge-front" id="cardFront">
+    <div class="matrix-rain" id="matrixFront"></div>
+    <div class="bf-header">
+      <div>
+        <div class="bf-logo"><span class="s1">SHATS</span><br><span class="s2">CYBER</span></div>
+        <div class="bf-slogan"><span>— CODE · SECURE · DEFEND —</span></div>
+      </div>
+      <div class="bf-code">{/}</div>
+    </div>
+
+    <div class="bf-fields">
+      <div class="bf-icons">
+        <div class="bf-icon">🛡️</div>
+        <div class="bf-icon">🎯</div>
+        <div class="bf-icon">👥</div>
+        <div class="bf-icon">👤</div>
+        <div class="bf-icon">🔐</div>
+      </div>
+      <div class="bf-data">
+        <div class="bf-field"><div class="bf-label">1. SHATS CYBER</div><div class="bf-value">{{ current_user.role|upper }}</div></div>
+        <div class="bf-field"><div class="bf-label">2. YO'NALISH</div><div class="bf-value">IT & Cyber Security</div></div>
+        <div class="bf-field"><div class="bf-label">3. FAMILIYA</div><div class="bf-value">{{ current_user.familiya }}</div></div>
+        <div class="bf-field"><div class="bf-label">4. ISM</div><div class="bf-value">{{ current_user.ism }}</div></div>
+        <div class="bf-field"><div class="bf-label">5. ID RAQAM</div><div class="bf-value">#{{ current_user.custom_id or current_user.id }}</div></div>
+      </div>
+    </div>
+    <div class="bf-footer">SC-2026</div>
+    <svg class="circuit" viewBox="0 0 140 140"><path d="M10,130 L10,100 L40,100 L40,80 L70,80 L70,60 L100,60 L100,40 L130,40"/><path d="M30,130 L30,110 L60,110 L60,90 L90,90 L90,70 L120,70"/><circle cx="40" cy="80" r="3" fill="rgba(0,170,255,0.3)"/><circle cx="100" cy="40" r="3" fill="rgba(0,170,255,0.3)"/><circle cx="90" cy="90" r="2" fill="rgba(0,170,255,0.2)"/></svg>
+  </div>
+
+  <!-- ORQA TOMON -->
+  <div class="badge-card badge-back">
+    <div class="matrix-rain" id="matrixBack"></div>
+    <div class="bb-content">
+      <div class="bb-shield">
+        <div class="bb-shield-bg"></div>
+        <svg width="120" height="140" viewBox="0 0 120 140" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <linearGradient id="shieldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" style="stop-color:rgba(0,150,255,0.8)"/>
+              <stop offset="100%" style="stop-color:rgba(255,50,100,0.6)"/>
+            </linearGradient>
+          </defs>
+          <path d="M60,5 L110,25 L110,75 Q110,120 60,135 Q10,120 10,75 L10,25 Z" fill="none" stroke="url(#shieldGrad)" stroke-width="2"/>
+          <text x="60" y="75" text-anchor="middle" fill="#00ff88" font-size="28" font-family="monospace" font-weight="bold">{/}</text>
+          <text x="60" y="100" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="8" letter-spacing="1">🔒</text>
+        </svg>
+      </div>
+      <div style="font-size:24px;font-weight:900;letter-spacing:2px;">
+        <span style="color:#fff;">SHATS</span><br>
+        <span style="background:linear-gradient(135deg,#00c8ff,#00ff88);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">CYBER</span>
+      </div>
+      <div class="bb-slogan"><span class="c">CODE</span> · <span class="s">SECURE</span> · <span class="d">DEFEND</span></div>
+      <div class="bb-qr" id="qrContainer"></div>
+    </div>
+    <svg class="circuit" viewBox="0 0 140 140"><path d="M10,130 L10,100 L40,100 L40,80 L70,80 L70,60 L100,60 L100,40 L130,40"/><path d="M50,130 L50,120 L80,120 L80,100 L110,100"/><circle cx="70" cy="80" r="3" fill="rgba(255,50,100,0.3)"/><circle cx="110" cy="100" r="2" fill="rgba(255,50,100,0.2)"/></svg>
+  </div>
+</div>
+
+<div class="badge-actions">
+  <a class="ba-btn" onclick="window.print()">🖨️ Chop etish</a>
+  <a class="ba-btn" id="downloadQR">⬇️ QR yuklash</a>
+  <a class="ba-btn" onclick="shareBadge()">📤 Ulashish</a>
+</div>
+
+<!-- QR Generator (no pip needed) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script>
+// Generate QR
+const qrData = "{{ qr_data }}";
+if (typeof QRCode !== 'undefined') {
+  new QRCode(document.getElementById("qrContainer"), {
+    text: qrData,
+    width: 120, height: 120,
+    colorDark: "#00c8ff",
+    colorLight: "#050a18",
+    correctLevel: QRCode.CorrectLevel.H
+  });
+}
+
+// Matrix rain effect
+function fillMatrix(elId) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  let html = '';
+  const chars = '01アイウエオカキクケコサシスセソ{/}';
+  for (let i = 0; i < 800; i++) {
+    html += chars[Math.floor(Math.random() * chars.length)];
+    if (Math.random() > 0.85) html += '<br>';
+  }
+  el.innerHTML = html;
+}
+fillMatrix('matrixFront');
+fillMatrix('matrixBack');
+
+// Download QR
+document.getElementById('downloadQR').addEventListener('click', () => {
+  const canvas = document.querySelector('#qrContainer canvas');
+  if (canvas) {
+    const a = document.createElement('a');
+    a.download = 'shats_cyber_qr.png';
+    a.href = canvas.toDataURL();
+    a.click();
+  }
+});
+
+function shareBadge() {
+  if (navigator.share) {
+    navigator.share({title:'SHATS CYBER Bejik', text:'ID: #{{ current_user.custom_id or current_user.id }}', url:location.href});
+  } else {
+    navigator.clipboard.writeText(location.href).then(() => alert('Havola nusxa olindi!'));
+  }
+}
+</script>
+
+<style>
+@media print {
+  .app-sidebar, .app-topbar, .badge-actions, nav { display:none !important; }
+  .app-main { margin-left:0 !important; }
+  .badge-wrap { gap:20px; }
+  .badge-card { box-shadow:none; print-color-adjust:exact; -webkit-print-color-adjust:exact; }
+}
+</style>
+{% endblock %}

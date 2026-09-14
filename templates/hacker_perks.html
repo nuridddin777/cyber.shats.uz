@@ -1,0 +1,20 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Maxsus Imtiyozlar — MAXSUS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:20px;">{{ icon('gift',18) }} Maxsus Imtiyozlar</h1>
+  <span class="hacker-badge">MAXSUS</span>
+</div>
+<div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px;">
+  {% for p in perks %}
+  <div class="cs-card">
+    <h3 style="font-size:14px; margin-bottom:6px;">{{ icon(p.icon, 14) }} {{ p.title }}</h3>
+    <p class="muted" style="font-size:12px;">{{ p.description }}</p>
+    {% if p.link %}<a href="{{ p.link }}" class="cs-btn cs-btn-sm" style="margin-top:10px; display:inline-flex;" target="_blank">Ko'rish</a>{% endif %}
+  </div>
+  {% else %}
+  <p class="muted" style="grid-column:1/-1; text-align:center; padding:30px;">Hali imtiyoz yo'q</p>
+  {% endfor %}
+</div>
+{% endblock %}

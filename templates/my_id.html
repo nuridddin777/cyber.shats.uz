@@ -1,0 +1,150 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Mening ID — CYBER SHATS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:18px;">
+    <h1 style="font-size:19px;">{{ icon('hash',18) }} Mening ID</h1>
+    <div class="cs-chip">Balans: <b>{{ balance | int | format_number }}</b> code</div>
+</div>
+
+<!-- Joriy ID -->
+<div class="cs-card" style="padding:20px;margin-bottom:18px;border-color:rgba(255,59,59,.3);">
+    <div style="font-size:13px;color:var(--cs-text-muted);margin-bottom:6px;">Sizning joriy ID:</div>
+    <div style="font-size:36px;font-weight:700;letter-spacing:6px;color:var(--cs-text-primary);font-family:monospace;">
+        #{{ current_user.custom_id or '-------' }}
+    </div>
+    <div style="font-size:12px;color:var(--cs-text-muted);margin-top:6px;">ID ni o'zgartirish CODE evaziga amalga oshiriladi — pastda narxlar ko'rsatilgan.</div>
+</div>
+
+<!-- ID sotish -->
+<div class="cs-card" style="padding:20px;margin-bottom:18px;">
+    <h3 style="font-size:14px;margin-bottom:12px;">💬 O'z ID mni sotish</h3>
+    {% if my_sell_offer and my_sell_offer.status in ('pending', 'countered') %}
+    <div style="border:1px solid var(--cs-border-active); border-radius:10px; padding:16px;">
+        <div style="font-family:monospace; font-size:22px; letter-spacing:4px; color:var(--cs-text-primary); margin-bottom:8px;">#{{ my_sell_offer.custom_id }}</div>
+        <div style="font-size:12.5px; margin-bottom:10px;">
+            So'ragan narxingiz: <strong style="color:var(--cs-text-yellow);">⚡ {{ "{:,}".format(my_sell_offer.asking_price|int) }} CODE</strong>
+        </div>
+        {% if my_sell_offer.status == 'countered' %}
+        <div class="cs-chip solid" style="margin-bottom:12px; color:var(--cs-text-yellow);">
+            Admin taklifi: ⚡ {{ "{:,}".format(my_sell_offer.counter_price|int) }} CODE
+        </div>
+        <div style="display:flex; gap:8px;">
+            <form method="post" action="{{ url_for('ids_bp.my_id_sell_respond', offer_id=my_sell_offer.id) }}">
+                <input type="hidden" name="decision" value="accept">
+                <button type="submit" class="cs-btn cs-btn-primary">Qabul qilish</button>
+            </form>
+            <form method="post" action="{{ url_for('ids_bp.my_id_sell_respond', offer_id=my_sell_offer.id) }}">
+                <input type="hidden" name="decision" value="reject">
+                <button type="submit" class="cs-btn cs-btn-danger">Rad etish</button>
+            </form>
+        </div>
+        {% else %}
+        <div class="muted" style="font-size:11.5px; margin-bottom:10px;">Admin ko'rib chiqishini kutmoqda...</div>
+        <form method="post" action="{{ url_for('ids_bp.my_id_sell_cancel', offer_id=my_sell_offer.id) }}">
+            <button type="submit" class="cs-btn cs-btn-sm">Bekor qilish</button>
+        </form>
+        {% endif %}
+    </div>
+    {% else %}
+    <p class="muted" style="font-size:11.5px; margin-bottom:12px;">
+        Joriy ID'ingizni ({{ current_user.custom_id }}) narx qo'yib sotuvga chiqaring. Faqat Super Admin/G'azna ko'radi va sotib olishi mumkin — kerak bo'lsa arzonroq narx taklif qilishlari (savdolashish) mumkin.
+    </p>
+    <form method="post" action="{{ url_for('ids_bp.my_id_sell') }}" style="display:flex; gap:8px;">
+        <input type="number" name="asking_price" class="cs-input" placeholder="So'ralgan narx (CODE)" min="1" required style="flex:1;">
+        <button type="submit" class="cs-btn cs-btn-primary">Sotuvga qo'yish</button>
+    </form>
+    {% endif %}
+</div>
+
+<!-- ID Tarixi (Koleksiya) -->
+<div class="cs-card" style="padding:20px;">
+    <h3 style="font-size:14px;margin-bottom:12px;">🗂️ ID Tarixi (Koleksiya)</h3>
+    <p class="muted" style="font-size:11px; margin-bottom:14px;">Sizga tegishli bo'lgan barcha ID'lar (hozirgi va avvalgi).</p>
+    {% for h in id_history %}
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-top:1px solid var(--cs-border);">
+        <div style="font-family:monospace; font-size:14px; letter-spacing:2px; {{ 'color:var(--cs-text-primary); font-weight:700;' if h.status=='current' }}">
+            #{{ h.custom_id }}
+        </div>
+        <div style="display:flex; align-items:center; gap:8px;">
+            {% if h.status == 'current' %}
+            <span class="cs-chip solid" style="font-size:9px;">Joriy</span>
+            {% else %}
+            <span class="cs-chip" style="font-size:9px;">Avvalgi</span>
+            {% endif %}
+            <span class="muted" style="font-size:10px;">{{ h.obtained_at | tashkent_time('%d.%m.%Y') }}</span>
+        </div>
+    </div>
+    {% else %}
+    <p class="muted" style="text-align:center; padding:20px;">Hali tarix yo'q.</p>
+    {% endfor %}
+</div>
+
+<!-- ID o'zgartirish -->
+<div class="cs-card" style="padding:20px;margin-bottom:18px;">
+    <h3 style="font-size:14px;margin-bottom:12px;">{{ icon('edit-2',14) }} IDni o'zgartirish</h3>
+    <div class="cs-chip solid" style="margin-bottom:12px; color:var(--cs-text-yellow);">
+        ⚡ Keyingi o'zgartirish narxi: {{ next_id_change_cost }} CODE
+    </div>
+    <form method="POST" action="{{ url_for('ids_bp.change_my_id') }}" style="display:flex;gap:10px;">
+        <input type="text" name="new_id" maxlength="7" pattern="\d{7}" placeholder="1234xxx" 
+               class="cs-input" style="width:140px;letter-spacing:4px;font-family:monospace;">
+        <button type="submit" class="cs-btn">O'zgartirish ({{ next_id_change_cost }} CODE)</button>
+    </form>
+    <div style="font-size:11px;color:var(--cs-text-muted);margin-top:6px;">
+        Aynan 7 ta raqam, o'zingiz tanlaysiz — qat'iy narx: {{ next_id_change_cost }} CODE.
+        Arzonroq variant istasangiz — <a href="{{ url_for('ids_bp.random_id_page') }}" style="color:var(--cs-text-primary);">Random ID</a> orqali tasodifiy ID aylantiring (1–1000 CODE, chiroyliligiga qarab).
+        Pastdagi 20 ta "chiroyli" ID bundan mustasno — ular alohida narxda sotiladi.
+    </div>
+</div>
+
+<div class="cs-card" style="padding:16px 20px;margin-bottom:18px;background:rgba(37,99,235,.05);border-color:rgba(37,99,235,.25);">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:12px; flex-wrap:wrap;">
+        <div>
+            <div style="font-weight:700; font-size:13px;">🎲 Random ID — arzonroq variant</div>
+            <div class="muted" style="font-size:11px; margin-top:2px;">Tasodifiy ID aylantiring, 1–1000 CODE (chiroyliligiga qarab)</div>
+        </div>
+        <a href="{{ url_for('ids_bp.random_id_page') }}" class="cs-btn cs-btn-sm">Aylantirish →</a>
+    </div>
+</div>
+
+<!-- Premium IDlar -->
+<div class="cs-card" style="padding:20px;margin-bottom:18px;">
+    <h3 style="font-size:15px;margin-bottom:14px;">{{ icon('star',15) }} Chiroyli IDlar (120–777 CODE)</h3>
+    <div style="overflow-x:auto;">
+        <table class="cs-table">
+            <thead><tr><th>ID</th><th>Tur</th><th>Narx</th><th>Holat</th><th>Amal</th></tr></thead>
+            <tbody>
+            {% for pid in premium_ids %}
+            <tr>
+                <td style="font-family:monospace;font-size:18px;letter-spacing:4px;color:var(--cs-text-primary);">#{{ pid.custom_id }}</td>
+                <td>
+                    {% if pid.id_type == 'sequential' %}
+                    <span class="cs-chip" style="color:var(--cs-text-yellow); border-color:rgba(255,178,56,.4);">Ketma-ket</span>
+                    {% else %}
+                    <span class="cs-chip">{{ pid.id_type|upper }}</span>
+                    {% endif %}
+                </td>
+                <td style="color:var(--cs-text-primary);">⚡ {{ pid.base_price | int | format_number }} CODE</td>
+                <td>
+                    {% if pid.status == 'available' %}
+                    <span class="cs-chip" style="color:var(--cs-text-primary); border-color:rgba(0,255,106,.4);">Bo'sh</span>
+                    {% elif pid.status == 'sold' %}
+                    <span class="cs-chip" style="color:var(--cs-text-muted);">Sotilgan</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if pid.status == 'available' %}
+                    <form method="POST" action="{{ url_for('ids_bp.buy_premium_id_route', custom_id=pid.custom_id) }}" style="display:inline;">
+                        <button type="submit" class="cs-btn" style="font-size:12px;padding:4px 10px;">Sotib olish</button>
+                    </form>
+                    {% else %}—{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

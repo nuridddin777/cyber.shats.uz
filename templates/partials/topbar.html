@@ -1,0 +1,57 @@
+{% from 'partials/icons.html' import icon %}
+<div class="mobile-topbar">
+    <button class="mobile-toggle" data-toggle="sidebar">{{ icon('menu', 16) }}</button>
+    <div class="logo">CYBER SHATS</div>
+    <div style="display:flex; align-items:center; gap:8px;">
+        <a href="{{ url_for('coins_bp.coins_page') }}" class="code-balance-chip" title="CODE tangalar">
+            <span class="code-coin-icon">⚡</span>{{ current_user.code_balance|default(0)|int if current_user else 0 }}
+        </a>
+        <a href="{{ url_for('notifications') }}" class="icon-btn" style="position:relative;">{{ icon('bell', 16) }}</a>
+    </div>
+</div>
+<div class="app-topbar">
+    <form class="search-box" action="{{ url_for('courses_bp.courses') }}" method="get">
+        {{ icon('search', 14) }}
+        <input type="text" name="q" placeholder="Kurslar, darslar, mavzular bo'yicha qidirish..." value="{{ request.args.get('q','') }}">
+    </form>
+    <div class="flex gap-12" style="align-items:center;">
+        <a href="{{ url_for('coins_bp.coins_page') }}" class="code-balance-chip" title="CODE tangalar — sotib olish/tarix">
+            <span class="code-coin-icon">⚡</span>
+            <span>{{ current_user.code_balance|default(0)|int if current_user else 0 }}</span>
+            <span class="code-balance-label">CODE</span>
+        </a>
+        <a href="{{ url_for('notifications') }}" class="icon-btn" title="Bildirishnomalar">
+            {{ icon('bell', 16) }}
+            {% if notif_count %}<span class="badge-dot">{{ notif_count }}</span>{% endif %}
+        </a>
+        <a href="{{ url_for('ai_bp.ai_assistant') }}" class="icon-btn" title="AI Yordamchi">{{ icon('bot', 16) }}</a>
+        <a href="{{ url_for('social_bp.stories_view_user', target_user_id=current_user.id) if has_active_story else url_for('profile') }}" class="user-chip" style="text-decoration:none;">
+            {% if has_active_story %}
+            <div style="padding:2px; border-radius:50%; background:conic-gradient(from 0deg, var(--cs-text-primary), var(--cs-text-violet), var(--cs-text-cyan), var(--cs-text-primary));">
+                {% if current_user.avatar_path %}
+                <img src="{{ current_user.avatar_path }}" style="width:28px;height:28px;border-radius:50%;object-fit:cover;display:block;">
+                {% else %}
+                <div class="avatar-fallback flex-center" style="width:28px;height:28px;border-radius:50%;background:rgba(255,59,59,.1); color:var(--cs-text-primary); font-family:var(--cs-font-display); font-size:12px; display:flex;">{{ current_user.ism[0]|upper if current_user else '?' }}</div>
+                {% endif %}
+            </div>
+            {% elif current_user.avatar_path %}
+            <img src="{{ current_user.avatar_path }}" style="width:32px;height:32px;border-radius:50%;object-fit:cover;border:1px solid var(--cs-border-active);">
+            {% else %}
+            <div class="avatar-fallback flex-center" style="width:32px;height:32px;border-radius:50%;background:rgba(255,59,59,.1); color:var(--cs-text-primary); font-family:var(--cs-font-display); display:flex; border:1px solid var(--cs-border-active);">{{ current_user.ism[0]|upper if current_user else '?' }}</div>
+            {% endif %}
+            <span class="cs-tag-level">LVL {{ current_user.level if current_user else 1 }}</span>
+        </a>
+    </div>
+</div>
+<style>
+.code-balance-chip {
+    display:flex; align-items:center; gap:5px; text-decoration:none;
+    background: rgba(255,178,56,.1); border:1px solid rgba(255,178,56,.35);
+    color: var(--cs-text-yellow); font-family: var(--cs-font-display); font-weight:700;
+    font-size:13px; padding:6px 12px; border-radius: var(--cs-radius-pill); transition: all .2s; white-space:nowrap;
+}
+.code-balance-chip:hover { background: rgba(255,178,56,.18); border-color: rgba(255,178,56,.6); transform: translateY(-1px); }
+.code-coin-icon { font-size:13px; }
+.code-balance-label { font-size:9px; color: var(--cs-text-muted); font-weight:500; letter-spacing:.5px; }
+.mobile-topbar .code-balance-chip { padding:5px 10px; font-size:12px; }
+</style>

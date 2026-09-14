@@ -1,0 +1,44 @@
+{# HTML/CSS jonli muharrir simulyatori — saytdan chiqmasdan ishlaydi #}
+<div class="card">
+  <h2>🧩 Amaliyot simulyatori — HTML kodi yozing va natijani darhol ko'ring</h2>
+  <p style="color:#a1a1c0;font-size:13px;">
+    Chapdagi oynaga HTML kodini yozing (masalan sarlavha va matn), o'ng tarafda natija DARHOL ko'rinadi —
+    hech qanday dastur o'rnatish shart emas, hammasi shu sahifada.
+  </p>
+
+  <div style="display:flex; gap:16px; flex-wrap:wrap; margin-top:14px;">
+    <div style="flex:1; min-width:280px;">
+      <label style="font-size:12px; color:#8ea2c0;">HTML kodi:</label>
+      <textarea id="sim-html-input" rows="12" spellcheck="false"
+        style="width:100%; font-family:monospace; font-size:13px; padding:12px; border-radius:10px; border:1px solid var(--edu-border); background:var(--edu-bg-soft); color:#e8f0fb;"
+      ><h1>Salom, Dunyo!</h1>
+<p>Bu — mening birinchi veb-sahifam.</p>
+<a href="#">Bu havola</a></textarea>
+      <button type="button" class="btn" id="sim-html-run" style="margin-top:8px;">▶ Natijani yangilash</button>
+    </div>
+    <div style="flex:1; min-width:280px;">
+      <label style="font-size:12px; color:#8ea2c0;">Natija (jonli ko'rinish):</label>
+      <iframe id="sim-html-preview" style="width:100%; height:280px; border-radius:10px; border:1px solid var(--edu-border); background:#fff;"></iframe>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var input = document.getElementById('sim-html-input');
+  var preview = document.getElementById('sim-html-preview');
+  var runBtn = document.getElementById('sim-html-run');
+
+  function render(){
+    preview.srcdoc = input.value;
+  }
+
+  runBtn.addEventListener('click', render);
+  input.addEventListener('input', function(){
+    clearTimeout(window.__simHtmlDebounce);
+    window.__simHtmlDebounce = setTimeout(render, 500);
+  });
+
+  render();
+})();
+</script>

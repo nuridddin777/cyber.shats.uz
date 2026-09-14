@@ -1,0 +1,34 @@
+# CYBER SHATS — Python paketlari
+# O'rnatish: pip install -r requirements.txt
+
+Flask==3.1.3
+Werkzeug==3.1.8
+reportlab==5.0.0
+Pillow==12.3.0
+anthropic==0.117.0
+python-dotenv==1.2.2
+requests==2.34.2
+pywebpush==2.3.0
+Markdown==3.10.2
+qrcode==8.2
+gunicorn
+psycopg2-binary==2.9.10
+fastapi==0.141.1
+uvicorn==0.52.4
+a2wsgi==1.10.10
+sqlalchemy==2.0.52
+
+# ============================================================
+# IXTIYORIY / KELAJAKDA KERAK BO'LISHI MUMKIN (asl spetsifikatsiyada
+# tilga olingan, ammo joriy versiyada ulanmagan funksiyalar uchun):
+#
+# python-telegram-bot   — Telegram bot integratsiyasi uchun
+# google-auth            — Google OAuth login uchun
+# google-api-python-client — Google Drive/Calendar integratsiyasi uchun
+# requests               — Click/Payme to'lov tizimlari uchun
+#
+# Bu paketlar hozircha o'rnatilmagan, chunki ular uchun sizning
+# shaxsiy API kalitlaringiz/hisob ma'lumotlaringiz talab qilinadi.
+# Batafsil ma'lumot uchun README.md faylidagi "Nima haqiqiy, nima
+# demo" bo'limini o'qing.
+# ============================================================

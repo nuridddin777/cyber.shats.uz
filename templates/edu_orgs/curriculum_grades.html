@@ -1,0 +1,42 @@
+{% import "edu_orgs/_shared.html" as shared %}
+<!DOCTYPE html>
+<html lang="uz"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O'quv dasturi — SHATS CYBER EDU</title>
+</head><body{% if is_pro %} class="{{ 'pro-student-theme' if role=='student' else ('pro-teacher-theme' if role=='teacher' else '') }}"{% endif %}>
+{% include "edu_orgs/_shared.html" %}
+<div class="container">
+  <div class="top-nav">
+    <div class="brand">SHATS CYBER <span>EDU</span>{% if is_pro %} <span class="badge" style="margin-left:6px;">PRO</span>{% endif %}</div>
+    <a href="{{ url_for('edu_orgs.dashboard') }}" class="btn secondary">← Panelga qaytish</a>
+  </div>
+
+  {{ shared.flashes() }}
+
+  <div class="card">
+    <h1>Informatika — o'quv dasturi</h1>
+    <p style="color:#a1a1c0;">
+      {{ org['name'] }} ({{ 'Maktab' if org['org_type']=='maktab' else ('Texnikum' if org['org_type']=='texnikum' else "O'quv markazi") }})
+      uchun mavjud sinf/kurslar.
+      {% if is_pro %}
+        <span class="badge">Pro — har mavzuda 5 tagacha amaliy + rasm tavsiyalari</span>
+      {% else %}
+        <span class="badge warn">Standart — har mavzuda 1 ta amaliy</span>
+      {% endif %}
+    </p>
+
+    {% if grades %}
+      <div class="grid-2">
+        {% for g in grades %}
+        <a href="{{ url_for('edu_orgs.curriculum_topics', grade_label=g) }}" class="card" style="background:#1a1a2a;text-decoration:none;">
+          <h3 style="margin:0;">{{ g }}</h3>
+          <p style="color:#a1a1c0;margin:6px 0 0 0;font-size:13px;">Mavzularni ko'rish →</p>
+        </a>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p style="color:#a1a1c0;">Hozircha '{{ org['org_type'] }}' turi uchun mundarija joylanmagan.</p>
+    {% endif %}
+  </div>
+</div>
+</body></html>

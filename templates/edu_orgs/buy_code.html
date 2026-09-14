@@ -1,0 +1,107 @@
+{% import "edu_orgs/_shared.html" as shared %}
+<!DOCTYPE html>
+<html lang="uz"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CODE sotib olish — SHATS CYBER EDU</title>
+</head><body>
+{% include "edu_orgs/_shared.html" %}
+<div class="container">
+  <div class="top-nav">
+    <div class="brand">SHATS CYBER <span>EDU</span></div>
+    <a href="{{ url_for('edu_orgs.org_dashboard') }}" class="btn secondary">← Boshqaruv paneliga</a>
+  </div>
+
+  {{ shared.flashes() }}
+
+  <div class="card">
+    <h1>CODE sotib olish</h1>
+    <p style="color:var(--edu-text-dim);">
+      Joriy balans: <b>{{ org['coin_balance'] }} CODE</b>. Narx SHATS CYBER platformasidagi
+      bilan bir xil: <b>1 CODE = {{ "{:,}".format(rate) }} so'm</b>.
+    </p>
+
+    <form method="POST" action="{{ url_for('edu_orgs.buy_code_submit') }}" enctype="multipart/form-data">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+
+      <label>Nechta CODE kerak?</label>
+      <input type="number" name="amount" id="amountInput" min="1" value="10" required>
+
+      <div style="background:var(--edu-bg-soft);border:1px solid var(--edu-border);border-radius:10px;padding:14px 16px;margin:6px 0 18px 0;">
+        <div style="color:var(--edu-text-dim);font-size:12px;">To'lanadigan summa</div>
+        <div id="priceOutput" style="font-size:26px;font-weight:800;color:var(--edu-accent);">0 so'm</div>
+      </div>
+
+      <div class="card" style="background:var(--edu-bg-soft);margin-bottom:18px;">
+        <h3 style="margin-top:0;">💳 To'lov uchun karta raqamlari</h3>
+        {% for name, number in cards.items() %}
+          <p style="font-family:monospace;font-size:16px;letter-spacing:1px;">
+            <b>{{ name|upper }}:</b> {{ number }}
+          </p>
+        {% endfor %}
+        <p style="color:var(--edu-text-dim);font-size:13px;">Karta egasi: <b>{{ card_holder }}</b></p>
+        <p style="color:var(--edu-warn);font-size:13px;">
+          ⚠️ Yuqoridagi summani shu kartaga o'tkazing, so'ng to'lov chekini pastda yuklang.
+        </p>
+      </div>
+
+      <label>To'lov cheki (rasm yoki PDF)</label>
+      <input type="file" name="receipt" accept=".png,.jpg,.jpeg,.gif,.webp,.pdf" required>
+
+      <button type="submit" class="btn" style="margin-top:14px;">So'rovni yuborish</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <h3 style="margin-top:0;">💬 Admin bilan bog'lanish</h3>
+    <p style="color:var(--edu-text-dim);font-size:13px;">
+      To'lov yoki boshqa savol yuzasidan to'g'ridan-to'g'ri bog'lanishingiz mumkin:
+    </p>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;">
+      <a href="https://t.me/{{ admin_telegram }}" target="_blank" rel="noopener" class="btn secondary">
+        ✈️ Telegram: @{{ admin_telegram }}
+      </a>
+      <a href="tel:{{ admin_phone }}" class="btn secondary">
+        📞 {{ admin_phone }}
+      </a>
+    </div>
+  </div>
+
+  {% if my_requests %}
+  <div class="card">
+    <h3 style="margin-top:0;">So'rovlar tarixi</h3>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Sana</th><th>Miqdor</th><th>Summa</th><th>Holat</th></tr>
+        {% for r in my_requests %}
+        <tr>
+          <td>{{ r['created_at'] }}</td>
+          <td>{{ r['code_amount'] }} CODE</td>
+          <td>{{ "{:,}".format(r['price_uzs']) }} so'm</td>
+          <td>
+            {% if r['status'] == 'completed' %}<span class="badge">Tasdiqlangan</span>
+            {% elif r['status'] == 'rejected' %}<span class="badge locked">Rad etilgan</span>
+            {% else %}<span class="badge warn">Kutilmoqda</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </table>
+    </div>
+  </div>
+  {% endif %}
+</div>
+
+<script>
+(function(){
+  var rate = {{ rate }};
+  var input = document.getElementById('amountInput');
+  var output = document.getElementById('priceOutput');
+  function update(){
+    var n = parseInt(input.value, 10) || 0;
+    var total = n * rate;
+    output.textContent = total.toLocaleString('ru-RU') + " so'm";
+  }
+  input.addEventListener('input', update);
+  update();
+})();
+</script>
+</body></html>

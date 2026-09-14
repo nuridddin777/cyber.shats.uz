@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Ro'yxatdan o'tish — CYBER SHATS{% endblock %}
+{% block extra_head %}<style>
+/* Hiding scrollbar */
+::-webkit-scrollbar { display: none !important; }
+html, body { -ms-overflow-style: none !important; scrollbar-width: none !important; }
+
+body{background:#05070c !important;background-image:none !important}
+body::after{display:none !important}
+.studio-shell{min-height:100vh;display:grid;grid-template-columns:1fr 460px;}
+@media(max-width:980px){.studio-shell{grid-template-columns:1fr;}}
+.studio-visual{position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:center;padding:60px 60px;background:radial-gradient(1200px 700px at 20% 20%, rgba(255,59,59,.12), transparent 60%), radial-gradient(900px 600px at 90% 80%, rgba(255,178,56,.08), transparent 60%), #06070d;}
+@media(max-width:980px){.studio-visual{min-height:340px;padding:40px 24px;}}
+#studioCanvas{position:absolute;inset:0;z-index:0;}
+.studio-copy{position:relative;z-index:2;max-width:560px;}
+.studio-eyebrow{font-size:11px;letter-spacing:3px;color:var(--cs-text-cyan,#b8b8c0);text-transform:uppercase;margin-bottom:18px;display:flex;align-items:center;gap:10px;}
+.studio-eyebrow .ln{width:26px;height:2px;background:linear-gradient(90deg,#ff3b3b,#ffb238);}
+.studio-h1{font-family:var(--cs-font-display);font-weight:800;font-size:clamp(32px,5vw,56px);line-height:1.05;color:#fff;letter-spacing:-1px;margin-bottom:20px;}
+.studio-h1 em{font-style:normal;background:linear-gradient(120deg,#ff3b3b,#ffb238);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+.studio-p{font-size:14px;color:#8a97ab;line-height:1.7;max-width:420px;margin-bottom:34px;}
+.studio-stats{display:flex;gap:36px;}
+.studio-stats b{display:block;font-family:var(--cs-font-display);font-size:22px;color:#fff;}
+.studio-stats span{font-size:10px;color:#6b7688;text-transform:uppercase;letter-spacing:1px;}
+
+.studio-form-side{background:#0a0b10;border-left:1px solid rgba(255,255,255,.06);display:flex;align-items:center;justify-content:center;padding:16px 24px;}
+.reg-card{width:100%;max-width:380px;}
+.reg-logo{margin-bottom:6px;}
+.reg-logo span{font-family:var(--cs-font-display);font-size:18px;font-weight:800;color:#fff;letter-spacing:1px;}
+.reg-title{font-size:20px;font-weight:700;color:#fff;margin-bottom:2px;}
+.reg-sub{font-size:12.5px;color:#6b7688;margin-bottom:12px;}
+.rf{margin-bottom:8px;}
+.rf label{display:block;font-size:11px;color:#8a97ab;margin-bottom:6px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;}
+.rf input,.rf select{width:100%;background:#12141c;border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#eef1f6;padding:9px 12px;font-size:14px;box-sizing:border-box;transition:.2s;}
+.rf input:focus,.rf select:focus{outline:none;border-color:#ff3b3b;box-shadow:0 0 0 3px rgba(255,59,59,.12);}
+.rf input::placeholder{color:#4a5568;}
+.rf-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.phone-wrap{display:flex;gap:0;}
+.phone-prefix{background:#12141c;border:1px solid rgba(255,255,255,.08);border-right:none;border-radius:10px 0 0 10px;padding:9px 12px;font-size:14px;color:#8a97ab;white-space:nowrap;font-weight:600;}
+.phone-wrap input{border-radius:0 10px 10px 0 !important;}
+.email-wrap{position:relative;}
+.email-suffix{position:absolute;right:14px;top:50%;transform:translateY(-50%);font-size:13px;color:#6b7688;pointer-events:none;font-weight:600;}
+.rf-check{display:flex;align-items:flex-start;gap:8px;margin:8px 0;}
+.rf-check input[type=checkbox]{margin-top:3px;accent-color:#ff3b3b;}
+.rf-check span{font-size:11.5px;color:#8a97ab;line-height:1.4;}
+.rf-check a{color:#ff3b3b;}
+.reg-btn{width:100%;background:linear-gradient(135deg,#ff4d4d,#c9242c);border:none;border-radius:10px;color:#fff;padding:10px;font-size:14px;font-weight:800;cursor:pointer;letter-spacing:.3px;transition:.2s;}
+.reg-btn:hover{transform:translateY(-1px);box-shadow:0 10px 26px rgba(255,59,59,.3);}
+.reg-btn-oauth{width:100%;display:flex;align-items:center;justify-content:center;gap:10px;background:#12141c;border:1px solid rgba(255,255,255,.08);border-radius:10px;color:#c9d1dc;padding:9px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none;transition:.2s;margin-bottom:9px;}
+.reg-btn-oauth:hover{border-color:rgba(255,255,255,.2);background:#161822;}
+.reg-foot{text-align:center;margin-top:12px;font-size:12.5px;color:#6b7688;}
+.reg-foot a{color:#ff3b3b;text-decoration:none;font-weight:600;}
+.pwd-meter{height:3px;border-radius:2px;margin-top:6px;transition:all 0.3s;}
+</style>{% endblock %}
+{% block content %}
+<div style="position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#8a8a92 33%,#fff 33%,#fff 66%,#ff3b3b 66%);z-index:999;"></div>
+
+<div class="studio-shell">
+  <div class="studio-visual">
+    <canvas id="studioCanvas"></canvas>
+    <div class="studio-copy">
+      <div class="studio-eyebrow"><span class="ln"></span>CYBER SHATS — IT TA'LIM STUDIYASI</div>
+      <h1 class="studio-h1">Kelajagingizni <em>bugun</em> qurishni boshlang</h1>
+      <p class="studio-p">18 ta IT yo'nalish, haqiqiy amaliy mashqlar, AI yordamchi va jamiyat — barchasi bitta joyda. Ro'yxatdan o'ting va birinchi darsni bugun boshlang.</p>
+      <div class="studio-stats">
+        <div><b>18</b><span>Yo'nalish</span></div>
+        <div><b>70+</b><span>Kurs</span></div>
+        <div><b>4.9</b><span>Baho</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="studio-form-side">
+    <div class="reg-card">
+      <div class="reg-logo"><span>CYBER SHATS</span></div>
+      <div class="reg-title">Ro'yxatdan o'tish</div>
+      <div class="reg-sub">Ma'lumotlaringizni kiriting va bepul boshlang</div>
+
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% for cat, msg in messages %}
+          <div style="background:rgba(255,68,68,0.1);border:1px solid rgba(255,68,68,0.3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:#ff8888;">{{ msg }}</div>
+        {% endfor %}
+      {% endwith %}
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:8px;">
+        <a href="{{ url_for('oauth.google_login') }}" class="reg-btn-oauth" style="margin-bottom:0;">
+          <svg width="16" height="16" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.1 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.6 15.9 18.9 13 24 13c3.1 0 5.9 1.1 8 3.1l5.7-5.7C34.5 6.1 29.5 4 24 4 16.3 4 9.6 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.4 0 10.3-2.1 14-5.5l-6.5-5.4C29.4 34.9 26.8 36 24 36c-5.3 0-9.7-3.1-11.3-7.5l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.5 5.4C41.5 35.7 44 30.3 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+          Google
+        </a>
+        <a href="{{ url_for('oauth.github_login') }}" class="reg-btn-oauth" style="margin-bottom:0;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .3a12 12 0 0 0-3.79 23.4c.6.11.82-.26.82-.58v-2.02c-3.34.72-4.04-1.61-4.04-1.61-.55-1.39-1.34-1.76-1.34-1.76-1.09-.75.08-.73.08-.73 1.21.08 1.85 1.24 1.85 1.24 1.07 1.84 2.81 1.31 3.5 1 .11-.78.42-1.31.76-1.61-2.67-.3-5.47-1.33-5.47-5.93 0-1.31.47-2.38 1.24-3.22-.12-.3-.54-1.52.12-3.18 0 0 1.01-.32 3.3 1.23a11.5 11.5 0 0 1 6 0c2.29-1.55 3.3-1.23 3.3-1.23.66 1.66.24 2.88.12 3.18.77.84 1.24 1.91 1.24 3.22 0 4.61-2.81 5.63-5.48 5.92.43.37.81 1.1.81 2.22v3.29c0 .32.22.7.83.58A12 12 0 0 0 12 .3"/></svg>
+          GitHub
+        </a>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px;margin:12px 0;color:#4a5568;font-size:11px;">
+        <span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span>
+        YOKI QO'LDA TO'LDIRING
+        <span style="flex:1;height:1px;background:rgba(255,255,255,.07);"></span>
+      </div>
+
+      <form method="post" action="{{ url_for('register') }}" id="regForm">
+        <input type="hidden" name="ref" id="refInput" value="">
+        <div class="rf-row">
+          <div class="rf"><label>Familiya *</label><input type="text" name="familiya" placeholder="Familiyangiz" required></div>
+          <div class="rf"><label>Ism *</label><input type="text" name="ism" placeholder="Ismingiz" required></div>
+        </div>
+        <div class="rf">
+          <label>Email *</label>
+          <div class="email-wrap">
+            <input type="text" name="email" id="emailInput" placeholder="example" required style="padding-right:110px;" oninput="fixEmail(this)">
+            <span class="email-suffix">@gmail.com</span>
+          </div>
+        </div>
+        <div class="rf">
+          <label>Telefon raqam</label>
+          <div class="phone-wrap">
+            <span class="phone-prefix">+998</span>
+            <input type="tel" name="telefon" placeholder="97 669 96 55" maxlength="12" oninput="formatPhone(this)">
+          </div>
+        </div>
+        <div class="rf">
+          <label>Parol * <span style="color:#4a5568;font-weight:400;text-transform:none;">(kamida 8 ta belgi)</span></label>
+          <input type="password" name="password" id="pwdInput" placeholder="••••••••" required minlength="8" oninput="checkPwd(this)">
+          <div class="pwd-meter" id="pwdMeter"></div>
+        </div>
+        <div class="rf-check">
+          <input type="checkbox" required id="termsCheck">
+          <span><a href="{{ url_for('terms_page') }}" target="_blank" rel="noopener">Foydalanish shartlari</a>ga roziman</span>
+        </div>
+        <button type="submit" class="reg-btn">Ro'yxatdan o'tish</button>
+      </form>
+
+      <div class="reg-foot">Hisobingiz bormi? <a href="{{ url_for('login') }}">Kirish</a></div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+function fixEmail(el) { let v = el.value.replace(/@.*$/,'').replace(/[^a-zA-Z0-9._-]/g,''); el.value = v; }
+(function() { var params = new URLSearchParams(window.location.search); var ref = params.get('ref'); if (ref) document.getElementById('refInput').value = ref; })();
+document.getElementById('regForm').addEventListener('submit', function(e) {
+  let emailEl = document.getElementById('emailInput'); let v = emailEl.value.replace(/@.*$/,''); emailEl.value = v + '@gmail.com';
+});
+function formatPhone(el) {
+  let v = el.value.replace(/\D/g,''); if(v.length > 9) v = v.slice(0,9);
+  if(v.length >= 7) v = v.slice(0,2)+' '+v.slice(2,5)+' '+v.slice(5,7)+' '+v.slice(7);
+  else if(v.length >= 5) v = v.slice(0,2)+' '+v.slice(2,5)+' '+v.slice(5);
+  else if(v.length >= 2) v = v.slice(0,2)+' '+v.slice(2);
+  el.value = v;
+}
+function checkPwd(el) {
+  let len = el.value.length; let meter = document.getElementById('pwdMeter');
+  if(len === 0){meter.style.background='transparent';meter.style.width='0';}
+  else if(len < 6){meter.style.background='#ff4444';meter.style.width='30%';}
+  else if(len < 8){meter.style.background='#ffb238';meter.style.width='60%';}
+  else{meter.style.background='#ff3b3b';meter.style.width='100%';}
+}
+
+// Abstrakt 3D markaziy shakl — "visual studio" uslubi (haqiqiy render, rasm emas)
+(function(){
+  if (typeof THREE === 'undefined') return;
+  var canvas = document.getElementById('studioCanvas');
+  if (!canvas) return;
+  var panel = canvas.parentElement;
+  var w = panel.clientWidth, h = panel.clientHeight;
+  var scene = new THREE.Scene();
+  var camera = new THREE.PerspectiveCamera(50, w / h, 0.1, 1000);
+  camera.position.set(0, 0, 7);
+  var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+  renderer.setSize(w, h);
+
+  var group = new THREE.Group();
+  scene.add(group);
+
+  var geo = new THREE.IcosahedronGeometry(2.1, 1);
+  var wire = new THREE.WireframeGeometry(geo);
+  var mat = new THREE.LineBasicMaterial({ color: 0xff3b3b, transparent: true, opacity: 0.55 });
+  var lines = new THREE.LineSegments(wire, mat);
+  group.add(lines);
+
+  var geo2 = new THREE.IcosahedronGeometry(1.35, 1);
+  var wire2 = new THREE.WireframeGeometry(geo2);
+  var mat2 = new THREE.LineBasicMaterial({ color: 0xffb238, transparent: true, opacity: 0.4 });
+  var lines2 = new THREE.LineSegments(wire2, mat2);
+  group.add(lines2);
+
+  var pn = 60, pgeo = new THREE.BufferGeometry(), ppos = new Float32Array(pn * 3);
+  for (var i = 0; i < pn; i++) {
+    var r = 3.2 + Math.random() * 1.2, th = Math.random() * Math.PI * 2, ph = Math.acos(2 * Math.random() - 1);
+    ppos[i*3] = r * Math.sin(ph) * Math.cos(th);
+    ppos[i*3+1] = r * Math.sin(ph) * Math.sin(th);
+    ppos[i*3+2] = r * Math.cos(ph);
+  }
+  pgeo.setAttribute('position', new THREE.BufferAttribute(ppos, 3));
+  scene.add(new THREE.Points(pgeo, new THREE.PointsMaterial({ color: 0xb8b8c0, size: 0.035, transparent: true, opacity: 0.6 })));
+
+  var running = true;
+  function onResize() { w = panel.clientWidth; h = panel.clientHeight; camera.aspect = w / h; camera.updateProjectionMatrix(); renderer.setSize(w, h); }
+  window.addEventListener('resize', onResize);
+  document.addEventListener('visibilitychange', function () { running = !document.hidden; if (running) animate(); });
+
+  function animate() {
+    if (!running) return;
+    requestAnimationFrame(animate);
+    group.rotation.y += 0.0028;
+    group.rotation.x += 0.0011;
+    lines2.rotation.y -= 0.0018;
+    renderer.render(scene, camera);
+  }
+  animate();
+})();
+</script>
+{% endblock %}

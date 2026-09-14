@@ -1,0 +1,174 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Koleksiya — CYBER SHATS{% endblock %}
+{% block app_content %}
+<h1 style="font-size:19px; margin-bottom:8px;">🏆 Koleksiya</h1>
+<p class="muted" style="font-size:12.5px; margin-bottom:16px;">
+    {{ unlocked_count }}/106 haykalcha yig'ilgan. 106-chi (CYBER SHATS) — faqat qolgan 105 tasi to'liq yig'ilgach avtomatik beriladi.
+    Profilda ko'pi bilan 10 tasini ko'rgazmaga qo'yish mumkin.
+</p>
+
+<div style="display:flex; gap:14px; margin-bottom:20px; flex-wrap:wrap;">
+    <div class="cs-chip solid">⚡ {{ "{:,}".format(balance|int) }} CODE</div>
+    <div class="cs-chip solid" style="color:#d97706;">🔑 {{ keys }} kalit</div>
+    <div class="cs-chip solid">🎫 Maxsus sandiq chiptasi: {{ mystery_tickets }}</div>
+</div>
+
+<!-- OLISH USULLARI -->
+<div class="cs-card" style="padding:20px; margin-bottom:20px;">
+    <h3 style="font-size:13px; margin-bottom:14px;">📖 Haykalchalarni qanday olish mumkin?</h3>
+    <div class="acquire-grid">
+        <div>
+            <div style="font-size:12px; font-weight:700; margin-bottom:4px;">🔵🟢🟣🔴 5,4,3,2-toifa (1-80 daraja)</div>
+            <p class="muted" style="font-size:11px; margin-bottom:8px;">Faqat Maxsus sandig'idan (tasodifiy, pastroq toifa ko'proq tushadi).</p>
+            <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                <form method="post" action="{{ url_for('shop.chests_buy_tickets') }}">
+                    <input type="hidden" name="chest_type" value="mystery"><input type="hidden" name="qty" value="1">
+                    <button type="submit" class="cs-btn cs-btn-sm">1 chipta — 5 CODE</button>
+                </form>
+                <button class="cs-btn cs-btn-sm cs-btn-primary" onclick="openMystery()" id="openMysteryBtn" {{ 'disabled' if mystery_tickets < 1 }}>📦 Ochish</button>
+            </div>
+        </div>
+        <div>
+            <div style="font-size:12px; font-weight:700; margin-bottom:4px;">🟡 1-toifa — Tilla (81-100 daraja)</div>
+            <p class="muted" style="font-size:11px;">To'g'ridan-to'g'ri CODE bilan sotib olinadi (⚡15–25 CODE, pastda ro'yxatda).</p>
+        </div>
+        <div>
+            <div style="font-size:12px; font-weight:700; margin-bottom:4px;">🌈 Bonus (101-105) va takror tushish</div>
+            <p class="muted" style="font-size:11px; margin-bottom:8px;">Kalitlar evaziga imkoniyat (har safar kafolatlanmaydi).</p>
+            <button class="cs-btn cs-btn-sm cs-btn-primary" onclick="redeemKeys()" id="redeemKeysBtn" {{ 'disabled' if keys < key_redeem_cost }}>
+                🔑 {{ key_redeem_cost }} kalit sarflash
+            </button>
+        </div>
+    </div>
+</div>
+
+<div class="collection-grid">
+    {% for item in items %}
+    <div class="statuette-slot tier-{{ item.tier.tier }} {{ 'final-piece' if item.is_final }} {{ '' if item.unlocked else 'locked' }}">
+        {% if item.unlocked %}
+        <img src="{{ url_for('shop.collection_statuette_svg', level=item.level) }}" class="statuette-img anim-tier-{{ item.tier.tier }}" alt="Daraja {{ item.level }}">
+        {% else %}
+        <img src="{{ url_for('shop.collection_statuette_svg', level=item.level) }}" class="statuette-img statuette-img-locked" alt="Daraja {{ item.level }} (qulflangan)">
+        <div class="statuette-locked">🔒</div>
+        {% if 81 <= item.level <= 100 %}
+        <form method="post" action="{{ url_for('shop.collection_buy_tier1', level=item.level) }}" style="position:absolute; bottom:16px;">
+            <button type="submit" class="cs-btn" style="font-size:9px; padding:2px 6px;">⚡{{ tier1_price(item.level) }}</button>
+        </form>
+        {% endif %}
+        {% endif %}
+        <div class="statuette-level">{{ item.level }}</div>
+        {% if item.unlocked %}
+            {% if item.level in pinned_levels %}
+            <form method="post" action="{{ url_for('shop.collection_unpin', level=item.level) }}">
+                <button type="submit" class="statuette-pin-btn pinned" title="Ko'rgazmadan olish">📌</button>
+            </form>
+            {% else %}
+            <form method="post" action="{{ url_for('shop.collection_pin', level=item.level) }}">
+                <button type="submit" class="statuette-pin-btn" title="Ko'rgazmaga qo'yish">📍</button>
+            </form>
+            {% endif %}
+        {% endif %}
+    </div>
+    {% endfor %}
+</div>
+
+<div id="collectionResultOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); z-index:9999; align-items:center; justify-content:center;">
+    <div class="cs-card" style="padding:28px; max-width:300px; text-align:center;">
+        <div id="collResultIcon" style="font-size:48px; margin-bottom:10px;">🎉</div>
+        <div id="collResultText" style="font-size:14px; font-weight:700; margin-bottom:16px;"></div>
+        <button class="cs-btn cs-btn-primary" onclick="location.reload();">Yopish</button>
+    </div>
+</div>
+
+<style>
+.acquire-grid{ display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:16px; }
+.collection-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(90px,1fr)); gap:10px; }
+.statuette-slot{
+  position:relative; aspect-ratio:1; border-radius:12px; overflow:hidden;
+  display:flex; align-items:center; justify-content:center; background:var(--cs-bg-input);
+  border:1px solid var(--cs-border);
+}
+.statuette-slot.locked{ }
+.statuette-locked{ font-size:22px; }
+.statuette-img{ width:100%; height:100%; object-fit:contain; }
+.statuette-img-locked{
+    filter: grayscale(100%) brightness(.35) contrast(1.1);
+    opacity: .55;
+    position: absolute;
+    inset: 0;
+}
+.statuette-slot.locked .statuette-locked{
+    position: relative;
+    z-index: 2;
+    text-shadow: 0 2px 6px rgba(0,0,0,.8);
+}
+.statuette-level{
+  position:absolute; bottom:3px; left:50%; transform:translateX(-50%);
+  font-size:9px; font-weight:800; background:rgba(0,0,0,.5); color:#fff; padding:1px 6px; border-radius:8px;
+}
+.statuette-pin-btn{
+  position:absolute; top:3px; right:3px; background:rgba(0,0,0,.4); border:none; border-radius:50%;
+  width:22px; height:22px; font-size:11px; cursor:pointer; display:flex; align-items:center; justify-content:center;
+}
+.statuette-pin-btn.pinned{ background:var(--cs-text-primary); }
+.statuette-slot.final-piece{ box-shadow:0 0 16px rgba(212,175,55,.5); border:2px solid #D4AF37; }
+
+.anim-tier-5 { }
+.anim-tier-4 { animation: statAnimGlow 3s ease-in-out infinite; }
+.anim-tier-3 { animation: statAnimSway 2.6s ease-in-out infinite; }
+.anim-tier-2 { animation: statAnimGlow 2s ease-in-out infinite, statAnimSway 3s ease-in-out infinite; }
+.anim-tier-1 { animation: statAnimSpinPulse 4s ease-in-out infinite; }
+.anim-tier-0 { animation: statAnimSpinPulse 2.5s ease-in-out infinite, statAnimGlow 1.5s ease-in-out infinite; }
+.anim-tier--1 { animation: statAnimSpinPulse 3s linear infinite, statAnimGlow 1.2s ease-in-out infinite; }
+
+@keyframes statAnimGlow {
+  0%, 100% { filter: drop-shadow(0 0 2px rgba(255,255,255,.15)); }
+  50% { filter: drop-shadow(0 0 10px rgba(255,255,255,.5)); }
+}
+@keyframes statAnimSway {
+  0%, 100% { transform: rotate(-3deg); }
+  50% { transform: rotate(3deg); }
+}
+@keyframes statAnimSpinPulse {
+  0%, 100% { transform: scale(1) rotate(0deg); }
+  50% { transform: scale(1.08) rotate(4deg); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .anim-tier-5, .anim-tier-4, .anim-tier-3, .anim-tier-2, .anim-tier-1, .anim-tier-0, .anim-tier--1 { animation: none !important; }
+}
+</style>
+
+<script>
+function openMystery() {
+    var btn = document.getElementById('openMysteryBtn');
+    btn.disabled = true;
+    fetch('{{ url_for("shop.api_collection_open_mystery") }}', {
+        method: 'POST', credentials: 'same-origin',
+        headers: {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}
+    }).then(function(r){ return r.json(); }).then(function(d){
+        btn.disabled = false;
+        if (!d.success) { alert(d.error || 'Xatolik.'); return; }
+        showResult('📦', (d.data.is_new ? 'Yangi! ' : 'Takror: ') + d.data.level + '-daraja (' + d.data.tier.label + ') + ' + d.data.keys_won + ' kalit');
+    });
+}
+function redeemKeys() {
+    var btn = document.getElementById('redeemKeysBtn');
+    btn.disabled = true;
+    fetch('{{ url_for("shop.api_collection_redeem_keys") }}', {
+        method: 'POST', credentials: 'same-origin',
+        headers: {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}
+    }).then(function(r){ return r.json(); }).then(function(d){
+        btn.disabled = false;
+        if (!d.success) { alert(d.error || 'Xatolik.'); return; }
+        if (!d.data.won) { showResult('😔', 'Bu safar hech narsa tushmadi. Qayta urinib ko\'ring!'); }
+        else { showResult('🎉', (d.data.is_new ? 'Yangi! ' : 'Takror: ') + d.data.level + '-daraja (' + d.data.tier.label + ')'); }
+    });
+}
+function showResult(icon, text) {
+    document.getElementById('collResultIcon').textContent = icon;
+    document.getElementById('collResultText').textContent = text;
+    document.getElementById('collectionResultOverlay').style.display = 'flex';
+}
+</script>
+{% endblock %}

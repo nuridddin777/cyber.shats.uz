@@ -1,0 +1,280 @@
+{% from 'partials/icons.html' import icon %}
+<aside class="cs-sidebar" id="cs-sidebar">
+    <!-- Bayroq chizig'i -->
+    <div style="height:3px; background:linear-gradient(90deg,#8a8a92 33%,#fff 33%,#fff 66%,#ff3b3b 66%); margin-bottom:1px; border-radius:0;"></div>
+    <a href="{{ url_for('dashboard') }}" class="logo" style="padding:8px 12px;">
+        {{ icon('shield', 16) }}
+        <div style="line-height:1;">
+            <span style="background:linear-gradient(135deg,#ff3b3b,#8a8a92); -webkit-background-clip:text; -webkit-text-fill-color:transparent; font-weight:900; font-size:14px;">CYBER SHATS</span>
+        </div>
+    </a>
+
+    <nav class="cs-nav" id="cs-nav-scroll">
+    {% set is_admin_mode = (request.path and request.path.startswith('/admin')) or request.endpoint == 'mentor' %}
+    {% if not is_admin_mode %}
+
+        <!-- 🏠 BOSH MENYU — doim ochiq, eng ko'p ishlatiladigan bo'limlar -->
+        <a href="{{ url_for('dashboard') }}" class="cs-nav-item {{ 'active' if request.endpoint=='dashboard' }}">{{ icon('home') }} Bosh sahifa</a>
+        <a href="{{ url_for('directions') }}" class="cs-nav-item {{ 'active' if request.endpoint=='directions' }}">{{ icon('grid') }} Yo'nalishlar</a>
+        <a href="{{ url_for('courses_bp.courses') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['courses','course_detail','lesson','lesson_materials'] }}">{{ icon('book') }} Kurslar</a>
+        <a href="{{ url_for('hackerlab_bp.hacker_lab') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['hacker_lab','practice'] }}">{{ icon('terminal') }} Amaliyot</a>
+        <a href="{{ url_for('ai_bp.ai_assistant') }}" class="cs-nav-item {{ 'active' if request.endpoint=='ai_bp.ai_assistant' }}">{{ icon('bot') }} AI Yordamchi</a>
+        <a href="{{ url_for('coins_bp.coins_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='coins_bp.coins_page' }}" style="color:var(--cs-text-yellow);">{{ icon('zap') }} Code Tangalar</a>
+
+        <!-- # ID — faqat ODDIY ID boshqaruvi (o'zgartirish, sotib olish/
+             sotish, tarix). Omad/baxtga asoslangan narsalar (Random ID,
+             Sandiqlar, Koleksiya) endi ALOHIDA "Omadli Sandiq" guruhida —
+             oldin hammasi bitta guruhga aralashtirilgan edi. -->
+        {% set id_active = request.endpoint in ['my_id_page','change_my_id','design_order_page'] %}
+        <details class="nav-group" {{ 'open' if id_active }}>
+            <summary class="nav-group-summary">{{ icon('hash') }} <span>ID</span></summary>
+            <div class="nav-group-body">
+                <a href="{{ url_for('ids_bp.my_id_page') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['my_id_page','change_my_id'] }}">{{ icon('hash') }} Mening ID</a>
+                <a href="{{ url_for('coins_bp.design_order_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='coins_bp.design_order_page' }}">🎨 Dizayn zakaz</a>
+            </div>
+        </details>
+
+        <!-- # OMADLI SANDIQ — baxt/omadga asoslangan barcha mexanikalar:
+             tasodifiy ID aylantirish, sandiq ochish, koleksiya yig'ish
+             (Mystery Chest orqali). -->
+        {% set lucky_active = request.endpoint in ['random_id_page','auction_page','chests_page','collection_page'] %}
+        <details class="nav-group" {{ 'open' if lucky_active }}>
+            <summary class="nav-group-summary">🎰 <span>Omadli Sandiq</span></summary>
+            <div class="nav-group-body">
+                <a href="{{ url_for('ids_bp.random_id_page') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['random_id_page','auction_page'] }}">🎲 Random ID</a>
+                <a href="{{ url_for('shop.chests_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='shop.chests_page' }}">📦 Sandiqlar</a>
+                <a href="{{ url_for('shop.collection_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='shop.collection_page' }}">🏆 Koleksiya</a>
+            </div>
+        </details>
+
+        <!-- # DO'KON — CODE evaziga sotib olinadigan bezak-narsalar
+             (galichka, ramka) — baxt/omadga bog'liq emas, to'g'ridan-to'g'ri
+             sotib olinadi. -->
+        {% set shop_active = request.endpoint in ['checkmarks_shop_page','frames_shop_page'] %}
+        <details class="nav-group" {{ 'open' if shop_active }}>
+            <summary class="nav-group-summary">🛍️ <span>Do'kon</span></summary>
+            <div class="nav-group-body">
+                <a href="{{ url_for('shop.checkmarks_shop_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='shop.checkmarks_shop_page' }}">✨ Galichkalar</a>
+                <a href="{{ url_for('shop.frames_shop_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='shop.frames_shop_page' }}">🖼️ Ramkalar</a>
+            </div>
+        </details>
+
+        <!-- 💬 MULOQOT -->
+        {% set muloqot_active = request.endpoint in ['messages_page','messages_thread','forum','forum_post','groups_list','group_detail','channels_list','channel_detail','channel_post_detail','stories_feed','stories_view_user','reels_feed','reels_create','calls_page'] %}
+        <details class="nav-group" {{ 'open' if muloqot_active }}>
+            <summary class="nav-group-summary">{{ icon('message') }} <span>Muloqot</span>
+                {% if unread_msg_count and unread_msg_count > 0 %}
+                <span class="cs-chip solid nav-group-badge">{{ unread_msg_count }}</span>
+                {% endif %}
+            </summary>
+            <div class="nav-group-body">
+                <a href="{{ url_for('messages_bp.messages_page') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['messages_page','messages_thread'] }}" style="display:flex; align-items:center; justify-content:space-between;">
+                    <span>{{ icon('send') }} Xabarlar</span>
+                    {% if unread_msg_count and unread_msg_count > 0 %}
+                    <span class="cs-chip solid" style="background:#ff5555; border-color:#ff5555; color:#fff; font-size:10px; padding:1px 6px; min-width:18px; text-align:center;">{{ unread_msg_count }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('forum_bp.forum') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['forum','forum_post'] }}">{{ icon('message') }} Forum</a>
+                <a href="{{ url_for('groups_bp.groups_list') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['groups_list','group_detail'] }}">{{ icon('users') }} Guruhlar</a>
+                <a href="{{ url_for('groups_bp.channels_list') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['channels_list','channel_detail','channel_post_detail'] }}">{{ icon('send') }} Kanallar</a>
+                <a href="{{ url_for('social_bp.stories_feed') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['stories_feed','stories_view_user'] }}">{{ icon('zap') }} Hikoyalar</a>
+                <a href="{{ url_for('social_bp.reels_feed') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['reels_feed','reels_create'] }}">{{ icon('play') }} Reels</a>
+                {% if current_user and current_user.plan == 'hacker' %}
+                <a href="{{ url_for('calls_bp.calls_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='calls_bp.calls_page' }}" style="color:#a855f7;">{{ icon('phone') }} Qo'ng'iroqlar</a>
+                {% endif %}
+            </div>
+        </details>
+
+        <!-- 🎓 TA'LIM -->
+        {% set talim_active = request.endpoint in ['tests','test_take','certificates_page','pentesting_ping_page','code_editor_page','news','mentors_page','career_center_page'] or (request.path and request.path.startswith('/edu')) %}
+        <details class="nav-group" {{ 'open' if talim_active }}>
+            <summary class="nav-group-summary">{{ icon('book') }} <span>Ta'lim</span></summary>
+            <div class="nav-group-body">
+                <a href="{{ url_for('tests_bp.tests') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['tests','test_take'] }}">{{ icon('file-text') }} Testlar</a>
+                <a href="{{ url_for('certs_bp.certificates_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='certs_bp.certificates_page' }}">{{ icon('award') }} Sertifikatlar</a>
+                <a href="/edu2/login" class="cs-nav-item" style="color:#00c853;">{{ icon('school') }} EDU</a>
+                <a href="{{ url_for('pentest_bp.pentesting_ping_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='pentesting_ping_page' }}">{{ icon('wifi') }} Ping Test</a>
+                <a href="{{ url_for('library_bp.news') }}" class="cs-nav-item {{ 'active' if request.endpoint=='library_bp.news' }}">{{ icon('zap') }} Yangiliklar</a>
+                {% if current_user and (current_user.plan in ['cyber_pro','vip'] or current_user.role in ['admin','super_admin']) %}
+                <a href="{{ url_for('codehelp_bp.code_editor_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='code_editor_page' }}" style="color:#ff3366;">{{ icon('code') }} Code Editor</a>
+                {% endif %}
+                {% if current_user and current_user.plan == 'hacker' %}
+                <a href="{{ url_for('mentors_bp.mentors_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='mentors_bp.mentors_page' }}" style="color:#a855f7;">{{ icon('user-check') }} Mentorlar</a>
+                <a href="{{ url_for('karyera_bp.career_center_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='karyera_bp.career_center_page' }}" style="color:#a855f7;">{{ icon('briefcase') }} Karyera markazi</a>
+                {% endif %}
+            </div>
+        </details>
+
+        <!-- 💼 BIZNES -->
+        {% set biznes_active = request.endpoint in ['results','startups_list','startup_detail','startup_auctions_list','startup_auction_detail','smm_hub','smm_chat','freelance_page','incubator_page','developer_hub_page'] %}
+        <details class="nav-group" {{ 'open' if biznes_active }}>
+            <summary class="nav-group-summary">{{ icon('briefcase') }} <span>Biznes</span></summary>
+            <div class="nav-group-body">
+                <a href="{{ url_for('results') }}" class="cs-nav-item {{ 'active' if request.endpoint=='results' }}">{{ icon('folder') }} Loyihalar</a>
+                <a href="{{ url_for('startups_bp.startups_list') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['startups_list','startup_detail'] }}">{{ icon('briefcase') }} Startaplar</a>
+                <a href="{{ url_for('startups_bp.startup_auctions_list') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['startup_auctions_list','startup_auction_detail'] }}" style="color:#ffd23f;">{{ icon('zap') }} Startap Auksioni</a>
+                {% if current_user and current_user.plan in ['pro','cyber_pro','vip','enterprise'] or current_user and current_user.role in ['admin','super_admin'] %}
+                <a href="{{ url_for('smm_bp.smm_hub') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['smm_hub','smm_chat'] }}" style="color:#ff64c8;">{{ icon('share-2') }} SMM & Logistika</a>
+                {% endif %}
+                {% if current_user and current_user.plan == 'hacker' %}
+                <a href="{{ url_for('freelance_bp.freelance_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='freelance_page' }}" style="color:#a855f7;">{{ icon('briefcase') }} Freelance bozori</a>
+                <a href="{{ url_for('inkubator_bp.incubator_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='inkubator_bp.incubator_page' }}" style="color:#a855f7;">{{ icon('zap') }} Startap inkubatori</a>
+                <a href="{{ url_for('developer_hub_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='developer_hub_page' }}" style="color:#a855f7;">{{ icon('code') }} Developer Hub</a>
+                {% endif %}
+            </div>
+        </details>
+
+        <!-- 🏆 REYTING VA MUKOFOT -->
+        {% set reyting_active = request.endpoint in ['gamification','leaderboard','jamoa_page','redeem_page','friends_page'] %}
+        <details class="nav-group" {{ 'open' if reyting_active }}>
+            <summary class="nav-group-summary">{{ icon('award') }} <span>Reyting va mukofot</span></summary>
+            <div class="nav-group-body">
+                <a href="{{ url_for('leaderboard') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['leaderboard','gamification'] }}">{{ icon('trending-up') }} Reyting va Liderlar</a>
+                <a href="{{ url_for('jamoa_bp.jamoa_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='jamoa_bp.jamoa_page' }}">{{ icon('users') }} Jamoa</a>
+                <a href="{{ url_for('friends.friends_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='friends.friends_page' }}" style="display:flex; align-items:center; justify-content:space-between;">
+                    <span>{{ icon('user-plus') }} Do'stlar</span>
+                    {% if pending_friend_requests_count %}
+                    <span class="cs-chip solid" style="background:#ff5555; border-color:#ff5555; color:#fff; font-size:10px; padding:1px 6px; min-width:18px; text-align:center;">{{ pending_friend_requests_count }}</span>
+                    {% endif %}
+                </a>
+                <a href="{{ url_for('coins_bp.redeem_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='coins_bp.redeem_page' }}" style="color:#a855f7;">{{ icon('key') }} Kod faollashtirish</a>
+            </div>
+        </details>
+
+        <!-- 🔒 HACKER ZONASI — faqat MAXSUS tarifida -->
+        {% if current_user and current_user.plan == 'hacker' %}
+        {% set hacker_active = request.endpoint in ['security_zone_page','security_zone_article','security_zone_quiz','security_certificate_page','ctf_tasks_page','shats_live_page','secret_chat_list_page','secret_chat_thread','referrals_page','admin_chat_page','organization_page','bejik_page','bio_maxsus_page','gift_card_page','hacker_perks_page','shats_pos_page'] %}
+        <details class="nav-group nav-group-hacker" {{ 'open' if hacker_active }}>
+            <summary class="nav-group-summary" style="color:#a855f7;">{{ icon('shield') }} <span>Hacker zonasi</span> <span class="hacker-badge" style="margin-left:auto; font-size:8px; padding:1px 6px;">MAXSUS</span></summary>
+            <div class="nav-group-body">
+                <a href="{{ url_for('secz_bp.security_zone_page') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['security_zone_page','security_zone_article','security_zone_quiz'] }}" style="color:#a855f7;">{{ icon('shield') }} Xavfsizlik zonasi</a>
+                <a href="{{ url_for('secz_bp.security_certificate_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='secz_bp.security_certificate_page' }}" style="color:#a855f7;">{{ icon('award') }} Sertifikat markazi</a>
+                <a href="{{ url_for('ctf_bp.ctf_tasks_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='ctf_bp.ctf_tasks_page' }}" style="color:#a855f7;">{{ icon('target') }} Maxsus vazifalar</a>
+                <a href="{{ url_for('shatslive_bp.shats_live_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='shatslive_bp.shats_live_page' }}" style="color:#a855f7;">{{ icon('play') }} SHATS LIVE</a>
+                <a href="{{ url_for('maxfiy_bp.secret_chat_list_page') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['secret_chat_list_page','secret_chat_thread'] }}" style="color:#a855f7;">{{ icon('lock') }} Maxfiy chat</a>
+                <a href="{{ url_for('referrals_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='referrals_page' }}" style="color:#a855f7;">{{ icon('send') }} Do'stlar taklif</a>
+                <a href="{{ url_for('adminchat_bp.admin_chat_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='admin_chat_page' }}" style="color:#a855f7;">{{ icon('message') }} Admin chat</a>
+                <a href="{{ url_for('tashkilot_bp.organization_page', org_key='mat') }}" class="cs-nav-item {{ 'active' if request.endpoint=='tashkilot_bp.organization_page' and request.view_args and request.view_args.org_key=='mat' }}" style="color:#a855f7;">{{ icon('briefcase') }} M.A.T maxsus</a>
+                <a href="{{ url_for('tashkilot_bp.organization_page', org_key='jxt') }}" class="cs-nav-item {{ 'active' if request.endpoint=='tashkilot_bp.organization_page' and request.view_args and request.view_args.org_key=='jxt' }}" style="color:#a855f7;">{{ icon('briefcase') }} JXT TASHKILOTI</a>
+                <a href="{{ url_for('tashkilot_bp.organization_page', org_key='shats') }}" class="cs-nav-item {{ 'active' if request.endpoint=='tashkilot_bp.organization_page' and request.view_args and request.view_args.org_key=='shats' }}" style="color:#a855f7;">{{ icon('briefcase') }} SHATS JAMOSI</a>
+                <a href="{{ url_for('bejik_bp.bejik_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='bejik_bp.bejik_page' }}" style="color:#a855f7;">{{ icon('id') }} Bejik va QR kod</a>
+                <a href="{{ url_for('bio_maxsus_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='bio_maxsus_page' }}" style="color:#a855f7;">{{ icon('user') }} Bio maxsus</a>
+                <a href="{{ url_for('gift_card_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='gift_card_page' }}" style="color:#a855f7;">{{ icon('gift') }} Sovg'a-kartochka</a>
+                <a href="{{ url_for('hacker_perks_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='hacker_perks_page' }}" style="color:#a855f7;">{{ icon('star') }} Maxsus imtiyozlar</a>
+                <a href="{{ url_for('shatspos_bp.shats_pos_page') }}" class="cs-nav-item {{ 'active' if request.endpoint=='shatspos_bp.shats_pos_page' }}" style="color:#a855f7;">{{ icon('shopping-cart') }} SHATS POS</a>
+            </div>
+        </details>
+        {% endif %}
+
+        {% endif %}
+        <!-- ⚙️ ADMIN PANEL — alohida "rejim", faqat admin/mentor -->
+        {% if current_user and current_user.role in ['admin','mentor','super_admin'] %}
+        {% set admin_active = request.endpoint in ['mentor','admin_dashboard','admin_users','admin_security','admin_payments','admin_leaderboard','admin_announcements','admin_news','admin_certificates','admin_hacker_lab_security','admin_startups','admin_pricing','admin_redeem_codes','admin_chat_inbox','admin_chat_thread','admin_organizations','admin_hacker_perks','admin_promo_codes','admin_design','admin_ids','admin_page_access','admin_teacher_applications','admin_groups_review','admin_channels_review'] %}
+        <details class="nav-group nav-group-admin" {{ 'open' if admin_active }}>
+            <summary class="nav-group-summary">{{ icon('cpu') }} <span>Admin rejimi</span></summary>
+            <div class="nav-group-body">
+                <a href="{{ url_for('mentor') }}" class="cs-nav-item {{ 'active' if request.endpoint=='mentor' }}">{{ icon('users') }} Mentor</a>
+                <a href="{{ url_for('admindash_bp.admin_dashboard') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['admin_dashboard','admin_users','admin_security','admin_payments','admin_leaderboard'] }}" style="color:var(--cs-text-primary);">{{ icon('cpu') }} Admin Panel</a>
+                <a href="{{ url_for('adminann_bp.admin_announcements') }}" class="cs-nav-item {{ 'active' if request.endpoint=='admin_announcements' }}" style="color:#ffd23f;">{{ icon('message') }} E'lonlar</a>
+                <a href="{{ url_for('adminann_bp.admin_news') }}" class="cs-nav-item {{ 'active' if request.endpoint=='admin_news' }}" style="color:var(--cs-text-cyan);">{{ icon('zap') }} Yangiliklar</a>
+                <a href="{{ url_for('adminmod_bp.admin_certificates') }}" class="cs-nav-item {{ 'active' if request.endpoint=='admin_certificates' }}" style="color:#3366ff;">{{ icon('award') }} Sertifikat arizalari</a>
+                <a href="{{ url_for('hackerlab_bp.admin_hacker_lab_security') }}" class="cs-nav-item {{ 'active' if request.endpoint=='hackerlab_bp.admin_hacker_lab_security' }}" style="color:#ff5555;">{{ icon('shield') }} Hacker Lab Xavfsizlik</a>
+                <a href="{{ url_for('startups_bp.admin_startups') }}" class="cs-nav-item {{ 'active' if request.endpoint=='startups_bp.admin_startups' }}" style="color:#3366ff;">{{ icon('briefcase') }} Startaplar tasdiqlash</a>
+                <a href="{{ url_for('adminmisc_bp.admin_pricing') }}" class="cs-nav-item {{ 'active' if request.endpoint=='admin_pricing' }}" style="color:#ffd700;">{{ icon('settings') }} CODE Narxlar</a>
+                <a href="{{ url_for('adminmisc_bp.admin_redeem_codes') }}" class="cs-nav-item {{ 'active' if request.endpoint=='admin_redeem_codes' }}" style="color:#a855f7;">{{ icon('key') }} MAXSUS kodlari</a>
+                <a href="{{ url_for('adminchat_bp.admin_chat_inbox') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['admin_chat_inbox','admin_chat_thread'] }}" style="color:#a855f7;">{{ icon('message') }} Admin chat murojaatlari</a>
+                <a href="{{ url_for('admintashkilot_bp.admin_organizations') }}" class="cs-nav-item {{ 'active' if request.endpoint=='admin_organizations' }}" style="color:#a855f7;">{{ icon('briefcase') }} M.A.T / JXT boshqaruvi</a>
+                <a href="{{ url_for('admintashkilot_bp.admin_hacker_perks') }}" class="cs-nav-item {{ 'active' if request.endpoint=='admin_hacker_perks' }}" style="color:#a855f7;">{{ icon('gift') }} Maxsus imtiyozlar</a>
+                <a href="{{ url_for('adminmisc_bp.admin_promo_codes') }}" class="cs-nav-item {{ 'active' if request.endpoint=='admin_promo_codes' }}" style="color:#00c853;">{{ icon('tag') }} Promo Kodlar</a>
+                <a href="{{ url_for('adminmisc_bp.admin_design') }}" class="cs-nav-item {{ 'active' if request.endpoint=='admin_design' }}" style="color:#ff69b4;">{{ icon('sun') }} Dizayn Boshqaruv</a>
+                <a href="{{ url_for('adminids_bp.admin_ids') }}" class="cs-nav-item {{ 'active' if request.endpoint in ['admin_ids'] }}" style="color:#ffd23f;">{{ icon('hash') }} ID Boshqaruvi</a>
+                <a href="{{ url_for('adminaccess_bp.admin_page_access') }}" class="cs-nav-item {{ 'active' if request.endpoint=='admin_page_access' }}" style="color:#ff3b3b;">{{ icon('lock') }} Sahifalar Ruxsati</a>
+            </div>
+        </details>
+        {% endif %}
+
+    </nav>
+
+    <!-- 👤 PROFIL — sidebar pastida, alohida (accordion emas), 2x2 grid -->
+    <div class="cs-nav-profile-group" style="display:grid; grid-template-columns:1fr 1fr; padding: 4px 8px; gap:4px;">
+        <a href="{{ url_for('profile') }}" class="cs-nav-item {{ 'active' if request.endpoint=='profile' }}" style="padding:6px; font-size:10px; gap:4px; border-radius:4px;">{{ icon('user') }} Profil</a>
+        <a href="{{ url_for('settings') }}" class="cs-nav-item {{ 'active' if request.endpoint=='settings' }}" style="padding:6px; font-size:10px; gap:4px; border-radius:4px;">{{ icon('settings') }} Sozlama</a>
+        <a href="/virtual/" class="cs-nav-item" style="color:#00ffff; padding:6px; font-size:10px; gap:4px; border-radius:4px;">{{ icon('planet') }} Virtual</a>
+        <a href="{{ url_for('logout') }}" class="cs-nav-item logout" style="padding:6px; font-size:10px; gap:4px; border:none; margin:0; border-radius:4px;">{{ icon('logout') }} Chiqish</a>
+    </div>
+
+    {% if current_user %}
+    <div class="cs-nav-foot" style="padding: 10px 12px; gap:8px;">
+        <div class="avatar-fallback flex-center" style="width:26px; height:26px; font-size:11px; background:rgba(0,255,65,.1); color:var(--cs-text-primary); font-family:var(--cs-font-display);">{{ current_user.ism[0]|upper }}</div>
+        <div class="who" style="font-size:11px; line-height:1.2;">
+            <strong style="display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">{{ current_user.ism }} {{ current_user.familiya }}</strong>
+            <div style="display:flex; align-items:center; gap:4px; margin-top:2px;">
+                <small style="color:var(--cs-text-muted); font-size:9.5px;">LVL {{ current_user.level }} · {{ current_user.xp }} XP</small>
+                <small style="color:var(--cs-text-primary); font-size:9.5px; font-weight:bold;">⚡ {{ current_user.code_balance|default(0) }}</small>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</aside>
+
+<style>
+/* Sidebar nav scroll */
+#cs-nav-scroll {
+    overflow-y: auto;
+    overflow-x: hidden;
+    flex: 1;
+}
+
+/* --- Accordion guruhlari --- */
+.nav-group { border-bottom: 1px solid rgba(255,255,255,.04); }
+.nav-group-summary {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 5px 12px;
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--cs-text-muted);
+    cursor: pointer;
+    list-style: none;
+    user-select: none;
+    transition: color .15s, background .15s;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+.nav-group-summary::-webkit-details-marker { display: none; }
+.nav-group-summary::after {
+    content: '›';
+    margin-left: auto;
+    font-size: 16px;
+    transition: transform .2s;
+    opacity: .5;
+}
+.nav-group[open] > .nav-group-summary::after { transform: rotate(90deg); }
+.nav-group-summary:hover { color: var(--cs-text-primary); background: rgba(0,255,65,.04); }
+.nav-group-summary svg { width:14px; height:14px; flex-shrink:0; }
+.nav-group-body { padding: 0; }
+.nav-group-body .cs-nav-item { padding-left: 28px; font-size: 10px; }
+.nav-group-badge {
+    background:#ff5555; border-color:#ff5555; color:#fff;
+    font-size:9px; padding:1px 5px; min-width:16px; text-align:center; margin-left:auto;
+}
+.nav-group-hacker .nav-group-summary { background: rgba(168,85,247,.04); }
+.nav-group-admin { border-top: 1px solid rgba(255,255,255,.08); margin-top: 4px; }
+.nav-group-admin .nav-group-summary { background: rgba(255,255,255,.02); }
+
+/* Profil bo'limi — pastda, alohida */
+.cs-nav-profile-group { border-top: 1px solid var(--cs-border); padding: 4px 0; flex-shrink: 0; }
+</style>
+
+<script>
+// Sahifa yuklanganda aktiv link joylashgan guruhni avtomatik ochish + ko'rinishga scroll qilish
+(function() {
+    const nav = document.getElementById('cs-nav-scroll');
+    if (!nav) return;
+    const activeLink = nav.querySelector('.cs-nav-item.active');
+    if (activeLink) {
+        setTimeout(() => activeLink.scrollIntoView({ block: 'center', behavior: 'smooth' }), 100);
+    }
+})();
+</script>

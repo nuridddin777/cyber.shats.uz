@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>CYBER SHATS</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+  :root {
+    --bg: #0a0e1a; --card: #12172a; --card-2: #171d33;
+    --gold: #d4af37; --blue: #3b82f6; --green: #22c55e; --red: #ef4444;
+    --text: #eef1f8; --muted: #8891a8; --border: rgba(255,255,255,.08);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  body { margin: 0; background: var(--bg); color: var(--text); font-family: -apple-system, "Segoe UI", Roboto, sans-serif; padding: 12px 14px 28px; }
+  .topbar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; min-height: 28px; }
+  .back-btn { background: var(--card); border: none; border-radius: 10px; width: 32px; height: 32px; color: var(--text); font-size: 16px; display: none; align-items: center; justify-content: center; }
+  .topbar-title { font-size: 15px; font-weight: 700; }
+
+  .balance-card { background: linear-gradient(135deg, #1d2a5c 0%, #2b1d5c 100%); border-radius: 20px; padding: 22px 20px; margin-bottom: 16px; box-shadow: 0 8px 24px rgba(59,90,246,.25); }
+  .balance-label { font-size: 12px; opacity: .75; margin-bottom: 4px; }
+  .balance-value { font-size: 34px; font-weight: 800; }
+  .balance-som { font-size: 13px; opacity: .7; margin-top: 2px; }
+  .user-row { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .user-avatar { width: 40px; height: 40px; border-radius: 50%; background: rgba(255,255,255,.15); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+  .user-name { font-weight: 700; font-size: 14px; }
+  .user-sub { font-size: 11px; opacity: .7; }
+
+  .tile-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 4px; }
+  .tile { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px 12px; text-align: center; cursor: pointer; }
+  .tile:active { background: var(--card-2); transform: scale(.97); }
+  .tile-icon { font-size: 26px; margin-bottom: 8px; }
+  .tile-label { font-size: 12.5px; font-weight: 700; }
+
+  .row-btns { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
+  .action-btn { background: rgba(255,255,255,.1); border: none; border-radius: 14px; padding: 12px 6px; color: #fff; font-size: 11px; font-weight: 600; display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; }
+  .action-btn:active { background: rgba(255,255,255,.2); }
+
+  .section-title { font-size: 12.5px; font-weight: 700; color: var(--muted); margin: 20px 0 10px; letter-spacing: .5px; }
+  .plan-grid, .pkg-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .plan-card, .pkg-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 16px 12px; text-align: center; cursor: pointer; transition: .15s; }
+  .plan-card:active, .pkg-card:active { background: var(--card-2); transform: scale(.97); }
+  .plan-icon { font-size: 24px; margin-bottom: 6px; }
+  .plan-label { font-size: 12px; font-weight: 700; margin-bottom: 4px; }
+  .plan-price { font-size: 14px; font-weight: 800; color: var(--gold); }
+  .plan-price-som { font-size: 10.5px; color: var(--muted); margin-top: 2px; }
+
+  .course-row { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+  .course-title { font-size: 12.5px; font-weight: 700; }
+  .course-dir { font-size: 10.5px; color: var(--muted); }
+  .course-price { font-size: 13px; font-weight: 800; color: var(--gold); }
+
+  .loading { text-align: center; padding: 60px 20px; color: var(--muted); font-size: 13px; }
+  .error-box { background: rgba(239,68,68,.1); border: 1px solid rgba(239,68,68,.3); border-radius: 14px; padding: 16px; text-align: center; font-size: 13px; color: #fca5a5; margin-top: 20px; }
+
+  .form-card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 18px; }
+  .form-card input, .form-card textarea { width: 100%; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 11px 12px; color: var(--text); font-size: 13.5px; margin-bottom: 12px; }
+  .form-card label { font-size: 11.5px; color: var(--muted); display: block; margin-bottom: 6px; }
+  .primary-btn { width: 100%; background: linear-gradient(135deg, var(--blue), #6366f1); border: none; border-radius: 12px; padding: 13px; color: #fff; font-weight: 700; font-size: 14px; cursor: pointer; }
+  .primary-btn:disabled { opacity: .5; }
+  .file-input-wrap { border: 2px dashed var(--border); border-radius: 12px; padding: 18px; text-align: center; margin-bottom: 12px; cursor: pointer; font-size: 12.5px; color: var(--muted); }
+  .file-input-wrap.has-file { border-color: var(--green); color: var(--green); }
+  .card-info { background: rgba(0,255,106,.08); border: 1px solid rgba(0,255,106,.25); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; font-size: 12.5px; }
+  .card-number { font-family: monospace; font-size: 15px; font-weight: 700; letter-spacing: 1px; margin-top: 4px; }
+
+  .status-msg { font-size: 12.5px; margin-top: 10px; text-align: center; padding: 10px; border-radius: 10px; }
+  .status-msg.ok { background: rgba(34,197,94,.12); color: var(--green); }
+  .status-msg.err { background: rgba(239,68,68,.12); color: #fca5a5; }
+
+  .leader-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); }
+  .leader-rank { width: 22px; font-weight: 800; color: var(--muted); font-size: 12px; }
+  .leader-name { flex: 1; font-size: 13px; }
+  .leader-xp { font-size: 12px; color: var(--gold); font-weight: 700; }
+
+  .req-row { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 14px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center; }
+  .req-type { font-size: 12.5px; font-weight: 700; }
+  .req-date { font-size: 10.5px; color: var(--muted); }
+  .req-status { font-size: 10.5px; font-weight: 700; padding: 3px 9px; border-radius: 8px; }
+  .req-status.pending { background: rgba(245,158,11,.15); color: #fbbf24; }
+  .req-status.completed { background: rgba(34,197,94,.15); color: var(--green); }
+  .req-status.rejected { background: rgba(239,68,68,.15); color: #fca5a5; }
+</style>
+</head>
+<body>
+<div class="topbar">
+  <button class="back-btn" id="backBtn">←</button>
+  <div class="topbar-title" id="topTitle">CYBER SHATS</div>
+</div>
+<div id="app"><div class="loading">⏳ Yuklanmoqda...</div></div>
+
+<script>
+(function() {
+    var tg = window.Telegram && window.Telegram.WebApp;
+    if (tg) {
+        tg.ready(); tg.expand();
+        try { tg.setHeaderColor('#0a0e1a'); tg.setBackgroundColor('#0a0e1a'); } catch(e){}
+    }
+    var initData = tg ? tg.initData : "";
+    if (!initData) {
+        document.getElementById('app').innerHTML = `<div class="form-card" style="margin-top:30px; text-align:center;"><div style="font-size:40px; margin-bottom:10px;">⚠️</div><h3 style="margin-top:0; color:#fca5a5;">Telegram xatosi</h3><p style="font-size:14px; color:var(--muted);">Bu sahifa faqat <b>Telegram bot</b> ichida ochilganda ishlaydi. Oddiy brauzerda Telegram akkauntingizni tasdiqlash imkonsiz.</p><a href="https://t.me/shats_cyber_bot" style="display:inline-block; margin-top:10px; padding:10px 20px; background:var(--blue); color:#fff; text-decoration:none; border-radius:10px; font-weight:bold;">Botga o'tish</a></div>`;
+        return;
+    }
+    function haptic(type) { if (tg && tg.HapticFeedback) { try { tg.HapticFeedback.impactOccurred(type || 'light'); } catch(e){} } }
+
+    var app = document.getElementById('app');
+    var backBtn = document.getElementById('backBtn');
+    var topTitle = document.getElementById('topTitle');
+    var screenStack = [];
+    var cachedProfile = null;
+
+    function fetchJSON(url, opts) {
+        opts = opts || {};
+        opts.headers = opts.headers || {};
+        opts.headers['X-Telegram-Init-Data'] = initData;
+        return fetch(url, opts).then(function(r) { return r.json(); });
+    }
+    function fetchForm(url, formData) {
+        return fetch(url, { method: 'POST', headers: { 'X-Telegram-Init-Data': initData }, body: formData })
+            .then(function(r) { return r.json(); });
+    }
+
+    function loadProfile(cb) {
+        fetchJSON('/api/webapp/profile').then(function(res) {
+            cachedProfile = res.ok ? res.user : null;
+            cb(res);
+        });
+    }
+
+    function goto(screenName, opts) {
+        screenStack.push(screenName);
+        backBtn.style.display = screenStack.length > 1 ? 'flex' : 'none';
+        renderScreen(screenName, opts || {});
+    }
+    backBtn.addEventListener('click', function() {
+        if (screenStack.length > 1) {
+            screenStack.pop();
+            backBtn.style.display = screenStack.length > 1 ? 'flex' : 'none';
+            renderScreen(screenStack[screenStack.length - 1], {});
+        }
+    });
+
+    // ============ HOME ============
+    function screenHome() {
+        topTitle.textContent = 'CYBER SHATS';
+        loadProfile(function(res) {
+            if (!res.ok) { renderLinkProfile(); return; }
+            var u = res.user;
+            var initials = (u.ism || '?').charAt(0).toUpperCase();
+            var html = '<div class="balance-card">';
+            html += '<div class="user-row"><div class="user-avatar">' + initials + '</div>';
+            html += '<div><div class="user-name">' + u.familiya + ' ' + u.ism + '</div>';
+            html += '<div class="user-sub">#' + u.custom_id + ' · ' + u.plan + ' · Lvl ' + u.level + '</div></div></div>';
+            html += '<div class="balance-label">Balans</div>';
+            html += '<div class="balance-value">⚡ ' + u.code_balance.toLocaleString() + '</div>';
+            html += '<div class="balance-som">≈ ' + u.code_balance_som.toLocaleString() + ' so\'m</div>';
+            html += '</div>';
+
+            html += '<div class="tile-grid">';
+            html += tile('⚡', 'CODE sotib olish', 'buyCode');
+            html += tile('🎓', 'Tarif sotib olish', 'buyTariff');
+            html += tile('📚', 'Kurs sotib olish', 'buyCourse');
+            html += tile('📋', 'Mening so\'rovlarim', 'myRequests');
+            html += '</div>';
+
+            html += '<div class="row-btns">';
+            html += '<button class="action-btn" data-goto="promo"><span style="font-size:20px;">🎁</span>Bonus kod</button>';
+            html += '<button class="action-btn" data-goto="leaderboard"><span style="font-size:20px;">🏆</span>Reyting</button>';
+            html += '<button class="action-btn" onclick="window.open(\'https://t.me/shats_cyber_admin\')"><span style="font-size:20px;">💬</span>Yordam</button>';
+            html += '</div>';
+
+            app.innerHTML = html;
+            bindTiles();
+        });
+    }
+    function tile(icon, label, screenName) {
+        return '<div class="tile" data-goto="' + screenName + '"><div class="tile-icon">' + icon + '</div><div class="tile-label">' + label + '</div></div>';
+    }
+    function bindTiles() {
+        document.querySelectorAll('[data-goto]').forEach(function(el) {
+            el.addEventListener('click', function() { haptic('light'); goto(el.dataset.goto); });
+        });
+    }
+
+    // ============ PROFIL ULASH ============
+    function renderLinkProfile() {
+        topTitle.textContent = 'Profil ulash';
+        var html = '<div class="form-card">';
+        html += '<p style="font-size:12.5px;color:var(--muted);margin-top:0;">Saytdagi ID raqamingiz va emailingizni kiriting.</p>';
+        html += '<label>ID raqami</label><input type="text" id="linkId" placeholder="Masalan: 1342835">';
+        html += '<label>Email</label><input type="email" id="linkEmail" placeholder="email@misol.com">';
+        html += '<button class="primary-btn" id="linkSubmit">Ulash</button>';
+        html += '<div class="status-msg" id="linkMsg" style="display:none;"></div>';
+        html += '</div>';
+        app.innerHTML = html;
+        document.getElementById('linkSubmit').addEventListener('click', function() {
+            var cid = document.getElementById('linkId').value.trim();
+            var email = document.getElementById('linkEmail').value.trim();
+            if (!cid || !email) return;
+            haptic('medium');
+            fetchJSON('/api/webapp/link-profile', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ custom_id: cid, email: email })
+            }).then(function(res) {
+                var m = document.getElementById('linkMsg');
+                m.style.display = 'block';
+                m.className = 'status-msg ' + (res.ok ? 'ok' : 'err');
+                m.textContent = res.message;
+                if (res.ok) { haptic('heavy'); setTimeout(function(){ screenStack = []; goto('home'); }, 1000); }
+            });
+        });
+    }
+
+    // ============ CODE SOTIB OLISH ============
+    function screenBuyCode() {
+        topTitle.textContent = 'CODE sotib olish';
+        app.innerHTML = '<div class="loading">⏳</div>';
+        fetchJSON('/api/webapp/code-packages').then(function(res) {
+            var html = '<div class="pkg-grid">';
+            (res.packages || []).forEach(function(p) {
+                html += '<div class="pkg-card" data-code="' + p.code + '" data-som="' + p.price_som + '">';
+                html += '<div class="plan-icon">⚡</div><div class="plan-label">' + p.code + ' CODE</div>';
+                html += '<div class="plan-price-som">' + p.price_som.toLocaleString() + ' so\'m</div></div>';
+            });
+            html += '</div>';
+            app.innerHTML = html;
+            document.querySelectorAll('.pkg-card').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    haptic('light');
+                    goto('payReceipt', { type: 'code', code_amount: el.dataset.code, price_uzs: el.dataset.som });
+                });
+            });
+        });
+    }
+
+    // ============ TARIF SOTIB OLISH ============
+    function screenBuyTariff() {
+        topTitle.textContent = 'Tarif sotib olish';
+        app.innerHTML = '<div class="loading">⏳</div>';
+        fetchJSON('/api/webapp/pricing').then(function(res) {
+            var html = '<div class="plan-grid">';
+            (res.plans || []).forEach(function(p) {
+                html += '<div class="plan-card" data-plan="' + p.key + '" data-som="' + p.price_uzs + '">';
+                html += '<div class="plan-icon">' + p.icon + '</div><div class="plan-label">' + p.label + '</div>';
+                html += '<div class="plan-price">⚡ ' + p.price_code + ' CODE</div>';
+                html += '<div class="plan-price-som">' + p.price_uzs.toLocaleString() + ' so\'m</div></div>';
+            });
+            html += '</div>';
+            app.innerHTML = html;
+            document.querySelectorAll('.plan-card').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    haptic('light');
+                    goto('payReceipt', { type: 'tariff', plan: el.dataset.plan, price_uzs: el.dataset.som });
+                });
+            });
+        });
+    }
+
+    // ============ KURS SOTIB OLISH ============
+    function screenBuyCourse() {
+        topTitle.textContent = 'Kurs sotib olish';
+        app.innerHTML = '<div class="loading">⏳</div>';
+        fetchJSON('/api/webapp/courses').then(function(res) {
+            var html = '';
+            (res.courses || []).forEach(function(c) {
+                html += '<div class="course-row" data-id="' + c.id + '" data-price="' + c.code_price + '">';
+                html += '<div><div class="course-title">' + c.title + '</div><div class="course-dir">' + c.direction_name + '</div></div>';
+                html += '<div class="course-price">⚡ ' + c.code_price + '</div></div>';
+            });
+            app.innerHTML = html || '<p class="loading">Hozircha kurs yo\'q.</p>';
+            document.querySelectorAll('.course-row').forEach(function(el) {
+                el.addEventListener('click', function() {
+                    haptic('light');
+                    goto('payReceipt', { type: 'course', course_ids: el.dataset.id, price_uzs: el.dataset.price * 10000 });
+                });
+            });
+        });
+    }
+
+    // ============ TO'LOV + CHEK YUKLASH (umumiy) ============
+    function screenPayReceipt(opts) {
+        topTitle.textContent = 'Chek yuklash';
+        var html = '<div class="form-card">';
+        html += '<div class="card-info">💳 To\'lov uchun karta:<div class="card-number">4916 9903 5863 3797</div>(Q.TEMUROV)</div>';
+        html += '<p style="font-size:12.5px;color:var(--muted);">To\'lovni amalga oshirib, chekning skrinshotini yuklang.</p>';
+        html += '<div class="file-input-wrap" id="fileWrap">📷 Chek rasmini tanlash</div>';
+        html += '<input type="file" id="fileInput" accept="image/*" style="display:none;">';
+        html += '<button class="primary-btn" id="submitReceipt" disabled>Yuborish</button>';
+        html += '<div class="status-msg" id="receiptMsg" style="display:none;"></div>';
+        html += '</div>';
+        app.innerHTML = html;
+
+        var fileWrap = document.getElementById('fileWrap');
+        var fileInput = document.getElementById('fileInput');
+        var submitBtn = document.getElementById('submitReceipt');
+        fileWrap.addEventListener('click', function() { fileInput.click(); });
+        fileInput.addEventListener('change', function() {
+            if (fileInput.files.length) {
+                fileWrap.textContent = '✅ ' + fileInput.files[0].name;
+                fileWrap.classList.add('has-file');
+                submitBtn.disabled = false;
+            }
+        });
+        submitBtn.addEventListener('click', function() {
+            haptic('medium');
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Yuborilmoqda...';
+            var fd = new FormData();
+            fd.append('receipt', fileInput.files[0]);
+            if (opts.code_amount) fd.append('code_amount', opts.code_amount);
+            if (opts.plan) fd.append('plan', opts.plan);
+            if (opts.course_ids) fd.append('course_ids', opts.course_ids);
+            fd.append('price_uzs', opts.price_uzs || 0);
+            fetchForm('/api/webapp/purchase/' + opts.type, fd).then(function(res) {
+                var m = document.getElementById('receiptMsg');
+                m.style.display = 'block';
+                m.className = 'status-msg ' + (res.ok ? 'ok' : 'err');
+                m.textContent = res.message;
+                if (res.ok) { haptic('heavy'); setTimeout(function(){ screenStack = ['home']; goto('myRequests'); }, 1200); }
+                else { submitBtn.disabled = false; submitBtn.textContent = 'Yuborish'; }
+            });
+        });
+    }
+
+    // ============ MENING SO'ROVLARIM ============
+    function screenMyRequests() {
+        topTitle.textContent = 'Mening so\'rovlarim';
+        app.innerHTML = '<div class="loading">⏳</div>';
+        fetchJSON('/api/webapp/my-requests').then(function(res) {
+            if (!res.ok) { app.innerHTML = '<div class="error-box">Profilingiz ulanmagan.</div>'; return; }
+            var typeLabels = { code: 'CODE', tariff: 'Tarif', course: 'Kurs' };
+            var html = '';
+            (res.requests || []).forEach(function(r) {
+                html += '<div class="req-row"><div><div class="req-type">' + (typeLabels[r.request_type] || r.request_type) + '</div>';
+                html += '<div class="req-date">' + r.created_at + '</div></div>';
+                html += '<div class="req-status ' + r.status + '">' + r.status + '</div></div>';
+            });
+            app.innerHTML = html || '<p class="loading">Hali so\'rov yo\'q.</p>';
+        });
+    }
+
+    // ============ BONUS KOD ============
+    function screenPromo() {
+        topTitle.textContent = 'Bonus kod';
+        var html = '<div class="form-card">';
+        html += '<label>Promo kod</label><input type="text" id="promoInput" placeholder="Kodni kiriting">';
+        html += '<button class="primary-btn" id="promoSubmit">Faollashtirish</button>';
+        html += '<div class="status-msg" id="promoMsg" style="display:none;"></div>';
+        html += '</div>';
+        app.innerHTML = html;
+        document.getElementById('promoSubmit').addEventListener('click', function() {
+            var code = document.getElementById('promoInput').value.trim();
+            if (!code) return;
+            haptic('medium');
+            fetchJSON('/api/webapp/redeem-promo', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ code: code })
+            }).then(function(res) {
+                var m = document.getElementById('promoMsg');
+                m.style.display = 'block';
+                m.className = 'status-msg ' + (res.ok ? 'ok' : 'err');
+                m.textContent = res.message;
+                if (res.ok) haptic('heavy');
+            });
+        });
+    }
+
+    // ============ REYTING ============
+    function screenLeaderboard() {
+        topTitle.textContent = 'Reyting';
+        app.innerHTML = '<div class="loading">⏳</div>';
+        fetchJSON('/api/webapp/leaderboard').then(function(res) {
+            var medals = ['🥇','🥈','🥉'];
+            var html = '';
+            (res.leaders || []).forEach(function(l, i) {
+                html += '<div class="leader-row"><div class="leader-rank">' + (medals[i] || (i+1)) + '</div>';
+                html += '<div class="leader-name">' + l.familiya + ' ' + l.ism + '</div>';
+                html += '<div class="leader-xp">Lvl ' + l.level + ' · ' + l.xp + ' XP</div></div>';
+            });
+            app.innerHTML = html || '<p class="loading">Ma\'lumot yo\'q.</p>';
+        });
+    }
+
+    function renderScreen(name, opts) {
+        if (name === 'home') screenHome();
+        else if (name === 'buyCode') screenBuyCode();
+        else if (name === 'buyTariff') screenBuyTariff();
+        else if (name === 'buyCourse') screenBuyCourse();
+        else if (name === 'payReceipt') screenPayReceipt(opts);
+        else if (name === 'myRequests') screenMyRequests();
+        else if (name === 'promo') screenPromo();
+        else if (name === 'leaderboard') screenLeaderboard();
+    }
+
+    goto('home');
+})();
+</script>
+</body>
+</html>

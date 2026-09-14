@@ -1,0 +1,169 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Random ID — CYBER SHATS{% endblock %}
+{% block app_content %}
+<h1 style="font-size:19px; margin-bottom:8px;">🎲 Random ID</h1>
+<p class="muted" style="font-size:12.5px; margin-bottom:20px;">
+    ID auksioni yopildi — endi shu yerda tasodifiy ID "aylantirasiz". Har aylantirishda yangi ID va narx
+    (1–1000 CODE, ID qanchalik chiroyli bo'lsa shuncha qimmat) ko'rsatiladi. Yoqmasa — bepul qayta aylantiravering,
+    faqat sotib olganingizda CODE yechiladi.
+</p>
+
+<div class="cs-card" style="padding:28px; text-align:center; max-width:420px; margin:0 auto 20px;">
+    <div class="cs-chip solid" style="margin-bottom:16px;">⚡ Balansingiz: {{ "{:,}".format(balance|int) }} CODE</div>
+
+    <div id="ridResult" style="display:none; margin-bottom:18px;">
+        <div style="font-family:var(--cs-font-mono); font-size:34px; font-weight:800; letter-spacing:6px; color:var(--cs-text-primary); margin-bottom:8px; display:flex; justify-content:center; gap:2px;">
+            <span>#</span>
+            <span class="rid-digit" data-i="0">0</span><span class="rid-digit" data-i="1">0</span><span class="rid-digit" data-i="2">0</span><span class="rid-digit" data-i="3">0</span><span class="rid-digit" data-i="4">0</span><span class="rid-digit" data-i="5">0</span><span class="rid-digit" data-i="6">0</span>
+        </div>
+        <div class="cs-chip solid" id="ridPriceChip" style="color:var(--cs-text-yellow); opacity:0; transition:opacity .3s;">⚡ <span id="ridPrice">0</span> CODE</div>
+    </div>
+
+    <div id="ridEmpty" style="padding:30px 0; color:var(--cs-text-muted); font-size:13px;">
+        Hali aylantirmadingiz — pastdagi tugmani bosing 🎲
+    </div>
+
+    <div style="display:flex; gap:10px; justify-content:center; margin-top:20px; flex-wrap:wrap;">
+        <button id="ridSpinBtn" class="cs-btn cs-btn-primary" onclick="spinRandomId()">🎲 Aylantirish</button>
+        <form method="post" action="{{ url_for('ids_bp.random_id_confirm') }}" id="ridConfirmForm" style="display:none;">
+            <button type="submit" class="cs-btn" style="background:var(--cs-text-yellow); color:#1a1200; border:none; font-weight:800;">
+                {{ icon('check',13) }} Shu ID ni sotib olish
+            </button>
+        </form>
+        <form method="post" action="{{ url_for('ids_bp.random_id_reserve') }}" id="ridReserveForm" style="display:none;">
+            <button type="submit" class="cs-btn" style="background:var(--cs-text-primary); color:#fff; border:none; font-weight:800;" {{ 'disabled title="Sizda allaqachon faol band bor"' if active_reservation }}>
+                🔒 {{ reservation_hours }} soatga band qilish
+            </button>
+        </form>
+    </div>
+</div>
+
+{% if active_reservation %}
+<div class="cs-card" style="padding:24px; max-width:420px; margin:0 auto 20px; border-color:rgba(0,255,106,.4); background:rgba(0,255,106,.05);">
+    <h3 style="font-size:13px; margin-bottom:14px;">🔒 Band qilingan ID'ingiz</h3>
+    <div style="font-family:var(--cs-font-mono); font-size:26px; font-weight:800; letter-spacing:4px; color:var(--cs-text-primary); margin-bottom:8px;">
+        #{{ active_reservation.custom_id }}
+    </div>
+    <div class="muted" style="font-size:11.5px; margin-bottom:6px;">Narxi: ⚡ {{ active_reservation.price }} CODE</div>
+    <div class="muted" style="font-size:11px; margin-bottom:16px;">Muddati: {{ active_reservation.expires_at | tashkent_time }} gacha</div>
+    <div style="display:flex; gap:8px; justify-content:center;">
+        <form method="post" action="{{ url_for('ids_bp.random_id_reservation_buy', reservation_id=active_reservation.id) }}">
+            <button type="submit" class="cs-btn cs-btn-primary">⚡ Hozir sotib olish</button>
+        </form>
+        <form method="post" action="{{ url_for('ids_bp.random_id_reservation_cancel', reservation_id=active_reservation.id) }}" onsubmit="return confirm('Band bekor qilinsinmi?');">
+            <button type="submit" class="cs-btn cs-btn-sm">Bekor qilish</button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<div class="cs-card" style="padding:18px; max-width:420px; margin:0 auto;">
+    <h3 style="font-size:11.5px; margin-bottom:10px; color:var(--cs-text-muted);">NARX QANDAY HISOBLANADI?</h3>
+    <ul style="font-size:11.5px; color:var(--cs-text-muted); line-height:1.8; padding-left:18px;">
+        <li>Oddiy, tasodifiy ID → 700 CODE atrofida</li>
+        <li>Ketma-ket yoki palindrom raqamlar → o'rtacha narx</li>
+        <li>Ko'p bir xil raqamli (masalan 1122333) → qimmatroq</li>
+        <li>Eng nodir kombinatsiyalar → 1000 CODEgacha</li>
+    </ul>
+    <p class="muted" style="font-size:10.5px; margin-top:10px;">
+        Aynan ID orqali o'zingiz tanlab o'zgartirish (Mening ID sahifasida) — qat'iy 500 CODE turadi.
+    </p>
+</div>
+
+<style>
+.rid-digit {
+    display: inline-block; width: 26px; text-align: center;
+    transition: transform .08s ease-out;
+}
+.rid-digit.spinning {
+    animation: rid-roll 0.1s linear infinite;
+}
+@keyframes rid-roll {
+    0% { transform: translateY(0); opacity: 1; }
+    50% { transform: translateY(-4px); opacity: .6; }
+    100% { transform: translateY(0); opacity: 1; }
+}
+.rid-digit.landed {
+    animation: rid-land 0.35s cubic-bezier(.34,1.56,.64,1);
+    color: var(--cs-text-yellow);
+}
+@keyframes rid-land {
+    0% { transform: scale(1.4); color: var(--cs-text-yellow); }
+    100% { transform: scale(1); color: var(--cs-text-primary); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .rid-digit, .rid-digit.spinning, .rid-digit.landed { animation: none !important; transition: none !important; }
+}
+</style>
+<script>
+var ridSpinIntervals = [];
+
+function ridClearIntervals() {
+    ridSpinIntervals.forEach(function(id) { clearInterval(id); });
+    ridSpinIntervals = [];
+}
+
+function spinRandomId() {
+    var btn = document.getElementById('ridSpinBtn');
+    btn.disabled = true;
+    ridClearIntervals();
+    document.getElementById('ridEmpty').style.display = 'none';
+    document.getElementById('ridResult').style.display = 'block';
+    document.getElementById('ridConfirmForm').style.display = 'none';
+    document.getElementById('ridReserveForm').style.display = 'none';
+    document.getElementById('ridPriceChip').style.opacity = '0';
+
+    var digitEls = document.querySelectorAll('.rid-digit');
+    digitEls.forEach(function(el) { el.classList.remove('landed'); });
+
+    // Server bilan PARALLEL, tasodifiy raqamlar "aylanadi" (haqiqiy slot-mashina
+    // effekti) — har bir katak boshqa vaqtda to'xtaydi (chapdan o'ngga), server
+    // javobi qaytgach barcha kataklar ASL natija bilan mos qatorda to'xtaydi.
+    digitEls.forEach(function(el) {
+        el.classList.add('spinning');
+        var interval = setInterval(function() {
+            el.textContent = Math.floor(Math.random() * 10);
+        }, 45);
+        ridSpinIntervals.push(interval);
+    });
+
+    fetch('{{ url_for("ids_bp.random_id_spin") }}', {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: {'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content}
+    })
+    .then(function(r) { return r.json(); })
+    .then(function(d) {
+        if (!d.success) { ridClearIntervals(); btn.disabled = false; alert('Xatolik yuz berdi.'); return; }
+        var finalDigits = d.data.custom_id.split('');
+        // Har bir katak KETMA-KET (chapdan o'ngga, 200ms farq bilan) to'xtaydi —
+        // shu "bosqichma-bosqich to'xtash" hissi haqiqiy slot-mashinaga o'xshaydi.
+        finalDigits.forEach(function(digit, i) {
+            setTimeout(function() {
+                clearInterval(ridSpinIntervals[i]);
+                var el = digitEls[i];
+                el.textContent = digit;
+                el.classList.remove('spinning');
+                el.classList.add('landed');
+                if (i === finalDigits.length - 1) {
+                    setTimeout(function() {
+                        btn.disabled = false;
+                        btn.textContent = '🎲 Qayta aylantirish';
+                        document.getElementById('ridPrice').textContent = d.data.price.toLocaleString();
+                        document.getElementById('ridPriceChip').style.opacity = '1';
+                        document.getElementById('ridConfirmForm').style.display = 'inline-block';
+                        document.getElementById('ridReserveForm').style.display = 'inline-block';
+                    }, 350);
+                }
+            }, 500 + i * 200);
+        });
+    })
+    .catch(function() {
+        ridClearIntervals();
+        btn.disabled = false;
+        btn.textContent = '🎲 Aylantirish';
+    });
+}
+</script>
+{% endblock %}

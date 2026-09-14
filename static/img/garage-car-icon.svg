@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 24" fill="none">
+  <path d="M4,17 C4,14 6,13 9,12.5 L13,8.5 C16,6.5 20,5.5 25,5.5 L34,5.5
+           C39,5.5 42,7.5 44.5,10 L46,12
+           C47,12.5 47.5,13.5 47.5,15 L47.5,16
+           C47.5,17 46.5,18 45,18 L42,18
+           L42,17 C42,15 40.5,14 39,14 C37.5,14 36,15 36,17 L36,18
+           L16,18 L16,17 C16,15 14.5,14 13,14 C11.5,14 10,15 10,17 L10,18 L7,18
+           C5,18 4,17.5 4,17 Z" fill="currentColor"/>
+  <circle cx="13" cy="17" r="3.2" fill="#0c0d0f"/>
+  <circle cx="13" cy="17" r="1.3" fill="currentColor"/>
+  <circle cx="39" cy="17" r="3.2" fill="#0c0d0f"/>
+  <circle cx="39" cy="17" r="1.3" fill="currentColor"/>
+</svg>

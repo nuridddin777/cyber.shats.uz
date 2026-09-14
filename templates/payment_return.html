@@ -1,0 +1,28 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}To'lov natijasi{% endblock %}
+{% block app_content %}
+
+<div class="cs-card" style="max-width:480px; margin:0 auto; padding:26px; text-align:center;">
+  {% if txn.status == 'paid' %}
+    <div style="font-size:40px; margin-bottom:10px;">✅</div>
+    <h2 style="font-size:16px; margin-bottom:8px;">To'lov muvaffaqiyatli!</h2>
+    <p class="muted" style="font-size:12px; margin-bottom:14px;">
+      {{ "{:,}".format(txn.amount_uzs) }} so'm qabul qilindi.<br>
+      Hisobingizga avtomatik <strong>{{ "{:,}".format(txn.code_amount) }} CODE</strong> qo'shildi.
+    </p>
+  {% elif txn.status == 'failed' %}
+    <div style="font-size:40px; margin-bottom:10px;">❌</div>
+    <h2 style="font-size:16px; margin-bottom:8px;">To'lov amalga oshmadi</h2>
+    <p class="muted" style="font-size:12px; margin-bottom:14px;">Qaytadan urinib ko'ring yoki boshqa karta tanlang.</p>
+  {% else %}
+    <div style="font-size:40px; margin-bottom:10px;">⏳</div>
+    <h2 style="font-size:16px; margin-bottom:8px;">To'lov kutilmoqda</h2>
+    <p class="muted" style="font-size:12px; margin-bottom:14px;">
+      Bank tomonidan tasdiqlash hali kelmadi. Bir necha soniyadan so'ng sahifani yangilang.
+    </p>
+  {% endif %}
+  <a href="{{ url_for('coins_bp.coins_page') }}" class="cs-btn">CODE Tangalar</a>
+</div>
+
+{% endblock %}

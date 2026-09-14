@@ -1,0 +1,58 @@
+{% import "edu_orgs/_shared.html" as shared %}
+<!DOCTYPE html>
+<html lang="uz"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>O'qituvchi ro'yxatdan o'tish — SHATS CYBER EDU</title>
+</head><body>
+{% include "edu_orgs/_shared.html" %}
+<div class="container">
+  <div class="top-nav"><div class="brand">SHATS CYBER <span>EDU</span></div>
+    <a href="{{ url_for('edu_orgs.login_page') }}">Kirish</a></div>
+
+  <div class="card">
+    <h1>O'qituvchi — ro'yxatdan o'tish</h1>
+    <p style="color:#a1a1c0;">Tashkilot: <b>{{ org['name'] }}</b> (@{{ org['username'] }})</p>
+    {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+
+    <form method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="hidden" name="org_id" value="{{ org['id'] }}">
+      <input type="hidden" name="connect_code" value="{{ connect_code }}">
+
+      <label>Familiya</label>
+      <input type="text" name="familiya" required>
+      <label>Ism</label>
+      <input type="text" name="ism" required>
+
+      <label>Fan</label>
+      <select name="subject_id" required>
+        <option value="">— tanlang —</option>
+        {% for s in subjects %}<option value="{{ s['id'] }}">{{ s['name'] }}</option>{% endfor %}
+      </select>
+
+      <label>Viloyat</label>
+      <select name="region_id">
+        <option value="">— tanlang —</option>
+        {% for r in regions %}<option value="{{ r['id'] }}">{{ r['name'] }}</option>{% endfor %}
+      </select>
+
+      <label>Tuman</label>
+      <select name="district_id">
+        <option value="">— tanlang —</option>
+        {% for d in districts %}<option value="{{ d['id'] }}">{{ d['name'] }} ({{ d['region_name'] }})</option>{% endfor %}
+      </select>
+
+      <label>Login (o'zingiz tanlang — kirishda shu login ishlatiladi)</label>
+      <input type="text" name="login" placeholder="masalan valiyev" required>
+
+      <label>Parol (o'zingiz o'ylab toping, kamida 6 belgi)</label>
+      <input type="password" name="password" required minlength="6">
+
+      <label>Parolni takrorlang</label>
+      <input type="password" name="password_confirm" required minlength="6">
+
+      <button type="submit" class="btn" style="width:100%;">Ro'yxatdan o'tish</button>
+    </form>
+  </div>
+</div>
+</body></html>

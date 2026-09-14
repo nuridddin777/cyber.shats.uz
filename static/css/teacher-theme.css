@@ -1,0 +1,41 @@
+/* ============================================================
+   CYBER SHATS — O'QITUVCHI PANELI TEMASI
+   Asosiy: OQ + QORA, yorqin aksent ranglar (ko'k-binafsha + amber)
+   ============================================================ */
+.teacher-theme {
+    --cs-bg-primary: #f5f6f8;
+    --cs-bg-secondary: #ffffff;
+    --cs-bg-card: #ffffff;
+    --cs-bg-glass: rgba(255,255,255,0.85);
+    --cs-bg-sidebar: #ffffff;
+    --cs-bg-input: #f0f1f4;
+
+    --cs-text-primary: #4f46e5;
+    --cs-text-secondary: #6366f1;
+    --cs-text-muted: #6b7280;
+    --cs-text-cyan: #0891b2;
+    --cs-text-violet: #f59e0b;
+    --cs-text-white: #14151a;
+    --cs-text-dark: #ffffff;
+    --cs-text-red: #dc2626;
+    --cs-text-yellow: #d97706;
+
+    --cs-border: rgba(20,21,26,0.09);
+    --cs-border-active: rgba(79,70,229,0.5);
+    --cs-glow: 0 4px 14px rgba(79,70,229,0.18);
+    --cs-glow-strong: 0 8px 26px rgba(79,70,229,0.28);
+    --cs-glow-red: 0 4px 14px rgba(220,38,38,0.25);
+    --cs-glow-cyan: 0 4px 14px rgba(8,145,178,0.22);
+    --cs-glow-violet: 0 4px 14px rgba(245,158,11,0.25);
+
+    --cs-grad-main: linear-gradient(180deg, #f5f6f8 0%, #eef0f4 100%);
+    --cs-grad-card: linear-gradient(155deg, rgba(79,70,229,.03) 0%, rgba(255,255,255,0) 55%);
+    --cs-grad-btn: linear-gradient(135deg, #6366f1 0%, #4f46e5 55%, #4338ca 100%);
+    --cs-grad-sidebar: linear-gradient(180deg, #ffffff 0%, #fbfbfd 100%);
+    --cs-grad-accent: linear-gradient(90deg, #4f46e5, #0891b2, #f59e0b, #4f46e5);
+}
+.teacher-theme body { animation: none; }
+.teacher-theme .cs-card { box-shadow: 0 1px 3px rgba(20,21,26,.06); }
+.teacher-theme .cs-card:hover { box-shadow: var(--cs-glow); }
+.teacher-theme .hex-icon { background: rgba(79,70,229,.08); }
+.teacher-theme ::selection { background: rgba(79,70,229,.2); }

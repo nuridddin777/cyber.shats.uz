@@ -1,0 +1,308 @@
+/* ============================================================
+   CYBER SHATS — ASOSIY STILLAR
+   ============================================================ */
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+
+body {
+    font-family: var(--cs-font-mono);
+    background: var(--cs-grad-main);
+    color: var(--cs-text-white);
+    margin: 0;
+    padding: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    overflow-x: hidden;
+}
+
+a { color: var(--cs-text-primary); text-decoration: none; transition: color .2s; }
+
+h1, h2, h3, h4, .logo, .cs-title {
+    font-family: var(--cs-font-display);
+    color: var(--cs-text-primary);
+    margin: 0 0 8px 0;
+}
+h1, h2 { text-transform: none; letter-spacing: -0.5px; font-weight: 700; color: var(--cs-text-white); }
+h1 .accent, h2 .accent, .grad-text {
+    background: var(--cs-grad-accent); background-size: 300% 100%;
+    -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+    animation: cs-gradient-flow 6s linear infinite;
+}
+h3, h4 { text-transform: uppercase; letter-spacing: 1.5px; font-weight: 600; }
+.logo, .cs-title { text-transform: uppercase; letter-spacing: 2px; }
+
+p { line-height: 1.6; color: var(--cs-text-white); }
+.muted { color: var(--cs-text-muted); }
+.cyan { color: var(--cs-text-cyan); }
+.red { color: var(--cs-text-red); }
+.code-text { font-family: var(--cs-font-mono); color: var(--cs-text-primary); }
+
+::selection { background: var(--cs-text-primary); color: #000; }
+
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-track { background: var(--cs-bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--cs-text-muted); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: var(--cs-text-primary); }
+
+/* ===================== MATRIX / SCANLINE FON ===================== */
+#matrix-canvas {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    opacity: 0.16;
+    z-index: 0;
+    pointer-events: none;
+}
+.scanline {
+    position: fixed; left: 0; right: 0; top: -2px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, rgba(255,59,59,0.45), transparent);
+    animation: scanline 5s linear infinite;
+    pointer-events: none;
+    z-index: 9999;
+}
+@keyframes scanline { 0% { top: -2px; } 100% { top: 100%; } }
+
+.crt-overlay {
+    position: fixed; inset: 0; pointer-events: none; z-index: 9998;
+    background: repeating-linear-gradient(0deg, rgba(0,0,0,0) 0px, rgba(0,0,0,0) 2px, rgba(0,0,0,0.08) 3px);
+    opacity: 0.35;
+}
+
+/* ===================== ANIMATSIYALAR ===================== */
+@keyframes glitch {
+    0% { transform: translate(0); }
+    10% { transform: translate(-2px, 2px); filter: hue-rotate(90deg); }
+    20% { transform: translate(-2px, -2px); }
+    30% { transform: translate(2px, 2px); filter: hue-rotate(-90deg); }
+    40% { transform: translate(2px, -2px); }
+    50% { transform: translate(0); }
+    100% { transform: translate(0); }
+}
+.glitch { animation: glitch 4s infinite; text-shadow: 2px 0 #b8b8c0, -2px 0 #ff0040; }
+.glitch:hover { animation-duration: 0.3s; }
+
+@keyframes blink-caret { from, to { border-color: transparent; } 50% { border-color: #ff3b3b; } }
+.typewriter-cursor::after {
+    content: '_'; animation: blink-caret 0.9s step-end infinite; color: var(--cs-text-primary);
+}
+
+@keyframes pulse-glow {
+    0%, 100% { box-shadow: 0 0 5px #ff3b3b, 0 0 10px rgba(255,59,59,0.3); }
+    50% { box-shadow: 0 0 20px #ff3b3b, 0 0 40px #ff3b3b, 0 0 55px rgba(255,59,59,0.45); }
+}
+.pulse-glow { animation: pulse-glow 2.2s ease-in-out infinite; }
+
+@keyframes fadeInUp { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+.fade-in-up { animation: fadeInUp 0.5s ease forwards; }
+
+@keyframes spin360 { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@keyframes pulse-dot { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+.dot-live { display:inline-block; width:7px; height:7px; border-radius:50%; background: var(--cs-text-primary); box-shadow: var(--cs-glow); animation: pulse-dot 1.6s infinite; }
+.dot-live.red { background: var(--cs-text-red); box-shadow: var(--cs-glow-red); }
+.dot-live.cyan { background: var(--cs-text-cyan); box-shadow: var(--cs-glow-cyan); }
+
+/* ===================== HUD OVERLAY — MINIMAL ===================== */
+.hud-overlay {
+    position: fixed; inset: 0; pointer-events: none; z-index: 60;
+    font-family: var(--cs-font-mono); font-size: 9.5px;
+    color: rgba(100,120,100,0.45); /* zaifroq rang — o'qishga xalaqit bermaydi */
+}
+.hud-tl, .hud-tr, .hud-bl, .hud-br { position: absolute; opacity: 0.55; transition: opacity .3s; }
+.hud-overlay:hover .hud-tl,
+.hud-overlay:hover .hud-tr,
+.hud-overlay:hover .hud-bl,
+.hud-overlay:hover .hud-br { opacity: 0.85; }
+.hud-tl { top: 10px; left: 10px; }
+.hud-tr { top: 10px; right: 10px; text-align: right; }
+.hud-bl { bottom: 10px; left: 10px; }
+.hud-br { bottom: 10px; right: 10px; text-align: right; }
+.hud-line { line-height: 1.7; white-space: nowrap; }
+.hud-line .green { color: rgba(0,255,106,0.6); }
+.hud-tl::before, .hud-tr::before, .hud-bl::before, .hud-br::before { content:''; position:absolute; width:8px; height:8px; opacity:0.4; }
+.hud-tl::before { top:-5px; left:-5px; border-top:1px solid #00ff6a; border-left:1px solid #00ff6a; }
+.hud-tr::before { top:-5px; right:-5px; border-top:1px solid #00ff6a; border-right:1px solid #00ff6a; }
+.hud-bl::before { bottom:-5px; left:-5px; border-bottom:1px solid #00ff6a; border-left:1px solid #00ff6a; }
+.hud-br::before { bottom:-5px; right:-5px; border-bottom:1px solid #00ff6a; border-right:1px solid #00ff6a; }
+body.has-sidebar .hud-tl, body.has-sidebar .hud-bl { left: calc(var(--cs-sidebar-w) + 10px); }
+@media (max-width: 900px) {
+    body.has-sidebar .hud-tl, body.has-sidebar .hud-bl { left: 10px; }
+}
+@media (max-width: 900px) {
+    .hud-overlay { display: none; }
+}
+
+/* ===================== TUGMALAR ===================== */
+.cs-btn {
+    background: transparent; border: 1px solid var(--cs-text-primary); color: var(--cs-text-primary);
+    padding: 12px 26px; font-family: var(--cs-font-mono); font-size: 13px; letter-spacing: 1px;
+    cursor: pointer; transition: all .25s; position: relative; overflow: hidden;
+    border-radius: var(--cs-radius-sm); display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+    text-decoration: none; font-weight: 500;
+}
+.cs-btn::after {
+    content: ''; position: absolute; top: 50%; left: 50%; width: 0; height: 0;
+    background: rgba(255,59,59,0.25); border-radius: 50%; transform: translate(-50%,-50%); transition: width .5s, height .5s;
+}
+.cs-btn:hover::after { width: 320px; height: 320px; }
+.cs-btn:hover { box-shadow: var(--cs-glow); color: #000; background: var(--cs-text-primary); transform: translateY(-1px); }
+.cs-btn-primary {
+    background: var(--cs-grad-btn); background-size: 200% 100%; color:#001a0c; font-weight:700; font-family: var(--cs-font-display);
+    box-shadow: var(--cs-glow); border:none;
+}
+.cs-btn-primary:hover { box-shadow: var(--cs-glow-strong); transform: translateY(-2px) scale(1.02); background: var(--cs-grad-btn); color:#001a0c;}
+/* DIQQAT: cheksiz pulse/shimmer animatsiyasi OLIB TASHLANDI — bir sahifada
+   bir nechta .cs-btn-primary bo'lishi mumkin, har biri animatsiyalansa sayt
+   sekinlashadi. Sahifadagi ENG asosiy (bitta) tugma uchun .cs-btn-hero
+   klassini qo'shing — animatsiya faqat o'shanda ishlaydi. */
+.cs-btn-hero { animation: cs-pulse-glow 3s ease-in-out infinite; }
+.cs-btn-hero::before {
+    content:''; position:absolute; top:0; left:0; width:40%; height:100%;
+    background: linear-gradient(115deg, transparent, rgba(255,255,255,.45), transparent);
+    animation: cs-shimmer-sweep 3.2s ease-in-out infinite;
+}
+.cs-btn-secondary { background: rgba(255,255,255,.02); border: 1px solid var(--cs-border-active); color: var(--cs-text-primary); }
+.cs-btn-secondary:hover { background: rgba(255,59,59,.08); color: var(--cs-text-primary); box-shadow: var(--cs-glow); }
+.cs-btn-danger { border-color: var(--cs-text-red); color: var(--cs-text-red); }
+.cs-btn-danger:hover { background: var(--cs-text-red); color:#000; box-shadow: var(--cs-glow-red); }
+.cs-btn-sm { padding: 8px 16px; font-size: 11px; border-radius: 8px; }
+.cs-btn-block { width: 100%; }
+.cs-btn[disabled] { opacity: .4; cursor: not-allowed; animation: none; }
+.cs-btn[disabled]:hover { background: transparent; color: var(--cs-text-primary); transform:none; }
+
+/* ===================== KARTALAR ===================== */
+.cs-card {
+    background: var(--cs-bg-card); background-image: var(--cs-grad-card);
+    border: 1px solid var(--cs-border); border-radius: var(--cs-radius);
+    padding: 20px; position: relative; transition: all .35s cubic-bezier(.2,.8,.2,1); backdrop-filter: blur(10px); overflow: hidden;
+}
+.cs-card::before { content:''; position:absolute; top:0; left:0; right:0; height:2px; background: var(--cs-grad-accent); background-size: 200% 100%; background-position: 0% 0%; opacity:.5; }
+/* DIQQAT: bu chiziq endi ANIMATSIYALANMAYDI — bir sahifada o'nlab .cs-card
+   bo'lishi mumkin, har biri cheksiz animatsiya bilan sayt sekinlashtirar edi. */
+.cs-card::after { content:''; position:absolute; bottom:0; right:0; width:16px; height:16px; border-right:2px solid var(--cs-text-primary); border-bottom:2px solid var(--cs-text-primary); opacity:.35; border-bottom-right-radius: var(--cs-radius); }
+.cs-card:hover { border-color: var(--cs-border-active); box-shadow: var(--cs-glow-strong); transform: translateY(-4px); }
+.cs-card.no-hover:hover { transform:none; }
+.cs-card-title { display:flex; align-items:center; justify-content: space-between; margin-bottom: 14px; }
+.cs-card-title h3 { margin:0; font-size: 13px; }
+
+/* ===================== FORMALAR ===================== */
+.cs-field { margin-bottom: 16px; position: relative; }
+.cs-field label { display:block; font-size: 11px; letter-spacing: 1px; color: var(--cs-text-muted); text-transform: uppercase; margin-bottom: 6px;}
+.cs-input, .cs-select, .cs-textarea {
+    width: 100%; background: var(--cs-bg-input); border: 1px solid var(--cs-border); color: var(--cs-text-white);
+    padding: 12px 14px; font-family: var(--cs-font-mono); font-size: 13px; border-radius: var(--cs-radius-sm); transition: all .2s;
+}
+.cs-input:focus, .cs-select:focus, .cs-textarea:focus { outline: none; border-color: var(--cs-text-primary); box-shadow: var(--cs-glow); }
+.cs-input::placeholder { color: var(--cs-text-muted); }
+.cs-input-icon { position: relative; }
+.cs-input-icon .ic { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--cs-text-muted); }
+.cs-input-icon input { padding-left: 38px; }
+.cs-input-icon .toggle-eye { position:absolute; right:12px; top:50%; transform:translateY(-50%); cursor:pointer; color: var(--cs-text-muted); background:none; border:none; }
+.cs-checkbox { display:flex; align-items:center; gap:8px; font-size:12px; color: var(--cs-text-muted); }
+.cs-checkbox input { accent-color: var(--cs-text-primary); }
+
+/* ===================== BADGE / CHIP / PROGRESS ===================== */
+.cs-chip { display:inline-flex; align-items:center; gap:5px; border:1px solid var(--cs-border); color: var(--cs-text-secondary); padding: 4px 12px; border-radius: var(--cs-radius-pill); font-size: 11px; letter-spacing: .5px;}
+.cs-chip.solid { background: rgba(255,59,59,0.14); border-color: var(--cs-border-active); }
+.cs-progress { height: 7px; width: 100%; background: rgba(255,59,59,0.08); border-radius: var(--cs-radius-pill); overflow: hidden; border:1px solid var(--cs-border);}
+.cs-progress > span { display:block; height: 100%; background: var(--cs-grad-btn); box-shadow: var(--cs-glow); border-radius: var(--cs-radius-pill); }
+.cs-tag-level { font-size:10px; padding:3px 10px; border-radius: var(--cs-radius-pill); border:1px solid var(--cs-border); color: var(--cs-text-cyan); text-transform: uppercase; }
+
+/* ===================== UMUMIY LAYOUT ===================== */
+.container { max-width: 1320px; margin: 0 auto; padding: 0 24px; }
+.section { padding: 64px 0; position: relative; z-index: 1; }
+.section-head { text-align:center; max-width: 640px; margin: 0 auto 40px; }
+.section-head .eyebrow { color: var(--cs-text-cyan); font-size: 11px; letter-spacing: 4px; margin-bottom: 10px; }
+.section-head h2 { font-size: 28px; }
+.section-head p { color: var(--cs-text-muted); }
+.grid { display:grid; gap: 18px; }
+.grid-2 { grid-template-columns: repeat(2, 1fr); }
+.grid-3 { grid-template-columns: repeat(3, 1fr); }
+.grid-4 { grid-template-columns: repeat(4, 1fr); }
+.grid-5 { grid-template-columns: repeat(5, 1fr); }
+.grid-6 { grid-template-columns: repeat(6, 1fr); }
+.flex { display:flex; }
+.flex-between { display:flex; align-items:center; justify-content: space-between; }
+.flex-center { display:flex; align-items:center; justify-content:center; }
+.gap-8{gap:8px;} .gap-12{gap:12px;} .gap-16{gap:16px;} .gap-24{gap:24px;}
+
+/* ===================== RESPONSIVE: MOBILE FIRST (320 -> 768 -> 1200) ===================== */
+@media (max-width: 1200px) {
+    .grid-6 { grid-template-columns: repeat(3, 1fr); }
+    .grid-5 { grid-template-columns: repeat(3, 1fr); }
+    .grid-4 { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .grid-2, .grid-3, .grid-4, .grid-5 { grid-template-columns: 1fr 1fr; }
+    .grid-6 { grid-template-columns: repeat(2, 1fr); }
+    .section { padding: 40px 0; }
+}
+@media (max-width: 480px) {
+    .grid-2, .grid-3, .grid-4, .grid-5, .grid-6 { grid-template-columns: 1fr; }
+    .container { padding: 0 14px; }
+}
+
+/* ============================================================
+   TELEFONDA UMUMIY QULAYLIK — ko'plab sahifalarda inline-style bilan
+   yozilgan "input + tugma" qatorlari, jadvallar va kartalar TOR
+   ekranda siqilib, tugmalar bosilmas holga tushib qolardi.
+   Bu yerda ENG KENG TARQALGAN andozalar uchun umumiy tuzatish —
+   har bir shablonni alohida tuzatishning o'rniga.
+   ============================================================ */
+@media (max-width: 640px) {
+    /* Input+tugma qatorlari — endi kerak bo'lsa pastga tushadi, siqilmaydi */
+    div[style*="display:flex"][style*="gap:8px"],
+    div[style*="display: flex"][style*="gap: 8px"] {
+        flex-wrap: wrap;
+    }
+    /* Jadvallar — gorizontal skroll bilan, matn siqilib "tirqish"ga aylanmasin */
+    table { min-width: 480px; }
+    /* Kartalar ichidagi padding — tor ekranda biroz kamroq, bo'sh joy tejaladi */
+    .cs-card { padding: 16px !important; }
+    /* Katta sarlavhalar — tor ekranda haddan tashqari katta bo'lib qolmasin */
+    h1 { font-size: clamp(17px, 5.5vw, 22px) !important; }
+    /* Tugmalar — barmoq bilan bosish uchun yetarlicha katta (44px min-tap-target) */
+    .cs-btn, button, input[type="submit"] { min-height: 40px; }
+    /* Forma inputlari — to'liq kenglikda, ustma-ust joylashishi uchun */
+    input.cs-input, select.cs-input, textarea.cs-input { font-size: 16px; } /* iOS auto-zoom oldini oladi */
+}
+
+
+/* ============================================================
+   "KAM HARAKAT AFZAL" (prefers-reduced-motion) — TZ 4.3
+   Foydalanuvchi OS darajasida animatsiyani kamaytirishni so'ragan bo'lsa,
+   doimiy/cheksiz (infinite) fon animatsiyalarini to'xtatamiz.
+   Matn o'qishga yordam beruvchi funksional narsalar (fade-in kabi bir martalik
+   o'tishlar) qoldiriladi — faqat CHEKSIZ tsikllar o'chiriladi.
+   ============================================================ */
+@media (prefers-reduced-motion: reduce) {
+    .scanline,
+    .glitch,
+    .pulse-glow,
+    #matrix-canvas {
+        animation: none !important;
+        display: none !important;
+    }
+    .dot-live {
+        animation: none !important;
+        opacity: 1 !important;
+    }
+    * {
+        scroll-behavior: auto !important;
+    }
+}
+
+/* === CUSTOM SCROLLBAR (Tariff theme matching & thinner) === */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: var(--cs-bg-primary);
+}
+::-webkit-scrollbar-thumb {
+    background: var(--cs-text-primary);
+    border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--cs-text-secondary, var(--cs-text-primary));
+}

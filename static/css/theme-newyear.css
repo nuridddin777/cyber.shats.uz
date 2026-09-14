@@ -1,0 +1,56 @@
+/* ============================================================
+   YANGI YIL TEMASI
+   Bayramona qizil-yashil-oltin, qish ohangi
+   ============================================================ */
+:root {
+    --cs-bg-primary: #f5f9f7;
+    --cs-bg-secondary: #eef7f1;
+    --cs-bg-card: #F3F9FE;
+    --cs-bg-glass: rgba(243, 249, 254, 0.90);
+    --cs-bg-sidebar: #F3F9FE;
+    --cs-bg-input: #eff6f2;
+
+    --cs-text-primary: #b91c1c;
+    --cs-text-secondary: #15803d;
+    --cs-text-muted: #64748b;
+    --cs-text-cyan: #15803d;
+    --cs-text-violet: #b8860b;
+    --cs-text-white: #0f2418;
+    --cs-text-dark: #ffffff;
+    --cs-text-red: #b91c1c;
+    --cs-text-yellow: #b8860b;
+
+    --cs-border: rgba(21, 128, 61, 0.15);
+    --cs-border-active: rgba(185, 28, 28, 0.45);
+    --cs-glow: 0 4px 16px rgba(185, 28, 28, 0.16);
+    --cs-glow-strong: 0 10px 30px rgba(21, 128, 61, 0.22);
+    --cs-glow-red: 0 4px 14px rgba(185, 28, 28, 0.25);
+    --cs-glow-cyan: 0 4px 14px rgba(21, 128, 61, 0.2);
+    --cs-glow-violet: 0 4px 14px rgba(184, 134, 11, 0.25);
+
+    --cs-grad-main:
+        radial-gradient(1100px 620px at 12% -8%, rgba(21,128,61,.07), transparent 55%),
+        radial-gradient(1000px 560px at 100% 0%, rgba(185,28,28,.06), transparent 55%),
+        radial-gradient(900px 500px at 50% 110%, rgba(184,134,11,.05), transparent 55%),
+        linear-gradient(180deg, #f5f9f7 0%, #eef7f1 100%);
+    --cs-grad-card: linear-gradient(155deg, rgba(21,128,61,.05) 0%, rgba(255,255,255,0) 55%);
+    --cs-grad-btn: linear-gradient(135deg, #dc2626 0%, #b91c1c 55%, #991b1b 100%);
+    --cs-grad-sidebar: linear-gradient(180deg, #eef7f1 0%, #e2f2e8 100%);
+    --cs-grad-accent: linear-gradient(90deg, #b91c1c, #15803d, #b8860b, #b91c1c);
+}
+
+body::before {
+    content: ''; position: fixed; top: 0; left: 0; right: 0; height: 4px;
+    background: linear-gradient(90deg, #b91c1c, #15803d, #b8860b, #15803d, #b91c1c);
+    z-index: 99999;
+}
+
+.logo::after {
+    content: '🎄 YANGI YIL';
+    display: inline-block; margin-left: 8px; font-size: 9px; font-weight: 800; letter-spacing: .5px;
+    background: linear-gradient(135deg, #15803d, #22c55e); color: #ffffff;
+    padding: 3px 8px; border-radius: 20px; vertical-align: middle;
+    box-shadow: 0 2px 8px rgba(21, 128, 61, 0.4);
+}
+
+.cs-btn-primary { background: linear-gradient(135deg, #dc2626, #b91c1c) !important; border-color: #b91c1c !important; }

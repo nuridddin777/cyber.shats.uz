@@ -1,0 +1,643 @@
+{% extends "base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}SHATS CYBER — Barcha IT yo'nalishlari bir joyda{% endblock %}
+{% block extra_head %}<style>
+/* ===== LOADING SCREEN ===== */
+#hackLoader{position:fixed;inset:0;z-index:99999;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Courier New',monospace;transition:opacity 0.8s}
+#hackLoader.done{opacity:0;pointer-events:none}
+#hackCode{color:var(--cs-text-primary);font-size:13px;max-width:700px;width:90%;line-height:1.6;text-align:left;height:200px;overflow:hidden;opacity:0.8}
+#hackTitle{font-size:clamp(32px,8vw,72px);font-weight:900;color:var(--cs-text-primary);letter-spacing:8px;opacity:0;transition:opacity 0.6s;text-shadow:0 0 30px rgba(255,59,59,0.5),0 0 60px rgba(255,59,59,0.3)}
+#hackTitle.show{opacity:1}
+#hackProgress{width:300px;height:3px;background:#111;border-radius:2px;margin-top:20px;overflow:hidden}
+#hackProgressFill{height:100%;width:0;background:var(--cs-text-primary);transition:width 0.3s;box-shadow:0 0 10px var(--cs-text-primary)}
+#hackStatus{color:var(--cs-text-primary);font-size:11px;margin-top:8px;opacity:0.6}
+.hack-scanline{position:fixed;inset:0;z-index:100000;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,59,59,0.03) 2px,rgba(255,59,59,0.03) 4px);pointer-events:none}
+#skipBtn{position:fixed;bottom:30px;right:30px;z-index:100001;background:rgba(255,59,59,0.1);border:1px solid rgba(255,59,59,0.3);color:var(--cs-text-primary);padding:8px 20px;cursor:pointer;font-family:'Courier New';font-size:12px;border-radius:4px}
+
+/* ===== MAIN SITE ===== */
+#mainSite{display:none}
+body{background:var(--cs-bg-primary) !important;background-image:none !important}
+body::after{display:none !important}
+.section{padding:70px 0;position:relative}
+.section-title{font-size:28px;font-weight:800;color:var(--cs-text-white);text-align:left;margin-bottom:8px;text-shadow:0 0 20px rgba(14,165,233,0.3)}
+.section-sub{font-size:14px;color:#0ea5e9;text-align:left;margin-bottom:36px}
+.container{max-width:1100px;margin:0 auto;padding:0 20px}
+
+/* Hero */
+.hero{min-height:92vh;display:flex;align-items:center;position:relative;overflow:hidden;background:radial-gradient(ellipse at 30% 50%,rgba(37,99,235,0.08),transparent 60%),radial-gradient(ellipse at 80% 30%,rgba(37,99,235,0.05),transparent 50%)}
+
+/* ===== YANGI ORQA FON — nozik harakatlanuvchi tarmoq/nur effekti ===== */
+.hero-new-bg{position:absolute;inset:0;z-index:0;overflow:hidden;pointer-events:none;}
+.hero-new-bg canvas{position:absolute;inset:0;width:100%;height:100%;}
+.hero-new-bg::before{
+  content:'';position:absolute;top:-30%;left:-10%;width:70%;height:160%;
+  background:radial-gradient(circle, rgba(37,99,235,.16) 0%, rgba(14,165,233,.06) 45%, transparent 70%);
+  filter:blur(4px);animation:heroGlowDrift 18s ease-in-out infinite alternate;
+}
+.hero-new-bg::after{
+  content:'';position:absolute;bottom:-40%;right:-10%;width:60%;height:140%;
+  background:radial-gradient(circle, rgba(14,165,233,.12) 0%, transparent 65%);
+  filter:blur(4px);animation:heroGlowDrift2 22s ease-in-out infinite alternate;
+}
+@keyframes heroGlowDrift{0%{transform:translate(0,0) scale(1);}100%{transform:translate(60px,40px) scale(1.15);}}
+@keyframes heroGlowDrift2{0%{transform:translate(0,0) scale(1);}100%{transform:translate(-50px,-30px) scale(1.1);}}
+.hero-content, .hero > .container{position:relative;z-index:2;}
+.hero-content{position:relative;z-index:2;max-width:620px}
+.hero h1{font-size:clamp(28px,5vw,46px);font-weight:900;color:var(--cs-text-white);line-height:1.15;margin-bottom:18px}
+.hero .accent{background:linear-gradient(135deg,var(--cs-text-primary),#1d4ed8);-webkit-background-clip:text;-webkit-text-fill-color:transparent;text-shadow:none}
+.hero p{color:#94A3B8;font-size:15px;line-height:1.8;margin-bottom:28px}
+.hero-btns{display:flex;gap:14px;flex-wrap:wrap}
+.btn-main{background:linear-gradient(135deg,var(--cs-text-primary),#1d4ed8);color:#000;border:none;border-radius:10px;padding:15px 32px;font-size:15px;font-weight:700;cursor:pointer;text-decoration:none;transition:all 0.3s;box-shadow:0 4px 20px rgba(37,99,235,0.35)}
+.btn-main:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(37,99,235,0.55)}
+.btn-sec{background:rgba(37,99,235,0.04);border:1px solid rgba(37,99,235,0.3);color:#93c5fd;border-radius:10px;padding:15px 32px;font-size:15px;font-weight:600;cursor:pointer;text-decoration:none;transition:all 0.3s;backdrop-filter:blur(8px)}
+.btn-sec:hover{background:rgba(37,99,235,0.08);border-color:rgba(37,99,235,0.5)}
+
+/* Glass cards */
+.glass{background:rgba(30,41,59,0.81);backdrop-filter:blur(16px);border:1px solid rgba(37,99,235,0.08);border-radius:16px}
+.glass:hover{border-color:rgba(184,184,192,0.3);box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+
+.about-card{background:rgba(30,41,59,0.94);backdrop-filter:blur(16px);border:1px solid rgba(37,99,235,0.12);border-radius:20px;padding:36px;max-width:620px;margin:0}
+
+.dir-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:14px}
+.dir-item{background:rgba(30,41,59,0.68);backdrop-filter:blur(12px);border:1px solid rgba(184,184,192,0.1);border-radius:14px;padding:22px 12px;text-align:center;transition:all 0.3s;text-decoration:none;position:relative;overflow:hidden}
+.dir-item::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(37,99,235,0.15),transparent 70%);opacity:0;transition:opacity 0.3s}
+.dir-item:hover{border-color:rgba(184,184,192,0.5);transform:translateY(-4px);box-shadow:0 12px 40px rgba(37,99,235,0.15)}
+.dir-item:hover::before{opacity:1}
+.dir-item .d-icon{font-size:36px;margin-bottom:10px;position:relative;z-index:1;filter:drop-shadow(0 0 8px rgba(184,184,192,0.3))}
+.dir-item .d-name{font-size:12px;font-weight:700;color:#F5EFEB;position:relative;z-index:1}
+
+.ad-banner{background:linear-gradient(135deg,rgba(37,99,235,0.12),rgba(37,99,235,0.06));backdrop-filter:blur(16px);border:1px solid rgba(37,99,235,0.15);border-radius:20px;padding:40px;text-align:center}
+
+.books-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:14px}
+.book-item{background:rgba(30,41,59,0.68);backdrop-filter:blur(12px);border:1px solid rgba(37,99,235,0.06);border-radius:12px;padding:18px 12px;text-align:center;transition:all 0.3s}
+.book-item:hover{border-color:rgba(184,184,192,0.3);transform:translateY(-3px)}
+.book-item .b-icon{font-size:40px;margin-bottom:8px;filter:drop-shadow(0 0 6px rgba(184,184,192,0.3))}
+.book-item .b-name{font-size:11px;color:#E2E8F0;font-weight:500}
+
+.tarif-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:18px}
+@media(max-width:900px){.tarif-grid{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:480px){.tarif-grid{grid-template-columns:1fr}}
+.tarif-card{background:linear-gradient(155deg, rgba(37,99,235,.05) 0%, rgba(30,41,59,0.94) 55%);backdrop-filter:blur(16px);border:1px solid rgba(37,99,235,0.08);border-radius:18px;padding:26px 20px 22px;text-align:center;transition:all 0.3s;position:relative;overflow:hidden;display:flex;flex-direction:column;}
+.tarif-card:hover{border-color:rgba(37,99,235,0.4);transform:translateY(-6px);box-shadow:0 16px 40px rgba(37,99,235,0.15)}
+.tarif-card.highlight{border-color:rgba(14,165,233,0.5);box-shadow:0 0 0 1px rgba(14,165,233,.3), 0 16px 40px rgba(14,165,233,.12);}
+.tarif-card.highlight::before{content:'';position:absolute;inset:0;background:radial-gradient(circle at 50% 0%,rgba(14,165,233,0.12),transparent 60%)}
+.tarif-icon{font-size:26px;margin-bottom:8px;position:relative;z-index:1;}
+.tarif-name{font-size:15px;font-weight:800;color:#F5EFEB;margin-bottom:4px;position:relative;z-index:1;letter-spacing:1px;}
+.tarif-price{font-size:26px;font-weight:900;margin:8px 0 2px;position:relative;z-index:1}
+.tarif-period{font-size:11px;color:#94A3B8;position:relative;z-index:1;margin-bottom:16px;}
+.tarif-features{list-style:none;padding:0;margin:0 0 18px;text-align:left;font-size:11.5px;color:#94A3B8;position:relative;z-index:1;flex:1;}
+.tarif-features li{padding:6px 0;border-top:1px solid rgba(30,41,59,.06);display:flex;align-items:center;gap:7px;}
+.tarif-features li:first-child{border-top:none;}
+.tarif-features li::before{content:'✓';color:var(--cs-text-primary,#2563eb);font-weight:900;flex-shrink:0;}
+.tarif-cta{position:relative;z-index:1;display:block;text-align:center;padding:10px;border-radius:10px;font-size:12px;font-weight:700;text-decoration:none;border:1px solid rgba(30,41,59,.12);color:#F5EFEB;transition:.2s;}
+.tarif-cta:hover{border-color:var(--cs-text-primary,#2563eb);color:var(--cs-text-primary,#2563eb);}
+.tarif-cta.solid{background:linear-gradient(135deg,#3b82f6,#1d4ed8);border:none;color:var(--cs-text-white);}
+.tarif-cta.solid:hover{box-shadow:0 8px 20px rgba(37,99,235,.35);color:var(--cs-text-white);}
+.tz-accent{background:linear-gradient(135deg,#3b82f6,#0ea5e9);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;}
+
+.footer{background:rgba(30,41,59,0.97);border-top:1px solid rgba(37,99,235,0.05);padding:48px 0 24px}
+.footer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:28px}
+.footer h4{color:#E2E8F0;font-size:14px;margin-bottom:14px;font-weight:700}
+.footer a,.footer p{color:#94A3B8;font-size:13px;text-decoration:none;line-height:1.8}
+.footer a:hover{color:#E2E8F0}
+.social-links{display:flex;gap:10px;margin-top:10px}
+.social-ic{width:40px;height:40px;border-radius:10px;background:rgba(37,99,235,0.08);border:1px solid rgba(37,99,235,0.15);display:flex;align-items:center;justify-content:center;color:#8a97ab;transition:all 0.25s}
+.social-ic svg{width:18px;height:18px;}
+.social-ic:hover{background:color-mix(in srgb, var(--sc) 18%, transparent);border-color:var(--sc);color:var(--sc);transform:translateY(-2px);box-shadow:0 4px 16px color-mix(in srgb, var(--sc) 30%, transparent)}
+
+.news-item{background:rgba(30,41,59,0.68);backdrop-filter:blur(12px);border:1px solid rgba(37,99,235,0.06);border-radius:12px;padding:18px;margin-bottom:12px;transition:all 0.2s}
+.news-item:hover{border-color:rgba(184,184,192,0.3)}
+
+/* Stat counters */
+.hero-stats{display:flex;gap:28px;margin-top:32px}
+.hero-stat .val{font-size:24px;font-weight:900;background:linear-gradient(135deg,var(--cs-text-primary),#1d4ed8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero-stat .lbl{font-size:10px;color:#94A3B8;letter-spacing:1px;margin-top:2px}
+
+/* Section alt bg */
+.section-alt{background:rgba(37,99,235,0.03);border-top:1px solid rgba(37,99,235,0.03);border-bottom:1px solid rgba(37,99,235,0.03)}
+
+/* Animations */
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(184,184,192,0.2)}50%{box-shadow:0 0 40px rgba(184,184,192,0.4)}}
+@media(max-width:900px){.hide-mobile-globe{display:none}}
+</style>{% endblock %}
+
+{% block content %}
+
+<!-- ===== HACKER LOADING SCREEN ===== -->
+<div id="hackLoader">
+  <div class="hack-scanline"></div>
+  <div id="hackCode"></div>
+  <div id="hackTitle">SHATS CYBER</div>
+  <div id="hackProgress"><div id="hackProgressFill"></div></div>
+  <div id="hackStatus">Initializing system...</div>
+</div>
+<button id="skipBtn" onclick="skipLoader()">O'TKAZIB YUBORISH →</button>
+
+<!-- ===== MAIN SITE ===== -->
+<div id="mainSite">
+
+{% include 'partials/public_nav.html' %}
+
+<!-- 1. HERO -->
+<section class="hero">
+  <div class="hero-new-bg"><canvas id="heroBgCanvas"></canvas></div>
+  <div class="container" style="position:relative;z-index:2; display:flex; align-items:center; gap:40px; flex-wrap:wrap;">
+    <div class="hero-content" style="flex:1; min-width:300px;">
+      <div style="display:flex;gap:4px;margin-bottom:14px;align-items:center;">
+        <div style="width:24px;height:4px;background:#8a8a92;border-radius:2px;"></div>
+        <div style="width:24px;height:4px;background:#fff;border-radius:2px;opacity:0.6;"></div>
+        <div style="width:24px;height:4px;background:#2563eb;border-radius:2px;"></div>
+        <span style="font-size:11px;margin-left:8px;color:#E2E8F0;font-weight:700;letter-spacing:2px;">SHATS CYBER</span>
+      </div>
+      <h1>IT VA DASTURLASHNI O'RGANING, <span class="accent">AMALIYOT QILING</span>, KELAJAGINGIZNI YARATING</h1>
+      <p>Web dasturlash, Python, Cyber Security va yana 15+ yo'nalish. Amaliyot, virtual olam, sertifikatlar — hammasi bir joyda.</p>
+      <div class="hero-btns">
+        <a href="{{ url_for('register') }}" class="btn-main">⚡ BEPUL BOSHLASH</a>
+        <a href="#directions" class="btn-sec">YO'NALISHLARNI KO'RISH</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="val">{{ total_students }}+</div><div class="lbl">O'QUVCHILAR</div></div>
+        <div class="hero-stat"><div class="val">{{ total_courses }}+</div><div class="lbl">KURSLAR</div></div>
+        <div class="hero-stat"><div class="val">18</div><div class="lbl">YO'NALISH</div></div>
+        <div class="hero-stat"><div class="val">4.9</div><div class="lbl">BAHO</div></div>
+      </div>
+    </div>
+    <div id="hero-mini-globe" data-globe data-speed="0.0026" data-camera-z="5.3"
+         style="flex:0 0 380px; height:380px; position:relative;" class="hide-mobile-globe"></div>
+  </div>
+  </div>
+</section>
+
+<!-- 3. HAQIDA -->
+<section class="section section-alt" style="position:relative;overflow:hidden;">
+  <div class="container" style="position:relative;z-index:2;">
+    <div class="about-grid">
+      <div class="about-card" style="text-align:left;">
+        <div style="color:var(--cs-text-primary);font-size:11px;letter-spacing:3px;font-weight:700;margin-bottom:10px;">_ BIZ HAQIMIZDA</div>
+        <h2 style="font-size:32px;font-weight:900;color:var(--cs-text-white);text-shadow:0 0 20px rgba(37,99,235,0.25);margin-bottom:18px;letter-spacing:1px;">SHATS <span style="color:var(--cs-text-primary);">CYBER</span></h2>
+        <p style="color:#E2E8F0;font-size:14px;line-height:1.8;text-align:left;">
+          2026-yilda IT sohasini rivojlantirish va sifatli ta'lim, amaliyot hamda virtual muhitni yaratish maqsadida tashkil etilgan platforma.
+        </p>
+        <div class="about-highlight">
+          <div class="ah-icon">🎯</div>
+          <div><b>Tashkilotchilar</b><span>SHATS jamoasi</span></div>
+        </div>
+        <div class="about-highlight">
+          <div class="ah-icon">🚩</div>
+          <div><b>Maqsad</b><span>Zamonaviy IT bilimlarni hamma uchun ochiq qilish va amaliy ko'nikmalarni rivojlantirish</span></div>
+        </div>
+      </div>
+      <div class="about-stats">
+        <div class="as-item"><div class="as-num">2026</div><div class="as-lbl">Tashkil topgan</div></div>
+        <div class="as-item"><div class="as-num">18</div><div class="as-lbl">IT yo'nalish</div></div>
+        <div class="as-item"><div class="as-num">{{ total_courses }}+</div><div class="as-lbl">Kurslar</div></div>
+        <div class="as-item"><div class="as-num">{{ total_students }}+</div><div class="as-lbl">O'quvchilar</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+.about-grid{ display:grid; grid-template-columns:1.3fr 1fr; gap:32px; align-items:center; }
+@media(max-width:800px){ .about-grid{ grid-template-columns:1fr; } }
+.about-highlight{ display:flex; gap:12px; align-items:flex-start; margin-top:16px; }
+.about-highlight .ah-icon{ font-size:18px; flex-shrink:0; margin-top:1px; }
+.about-highlight b{ display:block; color:#F5EFEB; font-size:13px; margin-bottom:2px; }
+.about-highlight span{ color:#8a97ab; font-size:12.5px; line-height:1.5; }
+.about-stats{ display:grid; grid-template-columns:1fr 1fr; gap:14px; }
+.as-item{ background:rgba(37,99,235,.05); border:1px solid rgba(37,99,235,.15); border-radius:14px; padding:20px 14px; text-align:center; }
+.as-num{ font-family:var(--cs-font-display); font-weight:800; font-size:26px; background:linear-gradient(120deg,#2563eb,#0ea5e9); -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent; }
+.as-lbl{ font-size:10.5px; color:#8a97ab; text-transform:uppercase; letter-spacing:.5px; margin-top:4px; }
+</style>
+
+<!-- 4. YO'NALISHLAR — cheksiz avtomatik aylanuvchi lenta (marquee) -->
+<section class="section" id="directions" style="background:rgba(30,41,59,0.7); overflow:hidden;">
+  <div class="container">
+    <div class="section-title">18 ta IT Yo'nalish</div>
+    <div class="section-sub">O'zingizga mos yo'nalishni tanlang</div>
+  </div>
+  {% set dir_emojis = {'code':'💻','terminal':'🐍','shield':'🛡️','smartphone':'📱','cpu':'⚙️','wifi':'🌐','database':'🗄️','bot':'🤖','trending-up':'📊','cloud':'☁️','git-branch':'🔧','share-2':'📣','target':'🎯','truck':'🚛','globe':'🌍','hash':'🔢','file-text':'📄'} %}
+  <div class="marquee-wrap">
+    <div class="marquee-track">
+      {% for d in directions + directions %}
+      <a href="{{ url_for('courses_bp.courses', d=d.slug) }}" class="marquee-card {{ 'coming-soon' if d.coming_soon }}">
+        {% if d.coming_soon %}<div class="mq-soon-badge">Tez kunda</div>{% endif %}
+        <div class="mq-icon">{{ dir_emojis.get(d.icon, '💻') }}</div>
+        <div class="mq-name">{{ d.name_uz }}</div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<style>
+.marquee-wrap{ position:relative; -webkit-mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); mask-image:linear-gradient(90deg, transparent, #000 8%, #000 92%, transparent); }
+.marquee-track{ display:flex; gap:16px; width:max-content; animation:marquee-scroll 42s linear infinite; padding:6px 0; }
+.marquee-wrap:hover .marquee-track{ animation-play-state:paused; }
+@keyframes marquee-scroll{ from{ transform:translateX(0); } to{ transform:translateX(-50%); } }
+.marquee-card{
+  flex-shrink:0; width:140px; text-decoration:none; text-align:center; padding:22px 14px;
+  background:rgba(30,41,59,0.74); backdrop-filter:blur(10px); border:1px solid rgba(37,99,235,0.07);
+  border-radius:14px; transition:.25s;
+}
+.marquee-card:hover{ border-color:rgba(37,99,235,.4); transform:translateY(-4px) scale(1.03); box-shadow:0 10px 24px rgba(37,99,235,.15); }
+.mq-icon{ font-size:30px; margin-bottom:8px; }
+.marquee-card.coming-soon{ opacity:.65; position:relative; }
+.mq-soon-badge{
+  position:absolute; top:6px; right:6px; background:rgba(217,119,6,.15); color:#d97706;
+  font-size:8px; font-weight:800; padding:2px 7px; border-radius:10px; letter-spacing:.5px;
+}
+.mq-name{ font-size:12px; color:#E2E8F0; font-weight:600; line-height:1.3; }
+@media (prefers-reduced-motion: reduce){ .marquee-track{ animation:none; } }
+</style>
+
+<!-- 5. REKLAMA -->
+<section class="section">
+  <div class="container">
+    <div style="background:linear-gradient(135deg,rgba(30,41,59,0.96),rgba(30,41,59,0.96));backdrop-filter:blur(16px);border:1px solid rgba(37,99,235,0.08);border-radius:20px;padding:32px 36px;display:flex;align-items:center;gap:28px;flex-wrap:wrap;">
+      <div style="font-size:56px;filter:drop-shadow(0 0 12px rgba(255,100,0,0.3));">📢</div>
+      <div style="flex:1;min-width:200px;">
+        <div style="font-size:18px;font-weight:800;color:#ff8c00;letter-spacing:2px;margin-bottom:6px;">REKLAMA JOYI</div>
+        <div style="font-size:14px;color:#94A3B8;line-height:1.6;">Bu yerda sizning reklamangiz bo'lishi mumkin! 10,000+ IT entuziastlar har kuni bu joyni ko'radi.</div>
+      </div>
+      <a href="https://www.shats.uz/" target="_blank" style="background:rgba(37,99,235,0.04);border:1px solid rgba(37,99,235,0.15);border-radius:10px;padding:14px 24px;color:#b8d8f8;font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap;transition:all .3s;">Reklama joyini band qilish →</a>
+    </div>
+  </div>
+</section>
+
+<!-- 6. TOP YO'NALISHLAR -->
+<section class="section section-alt">
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;">
+      <div class="section-title" style="margin:0;text-align:left;">🔥 MASHHUR YO'NALISHLAR</div>
+      <a href="{{ url_for('directions') }}" style="color:#E2E8F0;font-size:13px;text-decoration:none;">Barchasini ko'rish →</a>
+    </div>
+    <div class="popular-grid">
+      {% set dir_emojis = {'code':'💻','terminal':'🐍','shield':'🛡️','smartphone':'📱','cpu':'⚙️','wifi':'🌐','database':'🗄️','bot':'🤖','trending-up':'📊','cloud':'☁️','git-branch':'🔧','share-2':'📣','target':'🎯','truck':'🚛','globe':'🌍','hash':'🔢','file-text':'📄'} %}
+      {% for d in popular_directions %}
+      <a href="{{ url_for('courses_bp.courses', d=d.slug) }}" class="popular-card">
+        <div class="pc-rank">#{{ loop.index }}</div>
+        <div class="pc-icon">{{ dir_emojis.get(d.icon, '💻') }}</div>
+        <div class="pc-name">{{ d.name_uz }}</div>
+        <div class="pc-desc">{{ (d.description or 'Amaliy va nazariy bilimlarni birlashtirgan to\'liq kurs.')[:90] }}</div>
+        <div class="pc-foot">
+          <span>👤 {{ "{:,}".format(d.total_students) }} o'quvchi</span>
+          <span>→</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<style>
+.popular-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:16px; }
+.popular-card{
+  display:block; text-decoration:none; position:relative; background:rgba(30,41,59,0.81); backdrop-filter:blur(12px);
+  border:1px solid rgba(37,99,235,0.07); border-radius:14px; padding:22px 18px; transition:all .25s;
+}
+.popular-card:hover{ border-color:rgba(37,99,235,.35); transform:translateY(-5px); box-shadow:0 14px 30px rgba(37,99,235,.14); }
+.pc-rank{ position:absolute; top:14px; right:16px; font-family:var(--cs-font-mono); font-size:11px; color:#4a5568; }
+.pc-icon{ font-size:32px; margin-bottom:12px; filter:drop-shadow(0 0 8px rgba(37,99,235,.25)); }
+.pc-name{ font-size:15px; font-weight:700; color:var(--cs-text-white); margin-bottom:6px; }
+.pc-desc{ font-size:12px; color:#94A3B8; line-height:1.5; margin-bottom:14px; min-height:36px; }
+.pc-foot{ display:flex; justify-content:space-between; align-items:center; font-size:12px; }
+.pc-foot span:first-child{ color:#2563eb; }
+.pc-foot span:last-child{ color:#94A3B8; }
+</style>
+
+<!-- ===== THREAT ZONE: pastki bo'limlar (chuqurroq skan — LOW dan HIGH ga o'tadi) ===== -->
+<div id="threatZone">
+
+<!-- 7. FOYDALANUVCHI LOYHALARI -->
+<section class="section">
+  <div class="container">
+    <div class="section-title">💡 Foydalanuvchilar Loyhalari</div>
+    <div class="section-sub">Eng yaxshi startaplar va loyihalar</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;">
+      {% for s in daily_startups[:6] %}
+      <div style="background:rgba(30,41,59,0.96);border:1px solid rgba(184,184,192,0.1);border-radius:12px;padding:18px;">
+        <div style="font-size:14px;font-weight:700;color:#F5EFEB;">{{ s.title }}</div>
+        <div style="font-size:12px;color:#94A3B8;margin-top:4px;">{{ s.category or 'IT' }}</div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- 8. YANGILIKLAR -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="flex-between" style="align-items:flex-end; margin-bottom:8px; flex-wrap:wrap; gap:10px;">
+      <div class="section-title" style="margin-bottom:0;">📰 Yangiliklar</div>
+    </div>
+    <div class="news-grid">
+      {% set cat_meta = {'ai':('🤖','#3b82f6'),'xavfsizlik':('🛡️','#2563eb'),'dasturlash':('💻','#00c9e0'),'karyera':('💼','#0ea5e9'),'umumiy':('📰','#8a8a92')} %}
+      {% for n in news %}
+      {% set meta = cat_meta.get(n.category, cat_meta['umumiy']) %}
+      <a href="{{ n.url if n.url else '#' }}" {{ 'target="_blank" rel="noopener"' if n.url else '' }} class="news-card" style="--accent:{{ meta[1] }};">
+        <div class="news-card-top">
+          <span class="news-cat-badge">{{ meta[0] }} {{ n.category|default('umumiy')|capitalize }}</span>
+          <span class="news-date">{{ (n.published_at | tashkent_time('%d.%m.%Y')) if n.published_at else '' }}</span>
+        </div>
+        <div class="news-card-title">{{ n.title }}</div>
+        {% if n.summary %}<div class="news-card-summary">{{ n.summary[:120] }}{{ '...' if n.summary|length > 120 }}</div>{% endif %}
+        <div class="news-card-source">{{ n.source or 'CYBER SHATS' }} {% if n.url %}<span style="margin-left:auto;">→</span>{% endif %}</div>
+      </a>
+      {% else %}
+      <p class="muted" style="text-align:center; grid-column:1/-1;">Hozircha yangiliklar yo'q.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<!-- 9. TOP 9 KITOBLAR -->
+<section class="section">
+  <div class="container">
+    <div class="section-title">📚 Top 9 IT Kitoblar</div>
+    <div class="books-grid">
+      {% set book_meta = [
+        ('Clean Code','#e94b4b'), ('The Pragmatic Programmer','#3a7bd5'), ('PYTON DASTURLASH','#ffd43b'),
+        ("JavaScript: The Good Parts",'#f0db4f'), ('Design Patterns','#00c9a7'), ('Linux Asoslari','#f89820'),
+        ('Cyber Security','#2563eb'), ('Data Science','#8b5cf6'), ('AI va ML','#00bcd4')
+      ] %}
+      {% for title, color in book_meta %}
+      <div class="book-3d" style="--book-color:{{ color }};">
+        <div class="book-3d-inner">
+          <div class="book-cover"><span>{{ title }}</span></div>
+          <div class="book-spine"></div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+
+<style>
+.news-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:16px; max-width:900px; margin:0 auto; }
+@media(max-width:700px){ .news-grid{ grid-template-columns:1fr; } }
+.news-card{
+  display:block; text-decoration:none; background:rgba(30,41,59,0.68); backdrop-filter:blur(12px);
+  border:1px solid rgba(37,99,235,0.07); border-left:3px solid var(--accent); border-radius:12px;
+  padding:16px 18px; transition:all .25s;
+}
+.news-card:hover{ border-color:var(--accent); transform:translateY(-3px); box-shadow:0 10px 26px rgba(0,0,0,.3); }
+.news-card-top{ display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; }
+.news-cat-badge{ font-size:10px; color:var(--accent); font-weight:700; letter-spacing:.5px; }
+.news-date{ font-size:10px; color:#94A3B8; font-family:var(--cs-font-mono); }
+.news-card-title{ font-size:14px; font-weight:700; color:#F5EFEB; line-height:1.35; margin-bottom:6px; }
+.news-card-summary{ font-size:11.5px; color:#8a97ab; line-height:1.5; margin-bottom:10px; }
+.news-card-source{ font-size:10.5px; color:#94A3B8; display:flex; align-items:center; }
+
+.books-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(120px,1fr)); gap:26px; perspective:1000px; }
+.book-3d{ height:150px; }
+.book-3d-inner{
+  position:relative; width:100%; height:100%; transform-style:preserve-3d; transition:transform .5s;
+}
+.book-3d:hover .book-3d-inner{ transform:rotateY(-25deg) translateX(-6px); }
+.book-cover{
+  position:absolute; inset:0; border-radius:4px 8px 8px 4px;
+  background:linear-gradient(155deg, var(--book-color), color-mix(in srgb, var(--book-color) 60%, #000));
+  box-shadow:0 10px 24px rgba(0,0,0,.4), inset -3px 0 8px rgba(0,0,0,.25);
+  display:flex; align-items:center; justify-content:center; padding:14px;
+  border-left:4px solid rgba(30,41,59,.25);
+}
+.book-cover span{ color:var(--cs-text-white); font-size:12px; font-weight:800; text-align:center; line-height:1.3; text-shadow:0 2px 4px rgba(0,0,0,.4); }
+.book-spine{
+  position:absolute; left:-8px; top:2px; bottom:2px; width:8px;
+  background:color-mix(in srgb, var(--book-color) 70%, #000); border-radius:3px 0 0 3px;
+  transform:rotateY(90deg) translateZ(4px); transform-origin:right;
+}
+@media (prefers-reduced-motion: reduce){ .book-3d-inner{ transition:none; } }
+</style>
+
+<!-- 10. TARIF NARXLARI -->
+<section class="section section-alt">
+  <div class="container">
+    <div class="section-title" style="text-align:left;">💎 Tarif Narxlari</div>
+    <div class="section-sub" style="text-align:left;margin-bottom:32px;">4 ta tarif rejasi — CODE evaziga</div>
+    <div class="tarif-grid">
+      <div class="tarif-card tilt-card">
+        <div class="tarif-icon">🔓</div>
+        <div class="tarif-name">FREE</div>
+        <div class="tarif-price tz-accent">0</div>
+        <div class="tarif-period">CODE / oy</div>
+        <ul class="tarif-features">
+          <li>Bepul kurslarga kirish</li>
+          <li>Kuniga 3 ta AI so'rov</li>
+          <li>Asosiy sertifikatlar</li>
+        </ul>
+        <a href="{{ url_for('register') }}" class="tarif-cta">Boshlash</a>
+      </div>
+      <div class="tarif-card tilt-card">
+        <div class="tarif-icon">🟤</div>
+        <div class="tarif-name">PRO</div>
+        <div class="tarif-price tz-accent">{{ pro_price_code }}</div>
+        <div class="tarif-period">CODE / oy</div>
+        <ul class="tarif-features">
+          <li>Barcha FREE imkoniyatlar</li>
+          <li>Cheksiz AI (kod + suhbat)</li>
+          <li>Barcha pulik kurslar bepul</li>
+        </ul>
+        <a href="{{ url_for('pricing') }}" class="tarif-cta">Tanlash</a>
+      </div>
+      <div class="tarif-card tilt-card highlight" style="position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#ff3366,#4d7fff);color:#fff;font-size:10px;padding:4px 14px;border-radius:6px;font-weight:800;letter-spacing:1px;box-shadow:0 4px 12px rgba(255,51,102,0.4);">MASHHUR</div>
+        <div class="tarif-icon">⚡</div>
+        <div class="tarif-name">CYBER PRO</div>
+        <div class="tarif-price tz-accent">{{ cyber_pro_price_code }}</div>
+        <div class="tarif-period">CODE / oy</div>
+        <ul class="tarif-features">
+          <li>Barcha PRO imkoniyatlar</li>
+          <li>10,000 CODE xush kelibsiz bonusi</li>
+          <li>Har kurs uchun +1000 CODE</li>
+          <li>Maxsus "Neon Pulse" dizayn</li>
+        </ul>
+        <a href="{{ url_for('pricing') }}" class="tarif-cta solid">Tanlash</a>
+      </div>
+      <div class="tarif-card tilt-card" style="position:relative;">
+        <div style="position:absolute;top:-12px;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#BF953F,#FCF6BA,#B38728);color:#050505;font-size:10px;padding:4px 14px;border-radius:6px;font-weight:800;letter-spacing:1px;box-shadow:0 4px 12px rgba(191,149,63,0.4);">ENG KUCHLI</div>
+        <div class="tarif-icon">👑</div>
+        <div class="tarif-name">VIP</div>
+        <div class="tarif-price tz-accent">{{ vip_price_code }}</div>
+        <div class="tarif-period">CODE / oy</div>
+        <ul class="tarif-features">
+          <li>Barcha CYBER PRO imkoniyatlar</li>
+          <li>30,000 CODE xush kelibsiz bonusi</li>
+          <li>Shaxsiy mentor</li>
+          <li>Obsidian + Tilla eksklyuziv dizayn</li>
+        </ul>
+        <a href="{{ url_for('pricing') }}" class="tarif-cta">Tanlash</a>
+      </div>
+    </div>
+  </div>
+</section>
+</div><!-- /threatZone -->
+
+<!-- 11. FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div>
+        <h4>SHATS CYBER</h4>
+        <p>IT ta'lim platformasi. 2026-yilda tashkil etilgan.</p>
+        <p style="margin-top:8px;">📍 Toshkent, O'zbekiston</p>
+      </div>
+      <div>
+        <h4>Bog'lanish</h4>
+        <p>📱 Telegram: <a href="https://t.me/shedow_777">@shedow_777</a></p>
+        <p>📞 Tel: <a href="tel:+998976699655">+998 97 669 96 55</a></p>
+        <p>✉️ info@shatscyber.uz</p>
+      </div>
+      <div>
+        <h4>Ijtimoiy tarmoqlar</h4>
+        <div class="social-links">
+          <a href="https://t.me/shedow_777" title="Telegram" class="social-ic" style="--sc:#26A5E4;">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M21.05 3.5 2.56 10.72c-1.27.5-1.26 1.2-.23 1.51l4.72 1.48 1.82 5.6c.22.6.11.85.75.85.5 0 .72-.23 1-.5l2.4-2.32 4.98 3.68c.92.5 1.58.25 1.81-.85l3.28-15.44c.34-1.35-.5-1.96-1.04-1.73Zm-13 10.6-1.6-5.28L18.5 6.4c.42-.25.8-.11.49.17L8.05 14.1Z"/></svg>
+          </a>
+          <a href="#" title="Instagram" class="social-ic" style="--sc:#E1306C;">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.16c3.2 0 3.58.01 4.85.07 1.17.05 1.8.25 2.23.41.55.22.95.47 1.37.89.42.42.67.82.89 1.37.16.42.36 1.06.41 2.23.06 1.27.07 1.65.07 4.85s-.01 3.58-.07 4.85c-.05 1.17-.25 1.8-.41 2.23-.22.55-.47.95-.89 1.37-.42.42-.82.67-1.37.89-.42.16-1.06.36-2.23.41-1.27.06-1.65.07-4.85.07s-3.58-.01-4.85-.07c-1.17-.05-1.8-.25-2.23-.41-.55-.22-.95-.47-1.37-.89-.42-.42-.67-.82-.89-1.37-.16-.42-.36-1.06-.41-2.23-.06-1.27-.07-1.65-.07-4.85s.01-3.58.07-4.85c.05-1.17.25-1.8.41-2.23.22-.55.47-.95.89-1.37.42-.42.82-.67 1.37-.89.42-.16 1.06-.36 2.23-.41 1.27-.06 1.65-.07 4.85-.07M12 0C8.74 0 8.33.01 7.05.07 5.78.13 4.9.33 4.14.63c-.8.31-1.47.72-2.14 1.39C1.33 2.7.92 3.37.6 4.16c-.3.76-.5 1.64-.56 2.91C0 8.35 0 8.75 0 12s.01 3.65.07 4.93c.06 1.27.26 2.15.56 2.91.31.8.72 1.47 1.39 2.14.67.67 1.34 1.08 2.14 1.39.76.3 1.64.5 2.91.56 1.28.06 1.68.07 4.93.07s3.65-.01 4.93-.07c1.27-.06 2.15-.26 2.91-.56.8-.31 1.47-.72 2.14-1.39.67-.67 1.08-1.34 1.39-2.14.3-.76.5-1.64.56-2.91.06-1.28.07-1.68.07-4.93s-.01-3.65-.07-4.93c-.06-1.27-.26-2.15-.56-2.91-.31-.8-.72-1.47-1.39-2.14C21.3 1.33 20.63.92 19.84.6c-.76-.3-1.64-.5-2.91-.56C15.65 0 15.25 0 12 0Zm0 5.84A6.16 6.16 0 1 0 12 18.16 6.16 6.16 0 0 0 12 5.84Zm0 10.16A4 4 0 1 1 12 8a4 4 0 0 1 0 8Zm6.4-10.4a1.44 1.44 0 1 1-2.88 0 1.44 1.44 0 0 1 2.88 0Z"/></svg>
+          </a>
+          <a href="#" title="YouTube" class="social-ic" style="--sc:#FF0000;">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.5 6.19a3.02 3.02 0 0 0-2.12-2.14C19.51 3.5 12 3.5 12 3.5s-7.51 0-9.38.55A3.02 3.02 0 0 0 .5 6.19 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.81 3.02 3.02 0 0 0 2.12 2.14C4.49 20.5 12 20.5 12 20.5s7.51 0 9.38-.55a3.02 3.02 0 0 0 2.12-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.81ZM9.6 15.6V8.4l6.27 3.6-6.27 3.6Z"/></svg>
+          </a>
+          <a href="#" title="Facebook" class="social-ic" style="--sc:#1877F2;">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.07C24 5.68 18.63.5 12 .5S0 5.68 0 12.07c0 5.77 4.39 10.55 10.13 11.43v-8.09H7.08v-3.34h3.05V9.41c0-3 1.83-4.66 4.6-4.66 1.33 0 2.72.24 2.72.24v2.95H16.1c-1.5 0-1.97.92-1.97 1.87v2.26h3.35l-.54 3.34h-2.81v8.09C19.61 22.62 24 17.84 24 12.07Z"/></svg>
+          </a>
+          <a href="#" title="LinkedIn" class="social-ic" style="--sc:#0A66C2;">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.03-1.85-3.03-1.85 0-2.14 1.45-2.14 2.94v5.66H9.36V9h3.41v1.56h.05c.47-.9 1.63-1.85 3.36-1.85 3.6 0 4.27 2.37 4.27 5.45v6.29ZM5.34 7.43a2.06 2.06 0 1 1 0-4.12 2.06 2.06 0 0 1 0 4.12ZM7.12 20.45H3.56V9h3.56v11.45ZM22.22 0H1.77C.8 0 0 .78 0 1.75v20.5C0 23.22.8 24 1.77 24h20.45c.98 0 1.78-.78 1.78-1.75V1.75C24 .78 23.2 0 22.22 0Z"/></svg>
+          </a>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:28px;padding-top:16px;border-top:1px solid rgba(184,184,192,0.1);font-size:12px;color:#94A3B8;">
+      © 2026 SHATS CYBER. Barcha huquqlar himoyalangan. · <a href="{{ url_for('terms_page') }}" style="color:#94A3B8;">Foydalanish shartlari</a>
+      <div style="margin-top:6px; font-size:9px; color:#5a6b85; font-family:var(--cs-font-mono);">build: navy-cream-v1 · {{ build_stamp }}</div>
+    </div>
+  </div>
+</footer>
+
+</div><!-- /mainSite -->
+{% endblock %}
+
+{% block scripts %}
+<script>
+// ===== HACKER LOADING ANIMATION =====
+const codeLines = [
+  '> Initializing SHATS CYBER system...',
+  '> Loading kernel modules...',
+  '[OK] network.service - Network Manager',
+  '[OK] firewall.service - Cyber Shield Active',
+  '> Connecting to secure servers...',
+  '$ ssh root@shats-cyber.uz -p 2222',
+  'Authenticating... ████████████ 100%',
+  '[OK] Connected to SHATS CYBER mainframe',
+  '> Loading 18 IT directions...',
+  '> Activating Virtual World engine...',
+  '> Checking security protocols...',
+  '[WARN] Scanning for vulnerabilities...',
+  '[OK] System is SECURE',
+  '> Decrypting user interface...',
+  '> Loading 3D environment...',
+  '> Finalizing boot sequence...',
+  '',
+  '> SYSTEM READY',
+  '> Welcome to SHATS CYBER'
+];
+
+let lineIndex = 0;
+const codeEl = document.getElementById('hackCode');
+const titleEl = document.getElementById('hackTitle');
+const fillEl = document.getElementById('hackProgressFill');
+const statusEl = document.getElementById('hackStatus');
+let loaderDone = false;
+
+function typeLine() {
+  if (loaderDone) return;
+  if (lineIndex >= codeLines.length) {
+    titleEl.classList.add('show');
+    fillEl.style.width = '100%';
+    statusEl.textContent = 'SYSTEM READY — Entering SHATS CYBER...';
+    setTimeout(finishLoader, 1200);
+    return;
+  }
+  const line = codeLines[lineIndex];
+  codeEl.innerHTML += line + '<br>';
+  codeEl.scrollTop = codeEl.scrollHeight;
+  fillEl.style.width = ((lineIndex / codeLines.length) * 100) + '%';
+  statusEl.textContent = line.replace(/^[>\$\[]/, '').trim() || 'Processing...';
+  lineIndex++;
+  setTimeout(typeLine, 150 + Math.random() * 200);
+}
+
+function finishLoader() {
+  loaderDone = true;
+  document.getElementById('hackLoader').classList.add('done');
+  document.getElementById('skipBtn').style.display = 'none';
+  document.getElementById('mainSite').style.display = 'block';
+  setTimeout(() => { document.getElementById('hackLoader').remove(); }, 1000);
+}
+
+function skipLoader() {
+  loaderDone = true;
+  finishLoader();
+}
+
+// Start
+setTimeout(typeLine, 500);
+
+// ===== YANGI ORQA FON — nozik suzuvchi zarrachalar (hero ostida) =====
+(function(){
+  var canvas = document.getElementById('heroBgCanvas');
+  if(!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var w, h, particles = [];
+  function resize(){
+    var rect = canvas.parentElement.getBoundingClientRect();
+    w = canvas.width = rect.width;
+    h = canvas.height = rect.height;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  var COUNT = 55;
+  for(var i=0;i<COUNT;i++){
+    particles.push({
+      x: Math.random()*w, y: Math.random()*h,
+      vx: (Math.random()-0.5)*0.25, vy: (Math.random()-0.5)*0.25,
+      r: Math.random()*1.6+0.6
+    });
+  }
+
+  function draw(){
+    ctx.clearRect(0,0,w,h);
+    for(var i=0;i<particles.length;i++){
+      var p = particles[i];
+      p.x += p.vx; p.y += p.vy;
+      if(p.x<0||p.x>w) p.vx*=-1;
+      if(p.y<0||p.y>h) p.vy*=-1;
+      ctx.beginPath();
+      ctx.arc(p.x,p.y,p.r,0,Math.PI*2);
+      ctx.fillStyle = 'rgba(57,255,156,0.45)';
+      ctx.fill();
+    }
+    for(var i=0;i<particles.length;i++){
+      for(var j=i+1;j<particles.length;j++){
+        var a=particles[i], b=particles[j];
+        var dx=a.x-b.x, dy=a.y-b.y, dist=Math.sqrt(dx*dx+dy*dy);
+        if(dist<110){
+          ctx.beginPath();
+          ctx.moveTo(a.x,a.y); ctx.lineTo(b.x,b.y);
+          ctx.strokeStyle = 'rgba(37,99,235,'+(0.12*(1-dist/110))+')';
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+{% endblock %}

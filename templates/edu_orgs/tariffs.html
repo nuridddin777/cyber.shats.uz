@@ -1,0 +1,107 @@
+{% import "edu_orgs/_shared.html" as shared %}
+<!DOCTYPE html>
+<html lang="uz"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tariflar — SHATS CYBER EDU</title>
+</head><body>
+{% include "edu_orgs/_shared.html" %}
+<div class="container">
+  <div class="top-nav"><div class="brand">SHATS CYBER <span>EDU</span></div>
+    <form method="POST" action="{{ url_for('edu_orgs.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn secondary">Chiqish</button></form>
+  </div>
+
+  {{ shared.flashes() }}
+
+  <div class="card">
+    <h1>Tarif tanlang — {{ org['name'] }}</h1>
+    <p style="color:#a1a1c0;">Tarif sotib olinmaguncha panellar yopiq bo'ladi. Narx tashkilot
+      balansidan (CODE) yechiladi.
+      <span class="badge {{ 'warn' if not org['is_active'] else '' }}">
+        {{ 'Faol' if org['is_active'] else 'Faol emas' }}
+      </span>
+    </p>
+    <p>Tashkilot balansi: <b>{{ org['coin_balance'] }} CODE</b></p>
+
+    <div class="grid-2">
+      {% for t in tariffs %}
+      <div class="card" style="background:#1a1a2a;">
+        <h3>{{ t['display_name'] }}</h3>
+        <p style="font-size:1.4em;font-weight:bold;color:#00ff41;">{{ t['price_coins'] }} CODE <span style="font-size:0.6em;color:#a1a1c0;">/ oy</span></p>
+        <div class="table-wrap">
+<table>
+          <tr><td>O'qituvchilar</td><td>{{ t['max_teachers'] }}</td></tr>
+          <tr><td>O'quvchilar</td><td>{{ t['max_students'] }}</td></tr>
+          <tr><td>Qo'shimcha o'qituvchi narxi</td><td>{{ t['extra_teacher_coin_cost'] }} coin</td></tr>
+          <tr><td>Har {{ t['extra_student_group_size'] }} qo'shimcha o'quvchi</td><td>{{ t['extra_student_coin_cost'] }} coin</td></tr>
+          <tr><td>Monitoring paneli</td><td>{{ 'Bor' if t['has_monitoring_panel'] else 'Yo\'q' }}</td></tr>
+          <tr><td>Chuqurlashgan laboratoriyalar</td><td>{{ 'Bor' if t['has_advanced_labs'] else 'Yo\'q' }}</td></tr>
+        </table>
+</div>
+        <form method="POST" action="{{ url_for('edu_orgs.activate_tariff') }}" class="tarif-buy-form" style="margin-top:14px;" data-price="{{ t['price_coins'] }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <input type="hidden" name="tarif_code" value="{{ t['code'] }}">
+          <label>Muddat</label>
+          <div style="display:flex;gap:8px;margin-bottom:10px;">
+            <button type="button" class="btn secondary month-quick" data-months="1" style="flex:1;padding:8px;">1 oy</button>
+            <button type="button" class="btn secondary month-quick" data-months="12" style="flex:1;padding:8px;">1 yil (12 oy)</button>
+          </div>
+          <label>Yoki necha oyga (o'zingiz kiriting)</label>
+          <input type="number" name="months" class="months-input" min="1" max="60" value="1" required>
+          <p style="margin:-6px 0 12px 0;color:#a1a1c0;font-size:13px;">
+            Jami: <b class="total-price">{{ t['price_coins'] }}</b> CODE
+            <span class="gift-note" style="display:none;color:var(--edu-accent);"> (bonus: +1 marta 5-coin sovg'a)</span>
+          </p>
+          {% if org['coin_balance'] < t['price_coins'] %}
+            <p class="badge warn" style="margin-top:8px;">Balans yetarli emas — avval G'aznadan CODE oldiring</p>
+          {% endif %}
+          <button type="submit" class="btn">Sotib olish va faollashtirish</button>
+        </form>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Yoki 9 xonali faollashtirish kaliti bilan oching</h2>
+    <p style="color:#a1a1c0;">G'azna yoki Edu admin bergan kalitni kiriting — coin sarflamasdan
+      tegishli tarif faollashadi.</p>
+    <form method="POST" action="{{ url_for('edu_orgs.activate_tariff_with_key_route') }}" style="display:flex;gap:8px;max-width:360px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <input type="text" name="key_code" placeholder="masalan: 123456789" pattern="[0-9]{9}" maxlength="9" required>
+      <button type="submit" class="btn">Ochish</button>
+    </form>
+  </div>
+
+  <div class="card">
+    <a href="{{ url_for('edu_orgs.dashboard') }}" class="btn secondary">← Boshqaruv paneliga o'tish</a>
+  </div>
+</div>
+
+<script>
+(function(){
+  document.querySelectorAll('.tarif-buy-form').forEach(function(form){
+    var price = parseInt(form.dataset.price, 10) || 0;
+    var monthsInput = form.querySelector('.months-input');
+    var totalEl = form.querySelector('.total-price');
+    var giftNote = form.querySelector('.gift-note');
+    var quickBtns = form.querySelectorAll('.month-quick');
+
+    function recalc(){
+      var months = parseInt(monthsInput.value, 10);
+      if (!months || months < 1) months = 1;
+      totalEl.textContent = (price * months).toLocaleString('ru-RU');
+      giftNote.style.display = months >= 2 ? 'inline' : 'none';
+    }
+
+    quickBtns.forEach(function(btn){
+      btn.addEventListener('click', function(){
+        monthsInput.value = btn.dataset.months;
+        recalc();
+      });
+    });
+    monthsInput.addEventListener('input', recalc);
+    recalc();
+  });
+})();
+</script>
+</body></html>

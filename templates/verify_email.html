@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Emailni tasdiqlash — SHATS CYBER{% endblock %}
+{% block extra_head %}<style>
+html, body{overflow:hidden !important; height:100vh !important; margin:0 !important; background:#050a18 !important; background-image:none !important;}
+body::after{display:none !important}
+.verify-page{position:fixed;top:0;left:0;right:0;bottom:0;background:#050a18;display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;z-index:900;margin:0;overflow:hidden;}
+.verify-card{width:100%;max-width:400px;background:rgba(8,20,40,0.95);border:1px solid rgba(212,175,55,0.25);border-radius:12px;padding:24px;backdrop-filter:blur(12px);box-shadow:0 0 40px rgba(212,175,55,0.08)}
+.verify-logo{text-align:center;margin-bottom:12px}
+.verify-logo span{font-size:22px;font-weight:700;background:linear-gradient(135deg,#ffd54a,#c99400);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.verify-icon{font-size:32px;text-align:center;margin-bottom:6px}
+.verify-sub{font-size:13px;color:#8899aa;text-align:center;margin-bottom:6px;line-height:1.5}
+.verify-email{font-size:14px;color:#f0d68a;text-align:center;font-weight:700;margin-bottom:16px;word-break:break-all}
+.code-input{width:100%;background:rgba(5,15,35,0.9);border:1px solid rgba(212,175,55,0.2);border-radius:8px;color:#e8f4ff;padding:16px 14px;font-size:26px;letter-spacing:10px;text-align:center;box-sizing:border-box;transition:border-color 0.2s;font-weight:700}
+.code-input:focus{outline:none;border-color:rgba(212,175,55,0.6);box-shadow:0 0 12px rgba(212,175,55,0.15)}
+.verify-btn{width:100%;background:linear-gradient(135deg,#ffd54a,#c99400);border:none;border-radius:8px;color:#1a1200;padding:13px;font-size:15px;font-weight:800;cursor:pointer;transition:all 0.2s;margin-top:16px}
+.verify-btn:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(212,175,55,0.3)}
+.resend-form{margin-top:18px;text-align:center}
+.resend-btn{background:none;border:none;color:#e0b122;font-size:13px;font-weight:600;cursor:pointer;text-decoration:underline}
+.resend-btn:hover{color:#ffd54a}
+.verify-foot{text-align:center;margin-top:20px;font-size:13px;color:#5a7a9a}
+.verify-foot a{color:#e0b122;text-decoration:none;font-weight:600}
+</style>{% endblock %}
+{% block content %}
+<div style="position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#8a8a92 33%,#fff 33%,#fff 66%,#ff3b3b 66%);z-index:999;"></div>
+
+<div class="verify-page">
+  <div class="verify-card">
+    <div class="verify-logo">
+      <div style="font-size:36px;margin-bottom:6px;">🛡️</div>
+      <span>SHATS CYBER</span>
+    </div>
+
+    <div class="verify-icon">📩</div>
+    <div class="verify-sub">Tasdiqlash kodi quyidagi emailga yuborildi:</div>
+    <div class="verify-email">{{ email }}</div>
+
+    
+
+    <form method="post" action="{{ url_for('verify_email') }}">
+      <input type="text" name="code" class="code-input" placeholder="000000" maxlength="6"
+             inputmode="numeric" pattern="[0-9]*" autocomplete="one-time-code" required autofocus>
+      <button type="submit" class="verify-btn">{{ icon('check', 16) }} Tasdiqlash</button>
+    </form>
+
+    <div class="resend-form">
+      <form method="post" action="{{ url_for('verify_email_resend') }}" style="display:inline;">
+        <button type="submit" class="resend-btn">Kodni qayta yuborish</button>
+      </form>
+    </div>
+
+    <div class="verify-foot">
+      Boshqa hisob bilan kirmoqchimisiz? <a href="{{ url_for('logout') }}">Chiqish</a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script>
+document.querySelector('.code-input').addEventListener('input', function(e){
+  this.value = this.value.replace(/\D/g,'').slice(0,6);
+});
+</script>
+{% endblock %}

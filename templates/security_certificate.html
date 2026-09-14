@@ -1,0 +1,25 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Xavfsizlik Sertifikat Markazi — MAXSUS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:20px;">{{ icon('award',18) }} Xavfsizlik Sertifikat Markazi</h1>
+  <a href="{{ url_for('secz_bp.security_zone_page') }}" class="cs-btn cs-btn-sm">← Xavfsizlik Zonasi</a>
+</div>
+
+<div class="cs-card" style="max-width:600px; text-align:center; padding:32px;">
+  {% if eligible %}
+  <div style="font-size:40px; margin-bottom:10px;">🏆</div>
+  <h2 style="font-size:18px; color:#e0393d;">Tabriklaymiz! Sertifikat olishga huquqingiz bor.</h2>
+  <p class="muted" style="font-size:12px; margin:10px 0 20px;">Natijangiz: {{ score.score }}/{{ score.total }} ({{ score.level }})</p>
+  <a href="{{ url_for('secz_bp.security_certificate_pdf') }}" class="cs-btn cs-btn-primary">{{ icon('download',13) }} Sertifikatni yuklab olish (PDF)</a>
+  {% else %}
+  <div style="font-size:40px; margin-bottom:10px;">📋</div>
+  <h2 style="font-size:16px;">Sertifikat olish uchun testda kamida 90% ball to'plashingiz kerak.</h2>
+  {% if score %}
+  <p class="muted" style="font-size:12px; margin:10px 0 20px;">Joriy natijangiz: {{ score.score }}/{{ score.total }} ({{ score.level }})</p>
+  {% endif %}
+  <a href="{{ url_for('secz_bp.security_zone_quiz') }}" class="cs-btn cs-btn-primary">{{ icon('zap',13) }} Testni (qayta) topshirish</a>
+  {% endif %}
+</div>
+{% endblock %}

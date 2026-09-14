@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+{% block title %}Do'stlar — Virtual Olam{% endblock %}
+{% block extra_head %}
+<style>
+.vw-header{background:linear-gradient(135deg,#050a18,#0a1020);padding:28px 0 20px;margin-bottom:24px;border-bottom:1px solid rgba(30,144,255,0.15)}
+.friend-card{display:flex;align-items:center;gap:14px;background:rgba(10,22,45,0.9);border:1px solid rgba(30,144,255,0.12);border-radius:12px;padding:14px 16px;margin-bottom:10px;transition:all .15s}
+.friend-card:hover{border-color:rgba(30,144,255,0.3)}
+.f-avatar{width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.online-dot{width:10px;height:10px;border-radius:50%;border:2px solid #0a1628;position:absolute;bottom:0;right:0}
+</style>
+{% endblock %}
+{% block content %}
+<div class="vw-header">
+  <div class="container">
+    <nav style="font-size:13px;color:#5a7a9a;margin-bottom:4px;">
+      <a href="{{ url_for('virtual.world_home') }}" style="color:#5a7a9a;">Virtual Olam</a> / <span style="color:#7ec8f8;">Do'stlar</span>
+    </nav>
+    <h1 style="font-size:22px;font-weight:700;color:#e8f4ff;margin:0;">👥 Do'stlar ({{ friends|length }})</h1>
+  </div>
+</div>
+<div class="container" style="max-width:600px;">
+  {% if pending %}
+  <div style="margin-bottom:20px;">
+    <h3 style="color:#ffc107;font-size:15px;margin-bottom:10px;">📩 Kutayotgan so'rovlar ({{ pending|length }})</h3>
+    {% for p in pending %}
+    <div class="friend-card" style="border-color:rgba(255,200,0,0.2);">
+      <div class="f-avatar" style="background:rgba(255,200,0,0.15);">👤</div>
+      <div style="flex:1;">
+        <div style="color:#e8f4ff;font-weight:600;font-size:14px;">{{ p.nickname or (p.ism ~ ' ' ~ p.familiya) }}</div>
+      </div>
+      <button class="cs-btn" style="font-size:12px;padding:6px 12px;" onclick="acceptFriend({{ p.id }})">✓ Qabul qilish</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <h3 style="color:#e8f4ff;font-size:15px;margin-bottom:10px;">🤝 Do'stlar</h3>
+  {% for f in friends %}
+  <div class="friend-card">
+    <div style="position:relative;">
+      <div class="f-avatar" style="background:rgba(30,144,255,0.15);">🧑‍💻</div>
+      <div class="online-dot" style="background:{% if f.is_online %}#00c853{% else %}#555{% endif %};"></div>
+    </div>
+    <div style="flex:1;">
+      <div style="color:#e8f4ff;font-weight:600;font-size:14px;">{{ f.nickname or (f.ism ~ ' ' ~ f.familiya) }}</div>
+      <div style="font-size:12px;color:#5a7a9a;">
+        ⭐ Lv.{{ f.level or 1 }}
+        {% if f.is_online and f.room_name %} · <span style="color:#00c853;">{{ f.room_name }}da</span>{% endif %}
+      </div>
+    </div>
+  </div>
+  {% else %}
+  <div style="text-align:center;padding:40px;color:#5a7a9a;">
+    <div style="font-size:48px;margin-bottom:12px;">👥</div>
+    <div>Hali do'stlar yo'q</div>
+    <div style="font-size:12px;margin-top:4px;">Xonalarga kirib boshqa foydalanuvchilar bilan tanishing!</div>
+  </div>
+  {% endfor %}
+</div>
+<script>
+function acceptFriend(id) {
+  fetch(`/virtual/friends/accept/${id}`, {method:'POST'})
+  .then(r => r.json())
+  .then(d => { alert(d.msg); if(d.ok) location.reload(); });
+}
+</script>
+{% endblock %}

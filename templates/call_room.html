@@ -1,0 +1,58 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Video qo'ng'iroq{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:14px; flex-wrap:wrap; gap:10px;">
+  <h1 style="font-size:18px;">{{ icon('play',17) }} Video qo'ng'iroq</h1>
+  <div id="callStatus" class="muted" style="font-size:11.5px;"></div>
+</div>
+
+<div id="videoGrid" class="call-grid">
+  <div class="call-tile call-tile-local">
+    <video id="localVideo" autoplay playsinline muted></video>
+    <div class="call-tile-name">Siz</div>
+  </div>
+</div>
+
+<div class="call-controls">
+  <button id="micBtn" class="call-ctrl-btn" title="Mikrofon">🎤</button>
+  <button id="camBtn" class="call-ctrl-btn" title="Kamera">📹</button>
+  <form method="post" action="{{ url_for('call_bp.call_leave', room_code=call.room_code) }}" style="display:inline;">
+    <button type="submit" class="call-ctrl-btn call-ctrl-leave" title="Chiqish">{{ icon('logout',18) }}</button>
+  </form>
+  {% if is_host %}
+  <form method="post" action="{{ url_for('call_bp.call_end', room_code=call.room_code) }}" style="display:inline;" onsubmit="return confirm('Qo\'ng\'iroqni HAMMA uchun tugatasizmi?');">
+    <button type="submit" class="call-ctrl-btn call-ctrl-end" title="Hammaga tugatish">{{ icon('x',18) }}</button>
+  </form>
+  {% endif %}
+</div>
+
+<div style="text-align:center; margin-top:16px;">
+  <a href="{{ back_url }}" class="muted" style="font-size:11.5px;">{{ icon('chevron-left',11) }} Guruh/kanalga qaytish</a>
+</div>
+
+<style>
+.call-grid { display:grid; grid-template-columns:repeat(auto-fit, minmax(220px, 1fr)); gap:12px; margin-bottom:20px; }
+.call-tile { position:relative; background:#000; border-radius:14px; overflow:hidden; aspect-ratio:4/3; border:1px solid var(--cs-border); }
+.call-tile video { width:100%; height:100%; object-fit:cover; }
+.call-tile-name { position:absolute; bottom:8px; left:10px; font-size:11px; color:#fff; background:rgba(0,0,0,.5); padding:2px 8px; border-radius:20px; }
+.call-tile-local { border-color:var(--cs-border-active); }
+.call-controls { display:flex; justify-content:center; gap:14px; }
+.call-ctrl-btn { width:52px; height:52px; border-radius:50%; border:1px solid var(--cs-border); background:var(--cs-bg-card); color:var(--cs-text-white); cursor:pointer; display:flex; align-items:center; justify-content:center; transition:.2s; }
+.call-ctrl-btn:hover { border-color:var(--cs-border-active); }
+.call-ctrl-btn.off { background:rgba(255,59,59,.2); color:var(--cs-text-red); border-color:var(--cs-text-red); }
+.call-ctrl-leave { background:rgba(255,59,59,.15); color:var(--cs-text-red); }
+.call-ctrl-end { background:var(--cs-text-red); color:#fff; }
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script>
+window.CS_CALL = {
+    roomCode: {{ call.room_code|tojson }},
+    myId: {{ current_user.id }},
+    isHost: {{ 'true' if is_host else 'false' }}
+};
+</script>
+<script src="{{ url_for('static', filename='js/webrtc-call.js') }}"></script>
+{% endblock %}

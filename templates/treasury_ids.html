@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}ID Boshqaruvi — G'azna{% endblock %}
+{% block extra_head %}
+<style>
+body{ background: linear-gradient(180deg, #050505 0%, #0e0e0e 100%) !important; }
+body::before{ display:none !important; }
+.cs-card{
+  background: linear-gradient(155deg, #0e0e0e 0%, #1a1508 60%, #0e0e0e 100%) !important;
+  border: 1px solid rgba(179,135,40,.35) !important;
+  color: #FCF6BA !important;
+}
+.cs-card h1, .cs-card h2, .cs-card h3, h1, h2, h3 { color: #FCF6BA !important; }
+.muted { color: rgba(252,246,186,.55) !important; }
+a { color: #BF953F; }
+.cs-btn-primary {
+  background: linear-gradient(135deg,#BF953F 0%,#FCF6BA 50%,#B38728 100%) !important;
+  color: #050505 !important; font-weight: 800; border: none !important;
+}
+.cs-input {
+  background: #1a1a1a !important; border-color: rgba(179,135,40,.3) !important; color: #FCF6BA !important;
+}
+.cs-table th { color: rgba(252,246,186,.6) !important; }
+.cs-table td { color: #FCF6BA !important; border-color: rgba(179,135,40,.15) !important; }
+.cs-chip { border-color: rgba(179,135,40,.3) !important; color: #FCF6BA !important; }
+</style>
+{% endblock %}
+{% block content %}
+<div style="max-width:1000px; margin:0 auto; padding:24px 20px;">
+  <div class="flex-between" style="margin-bottom:18px;">
+    <h1 style="font-size:19px;">{{ icon('hash',18) }} ID Boshqaruvi — G'azna</h1>
+    <a href="{{ url_for('treasury_bp.treasury_dashboard') }}" class="cs-btn cs-btn-sm">← G'azna paneli</a>
+  </div>
+
+  <!-- ID AUKSIONINI YOPISH -->
+  <div class="cs-card" style="padding:20px; margin-bottom:20px;">
+    <h3 style="font-size:14px; margin-bottom:6px;">🔒 ID AUKSIONINI YOPISH</h3>
+    <p class="muted" style="font-size:11.5px; margin-bottom:14px;">
+      Eski taklif-berish uslubidagi auktsionni butunlay yopadi. Faol auktsionlardagi joriy g'olib takliflariga pul to'liq qaytariladi.
+    </p>
+    <form method="post" action="{{ url_for('treasury_bp.treasury_close_auctions') }}"
+          onsubmit="return confirm('ID auksioni butunlay yopiladi. Davom etasizmi?');">
+      <button type="submit" class="cs-btn cs-btn-primary">{{ icon('lock',13) }} Auksionni yopish</button>
+    </form>
+  </div>
+
+  <!-- MAXSUS (HARFLAR ARALASH) ID BERISH -->
+  <div class="cs-card" style="padding:20px; margin-bottom:20px;">
+    <h3 style="font-size:14px; margin-bottom:6px;">✨ MAXSUS ID (harflar aralash)</h3>
+    <p class="muted" style="font-size:11.5px; margin-bottom:14px;">
+      Istalgan foydalanuvchiga harflar aralash maxsus ID bering (masalan "SHATS-1"). 3-16 belgi, A-Z, 0-9, - va _.
+    </p>
+    <form method="post" action="{{ url_for('treasury_bp.treasury_grant_special_id') }}" style="display:flex; gap:8px; flex-wrap:wrap;">
+      <input type="text" name="target_identifier" class="cs-input" placeholder="Foydalanuvchi ID, maxsus ID yoki email" required style="flex:1; min-width:200px;">
+      <input type="text" name="new_id" class="cs-input" placeholder="Yangi maxsus ID" required style="flex:1; min-width:180px; text-transform:uppercase;">
+      <button type="submit" class="cs-btn cs-btn-primary">{{ icon('zap',13) }} Berish</button>
+    </form>
+  </div>
+
+  <!-- FOYDALANUVCHILAR SOTUVGA QO'YGAN IDLAR -->
+  <div class="cs-card" style="padding:20px; margin-bottom:20px;">
+    <h3 style="font-size:14px; margin-bottom:6px;">💬 FOYDALANUVCHILAR SOTUVGA QO'YGAN ID'LAR ({{ pending_sell_offers|length }})</h3>
+    <p class="muted" style="font-size:11.5px; margin-bottom:14px;">
+      Savdolashish mumkin — arzonroq narx taklif qiling yoki so'ralgan narxning o'zida sotib oling.
+    </p>
+    {% for o in pending_sell_offers %}
+    <div style="border:1px solid rgba(179,135,40,.25); border-radius:10px; padding:14px; margin-bottom:10px;">
+      <div class="flex-between" style="margin-bottom:8px;">
+        <div style="font-family:monospace; font-size:18px; letter-spacing:3px;">#{{ o.custom_id }}</div>
+        <div class="muted" style="font-size:11px;">{{ o.familiya }} {{ o.ism }}</div>
+      </div>
+      <div style="font-size:12px; margin-bottom:10px;">
+        So'ralgan narx: <strong style="color:var(--cs-text-yellow);">⚡ {{ "{:,}".format(o.asking_price|int) }} CODE</strong>
+        {% if o.status == 'countered' %}
+        · Siz taklif qilgan: <strong>⚡ {{ "{:,}".format(o.counter_price|int) }} CODE</strong> (javob kutilmoqda)
+        {% endif %}
+      </div>
+      {% if o.status == 'pending' %}
+      <div style="display:flex; gap:8px; flex-wrap:wrap;">
+        <form method="post" action="{{ url_for('treasury_bp.treasury_id_sell_accept', offer_id=o.id) }}" style="display:flex; gap:6px; align-items:center; flex-wrap:wrap;">
+          <select name="disposition" class="cs-input" style="font-size:10px; padding:4px 8px; width:auto;">
+            <option value="random_pool">Oddiy — Random hovuziga</option>
+            <option value="marketplace">Chiroyli — bozorga (narx qo'yaman)</option>
+          </select>
+          <input type="number" name="marketplace_price" placeholder="Bozor narxi" class="cs-input" style="width:100px; font-size:11px;">
+          <button type="submit" class="cs-btn cs-btn-primary" style="font-size:11px;">So'ralgan narxda olish</button>
+        </form>
+        <form method="post" action="{{ url_for('treasury_bp.treasury_id_sell_counter', offer_id=o.id) }}" style="display:flex; gap:6px;">
+          <input type="number" name="counter_price" placeholder="Arzonroq narx" class="cs-input" style="width:130px; font-size:11px;" required>
+          <button type="submit" class="cs-btn" style="font-size:11px;">Savdolashish</button>
+        </form>
+        <form method="post" action="{{ url_for('treasury_bp.treasury_id_sell_reject', offer_id=o.id) }}">
+          <button type="submit" class="cs-btn cs-btn-sm">Rad etish</button>
+        </form>
+      </div>
+      {% endif %}
+    </div>
+    {% else %}
+    <p class="muted" style="text-align:center; padding:20px;">Hozircha hech kim ID sotuvga qo'ymagan.</p>
+    {% endfor %}
+  </div>
+
+  <!-- YANGI PREMIUM ID QO'SHISH -->
+  <div class="cs-card" style="padding:20px; margin-bottom:20px;">
+    <h3 style="font-size:14px; margin-bottom:14px;">{{ icon('plus',14) }} YANGI CHIROYLI ID QO'SHISH</h3>
+    <form method="post" action="{{ url_for('treasury_bp.treasury_ids_create') }}" style="display:flex; gap:8px; flex-wrap:wrap;">
+      <input type="text" name="custom_id" class="cs-input" placeholder="7 xonali ID (masalan 7777777)" maxlength="7" required style="flex:1; min-width:160px;">
+      <input type="number" name="price" class="cs-input" placeholder="Narx (CODE)" required style="flex:1; min-width:140px;">
+      <button type="submit" class="cs-btn cs-btn-primary">{{ icon('plus',13) }} Qo'shish</button>
+    </form>
+  </div>
+
+  <!-- CHIROYLI IDlar RO'YXATI -->
+  <div class="cs-card" style="padding:20px;">
+    <h3 style="font-size:14px; margin-bottom:14px;">{{ icon('star',14) }} CHIROYLI IDLAR ({{ premium_ids|length }})</h3>
+    <div style="overflow-x:auto;">
+      <table class="cs-table">
+        <thead><tr><th>ID</th><th>Tur</th><th>Narx</th><th>Holat</th><th>Amal</th></tr></thead>
+        <tbody>
+        {% for pid in premium_ids %}
+        <tr>
+          <td style="font-family:monospace; font-size:16px; letter-spacing:3px;">#{{ pid.custom_id }}</td>
+          <td>{{ pid.id_type|upper }}</td>
+          <td>⚡ {{ "{:,}".format(pid.base_price|int) }} CODE</td>
+          <td>{{ 'Bo\'sh' if pid.status=='available' else 'Sotilgan' }}</td>
+          <td>
+            {% if pid.status == 'available' %}
+            <form method="post" action="{{ url_for('treasury_bp.treasury_ids_delete', custom_id=pid.custom_id) }}" onsubmit="return confirm('O\'chirilsinmi?');" style="display:inline;">
+              <button type="submit" class="cs-btn cs-btn-sm">{{ icon('trash-2',11) }}</button>
+            </form>
+            {% else %}—{% endif %}
+          </td>
+        </tr>
+        {% else %}
+        <tr><td colspan="5" class="muted" style="text-align:center; padding:20px;">Hozircha ID yo'q.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

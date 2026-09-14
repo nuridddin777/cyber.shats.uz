@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Virtual Olam Nazorati — Admin{% endblock %}
+{% block extra_head %}
+<style>
+.vw-header{background:linear-gradient(135deg,#050a18,#1a0a28);padding:28px 0 20px;margin-bottom:24px;border-bottom:1px solid rgba(180,124,255,0.2)}
+.stat-card{background:rgba(10,22,45,0.9);border:1px solid rgba(30,144,255,0.15);border-radius:12px;padding:18px;text-align:center}
+.stat-big{font-size:32px;font-weight:800}
+.tab-bar{display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid rgba(30,144,255,0.1);padding-bottom:4px}
+.tab-btn{background:none;border:none;color:#5a7a9a;padding:8px 16px;cursor:pointer;font-size:13px;border-radius:6px 6px 0 0;transition:all .15s}
+.tab-btn:hover{color:#7ec8f8}.tab-btn.active{color:#e8f4ff;background:rgba(30,144,255,0.1);border-bottom:2px solid #1e90ff}
+.tab-panel{display:none}.tab-panel.active{display:block}
+.data-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid rgba(30,144,255,0.06);font-size:13px}
+.data-row:hover{background:rgba(30,144,255,0.03)}
+</style>
+{% endblock %}
+{% block content %}
+<div class="vw-header">
+  <div class="container">
+    <div style="color:#b47cff;font-size:12px;letter-spacing:1px;margin-bottom:4px;">// ADMIN PANEL</div>
+    <h1 style="font-size:22px;font-weight:700;color:#e8f4ff;margin:0;">🌐 Virtual Olam Nazorati</h1>
+  </div>
+</div>
+<div class="container">
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px;">
+    <div class="stat-card"><div class="stat-big" style="color:#1e90ff;">{{ stats.total_avatars }}</div><div style="font-size:12px;color:#5a7a9a;">Avatarlar</div></div>
+    <div class="stat-card"><div class="stat-big" style="color:#00c853;">{{ stats.online_now }}</div><div style="font-size:12px;color:#5a7a9a;">Onlayn</div></div>
+    <div class="stat-card"><div class="stat-big" style="color:#b47cff;">{{ stats.total_rooms }}</div><div style="font-size:12px;color:#5a7a9a;">Xonalar</div></div>
+    <div class="stat-card"><div class="stat-big" style="color:#ffc107;">{{ stats.total_items }}</div><div style="font-size:12px;color:#5a7a9a;">Buyumlar</div></div>
+  </div>
+  <div class="tab-bar">
+    <button class="tab-btn active" onclick="showTab('rooms',this)">🏙️ Xonalar</button>
+    <button class="tab-btn" onclick="showTab('items',this)">📦 Buyumlar</button>
+    <button class="tab-btn" onclick="showTab('quests',this)">⚔️ Questlar</button>
+  </div>
+  <div class="tab-panel active" id="tab-rooms">
+    <div style="background:rgba(10,22,45,0.9);border:1px solid rgba(30,144,255,0.15);border-radius:12px;overflow:hidden;">
+      {% for r in rooms %}
+      <div class="data-row">
+        <span style="font-size:20px;">{% if r.theme=='cyber_city' %}🏙️{% elif r.theme=='lab' %}🔬{% elif r.theme=='security' %}🛡️{% elif r.theme=='library' %}📚{% elif r.theme=='studio' %}🎨{% elif r.theme=='arena' %}🎮{% elif r.theme=='shop' %}🛒{% else %}👑{% endif %}</span>
+        <div style="flex:1;"><div style="color:#e8f4ff;font-weight:600;">{{ r.name }}</div><div style="font-size:11px;color:#5a7a9a;">{{ r.slug }} · {{ r.room_type }} · max {{ r.max_users }}</div></div>
+        <span style="font-size:12px;color:{% if r.is_active %}#00c853{% else %}#ff4444{% endif %};">{% if r.is_active %}Faol{% else %}O'chiq{% endif %}</span>
+      </div>
+      {% endfor %}
+    </div>
+    <button class="cs-btn" style="margin-top:14px;" onclick="document.getElementById('addRoomModal').style.display='flex'">+ Yangi xona</button>
+  </div>
+  <div class="tab-panel" id="tab-items">
+    <div style="background:rgba(10,22,45,0.9);border:1px solid rgba(30,144,255,0.15);border-radius:12px;overflow:hidden;">
+      {% for it in items %}
+      <div class="data-row">
+        <span style="font-size:18px;width:28px;text-align:center;color:{{ it.color }};">●</span>
+        <div style="flex:1;"><div style="color:#e8f4ff;font-weight:600;">{{ it.name }}</div><div style="font-size:11px;color:#5a7a9a;">{{ it.item_type }} · {{ it.rarity }} · 🪙 {{ it.price_coins }}</div></div>
+      </div>
+      {% endfor %}
+    </div>
+    <button class="cs-btn" style="margin-top:14px;" onclick="document.getElementById('addItemModal').style.display='flex'">+ Yangi buyum</button>
+  </div>
+  <div class="tab-panel" id="tab-quests">
+    <div style="background:rgba(10,22,45,0.9);border:1px solid rgba(30,144,255,0.15);border-radius:12px;overflow:hidden;">
+      {% for q in quests %}
+      <div class="data-row">
+        <div style="flex:1;"><div style="color:#e8f4ff;font-weight:600;">{{ q.title }}</div><div style="font-size:11px;color:#5a7a9a;">{{ q.quest_type }} · +{{ q.reward_coins }}🪙 +{{ q.reward_xp }}XP</div></div>
+        <span style="font-size:12px;color:{% if q.is_active %}#00c853{% else %}#ff4444{% endif %};">{% if q.is_active %}Faol{% else %}O'chiq{% endif %}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<!-- Add Room Modal -->
+<div id="addRoomModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#0d1b2e;border:1px solid rgba(30,144,255,0.3);border-radius:16px;padding:28px;width:440px;max-width:95vw;">
+    <h3 style="color:#e8f4ff;margin:0 0 16px;">➕ Yangi Xona</h3>
+    <input type="text" id="rName" placeholder="Xona nomi" style="width:100%;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px;font-size:14px;margin-bottom:10px;box-sizing:border-box;">
+    <input type="text" id="rSlug" placeholder="slug (masalan: my_room)" style="width:100%;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px;font-size:14px;margin-bottom:10px;box-sizing:border-box;">
+    <textarea id="rDesc" placeholder="Tavsif" rows="2" style="width:100%;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px;font-size:14px;margin-bottom:10px;box-sizing:border-box;resize:none;"></textarea>
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="cs-btn cs-btn-outline" onclick="this.closest('[id]').style.display='none'">Bekor</button>
+      <button class="cs-btn" onclick="addRoom()">Yaratish</button>
+    </div>
+  </div>
+</div>
+<!-- Add Item Modal -->
+<div id="addItemModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:1000;align-items:center;justify-content:center;">
+  <div style="background:#0d1b2e;border:1px solid rgba(30,144,255,0.3);border-radius:16px;padding:28px;width:440px;max-width:95vw;">
+    <h3 style="color:#e8f4ff;margin:0 0 16px;">➕ Yangi Buyum</h3>
+    <input type="text" id="iName" placeholder="Buyum nomi" style="width:100%;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px;font-size:14px;margin-bottom:10px;box-sizing:border-box;">
+    <select id="iType" style="width:100%;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px;font-size:14px;margin-bottom:10px;">
+      <option value="hat">Shlyapa</option><option value="accessory">Aksessuar</option><option value="outfit">Kiyim</option><option value="badge">Bejik</option><option value="pet">Pet</option><option value="tool">Asbob</option><option value="vehicle">Transport</option>
+    </select>
+    <select id="iRarity" style="width:100%;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px;font-size:14px;margin-bottom:10px;">
+      <option value="common">Common</option><option value="uncommon">Uncommon</option><option value="rare">Rare</option><option value="epic">Epic</option><option value="legendary">Legendary</option>
+    </select>
+    <input type="number" id="iPrice" placeholder="Narx (coin)" value="10" style="width:100%;background:rgba(5,15,30,0.9);border:1px solid rgba(30,144,255,0.2);border-radius:8px;color:#e8f4ff;padding:10px;font-size:14px;margin-bottom:10px;box-sizing:border-box;">
+    <div style="display:flex;gap:10px;justify-content:flex-end;">
+      <button class="cs-btn cs-btn-outline" onclick="this.closest('[id]').style.display='none'">Bekor</button>
+      <button class="cs-btn" onclick="addItem()">Qo'shish</button>
+    </div>
+  </div>
+</div>
+<script>
+function showTab(name, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+}
+function addRoom() {
+  const body = `name=${encodeURIComponent(document.getElementById('rName').value)}&slug=${encodeURIComponent(document.getElementById('rSlug').value)}&description=${encodeURIComponent(document.getElementById('rDesc').value)}`;
+  fetch('/virtual/admin/room/add', {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body})
+  .then(r=>r.json()).then(d=>{alert(d.msg);if(d.ok)location.reload();});
+}
+function addItem() {
+  const body = `name=${encodeURIComponent(document.getElementById('iName').value)}&item_type=${document.getElementById('iType').value}&rarity=${document.getElementById('iRarity').value}&price_coins=${document.getElementById('iPrice').value}`;
+  fetch('/virtual/admin/item/add', {method:'POST',headers:{'Content-Type':'application/x-www-form-urlencoded'},body})
+  .then(r=>r.json()).then(d=>{alert(d.msg);if(d.ok)location.reload();});
+}
+</script>
+{% endblock %}

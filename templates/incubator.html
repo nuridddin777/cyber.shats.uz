@@ -1,0 +1,38 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block title %}Startap Inkubatori — MAXSUS{% endblock %}
+{% block app_content %}
+<div class="flex-between" style="margin-bottom:20px;">
+  <h1 style="font-size:20px;">{{ icon('zap',18) }} Startap Inkubatori</h1>
+</div>
+
+<div class="cs-card" style="max-width:520px; margin-bottom:20px;">
+  <h3 style="font-size:13px; margin-bottom:10px;">{{ icon('plus',14) }} YANGI G'OYA QO'SHISH</h3>
+  <form method="post" action="{{ url_for('inkubator_bp.incubator_create') }}">
+    <input type="text" name="title" required class="cs-input" style="margin-bottom:8px;" placeholder="G'oya nomi">
+    <textarea name="description" required class="cs-input" rows="3" style="margin-bottom:10px;" placeholder="G'oyangizni tasvirlab bering"></textarea>
+    <button class="cs-btn cs-btn-primary cs-btn-full">{{ icon('send',13) }} Joylash</button>
+  </form>
+</div>
+
+{% for idea in ideas %}
+<div class="cs-card" style="margin-bottom:14px;">
+  <div class="flex-between">
+    <h3 style="font-size:14px;">{{ idea.title }}</h3>
+    <form method="post" action="{{ url_for('inkubator_bp.incubator_vote', idea_id=idea.id) }}">
+      <button class="cs-btn cs-btn-sm" style="{{ 'background:#a855f7;color:#fff;border:0;' if idea.id in my_votes }}">
+        {{ icon('arrow-up',12) }} {{ idea.vote_count }}
+      </button>
+    </form>
+  </div>
+  <div class="muted" style="font-size:11px; margin:4px 0;">{{ idea.familiya }} {{ idea.ism }} · {{ idea.stage }}</div>
+  <p style="font-size:13px; color:#d8d0e8;">{{ idea.description }}</p>
+  <form method="post" action="{{ url_for('inkubator_bp.incubator_comment', idea_id=idea.id) }}" style="display:flex; gap:6px; margin-top:10px;">
+    <input type="text" name="content" required class="cs-input" style="font-size:11px;" placeholder="Fikr bildiring...">
+    <button class="cs-btn cs-btn-sm">{{ icon('send',11) }}</button>
+  </form>
+</div>
+{% else %}
+<p class="muted" style="text-align:center; padding:30px;">Hali g'oya yo'q</p>
+{% endfor %}
+{% endblock %}

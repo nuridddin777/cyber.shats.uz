@@ -1,0 +1,22 @@
+{% extends "app_base.html" %}
+{% from 'partials/icons.html' import icon %}
+{% block body_class %}has-sidebar teacher-theme{% endblock %}
+{% block title %}Kurs mavzusi joylashtirish — O'qituvchi paneli{% endblock %}
+{% block app_content %}
+<div style="max-width:640px; margin:0 auto;">
+  <h1 style="font-size:19px; margin-bottom:16px; color:var(--cs-text-white);">{{ icon('upload',18) }} Kurs mavzusi joylashtirish</h1>
+  <p class="muted" style="font-size:12.5px; margin-bottom:18px;">Fayl yuklab (Word/PDF) yoki to'g'ridan-to'g'ri yozib mavzu qo'shing. Admin ko'rib chiqadi.</p>
+  <form method="post" enctype="multipart/form-data" class="cs-card" style="padding:22px; display:flex; flex-direction:column; gap:14px;">
+    <div class="cs-field"><label>Mavzu sarlavhasi *</label><input class="cs-input" type="text" name="title" required></div>
+    <div class="cs-field">
+      <label>Matn (to'liq yozish)</label>
+      <textarea class="cs-textarea" name="content_text" rows="8" placeholder="Mavzu matnini shu yerga yozing..."></textarea>
+    </div>
+    <div class="cs-field">
+      <label>Yoki fayl yuklang (PDF/DOC/DOCX)</label>
+      <input class="cs-input" type="file" name="material_file" accept=".pdf,.doc,.docx">
+    </div>
+    <button type="submit" class="cs-btn cs-btn-primary" style="align-self:flex-start;">{{ icon('send',13) }} Yuborish</button>
+  </form>
+</div>
+{% endblock %}

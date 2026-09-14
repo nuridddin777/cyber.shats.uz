@@ -1,0 +1,177 @@
+{% import "edu_orgs/_shared.html" as shared %}
+<!DOCTYPE html>
+<html lang="uz"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="manifest" href="{{ url_for('edu_orgs.edu_manifest') }}">
+<meta name="theme-color" content="#2dd4bf">
+<title>{{ org['name'] }} — Boshqaruv paneli</title>
+</head><body>
+{% include "edu_orgs/_shared.html" %}
+<div class="container">
+  <div class="top-nav">
+    <div class="brand">SHATS CYBER <span>EDU</span></div>
+    <div>
+      <a href="{{ url_for('edu_orgs.curriculum_grades') }}" class="btn secondary" style="margin-right:8px;">O'quv dasturi</a>
+      <a href="{{ url_for('edu_orgs.org_treasury_page') }}" class="btn secondary" style="margin-right:8px;">G'azna</a>
+      <a href="{{ url_for('edu_orgs.tariffs_page') }}" class="btn secondary" style="margin-right:8px;">Tarif</a>
+      <form method="POST" action="{{ url_for('edu_orgs.logout') }}" style="display:inline;"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn secondary">Chiqish</button></form>
+    </div>
+  </div>
+
+  {{ shared.flashes() }}
+
+  <div class="card">
+    <h1>{{ org['name'] }} <span class="badge">@{{ org['username'] }}</span></h1>
+    <p style="color:#a1a1c0;">
+      Turi: {{ org['org_type'] }} &middot;
+      Manzil: {{ org['region_name'] or '—' }}{% if org['district_name'] %}, {{ org['district_name'] }}{% endif %} &middot;
+      Tarif: <b>{{ org['tarif_code'] or 'tanlanmagan' }}</b> &middot;
+      Holat:
+      {% if org['is_active'] %}<span class="badge">Faol</span>{% else %}<span class="badge warn">Faol emas</span>{% endif %}
+    </p>
+    <p>Coin balans: <b>{{ org['coin_balance'] }}</b> &middot;
+       Yagona G'azna jamg'armasi: <b>{{ fund_balance }}</b></p>
+
+    <a href="{{ url_for('edu_orgs.buy_code_page') }}" class="btn">💳 CODE sotib olish</a>
+  </div>
+
+  {% if tarif_error %}
+    <div class="card"><p class="badge locked">{{ tarif_error }}</p>
+    <p style="color:#a1a1c0;">Avval tarif tanlang: <a href="{{ url_for('edu_orgs.tariffs_page') }}">Tariflar sahifasi</a></p></div>
+  {% endif %}
+
+  <div class="grid-2">
+    <div class="card">
+      {% if org['org_type'] == 'texnikum' %}
+        <h2>Kurs ochish</h2>
+        <p style="font-size:13px;color:#a1a1c0;">Har bir kurs o'zining ulanish kodiga ega bo'ladi — bu kod
+          faqat tarif faollashtirilgach ishlaydi.</p>
+        <form method="POST" action="{{ url_for('edu_orgs.add_group_route') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <label>Kurs</label>
+          <select name="kurs_no" required>
+            <option value="1">1-kurs</option>
+            <option value="2">2-kurs</option>
+          </select>
+          <label>Fan/Yo'nalish</label>
+          <select name="subject_id">
+            <option value="">— tanlanmagan —</option>
+            {% for s in subjects %}<option value="{{ s['id'] }}">{{ s['name'] }}</option>{% endfor %}
+          </select>
+          <button type="submit" class="btn">Kurs ochish</button>
+        </form>
+      {% else %}
+        <h2>Sinf/Bo'lim ochish</h2>
+        <p style="font-size:13px;color:#a1a1c0;">Sinfni tanlang va bo'lim harflarini kiriting (masalan: A,B,V) —
+          har bir bo'lim (masalan 5-A, 5-B) o'zining alohida ulanish koduga ega bo'ladi. Kod faqat tarif
+          faollashtirilgach ishlaydi.</p>
+        <form method="POST" action="{{ url_for('edu_orgs.add_group_route') }}">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+          <label>Sinf</label>
+          <select name="grade_no" required>
+            {% for n in range(5, 12) %}<option value="{{ n }}">{{ n }}-sinf</option>{% endfor %}
+          </select>
+          <label>Bo'limlar (vergul bilan ajrating)</label>
+          <input type="text" name="section_letters" placeholder="masalan: A,B,V" required>
+          <label>Fan/Yo'nalish</label>
+          <select name="subject_id">
+            <option value="">— tanlanmagan —</option>
+            {% for s in subjects %}<option value="{{ s['id'] }}">{{ s['name'] }}</option>{% endfor %}
+          </select>
+          <button type="submit" class="btn">Sinf/Bo'lim ochish</button>
+        </form>
+      {% endif %}
+      <div class="table-wrap">
+<table>
+        <tr><th>{{ 'Kurs' if org['org_type']=='texnikum' else 'Sinf/Bo\'lim' }}</th><th>Ulanish kodi</th></tr>
+        {% for g in classes %}
+          <tr><td>{{ g['name'] }}</td><td>
+            {% if org['is_active'] %}<code>{{ g['join_code'] }}</code>{% else %}<span class="badge warn">tarif faollashgach</span>{% endif %}
+          </td></tr>
+        {% endfor %}
+      </table>
+</div>
+    </div>
+
+    <div class="card">
+      <h2>O'qituvchi/O'quvchi qo'shilishi</h2>
+      <p style="font-size:13px;color:#a1a1c0;">
+        Endi o'qituvchi va o'quvchilar ADMIN TOMONIDAN qo'shilmaydi —
+        ular O'ZLARI quyidagi havola (yoki ulanish kodi) orqali ro'yxatdan
+        o'tib, login va parolni o'zlari tanlaydi (tashkilotingiz avtomatik
+        biriktiriladi).
+      </p>
+      {% if teacher_status %}
+        <p style="font-size:13px;color:#a1a1c0;">
+          O'qituvchi limiti: {{ teacher_status.reason }}
+          {% if teacher_status.cost %}<span class="badge warn">keyingisi uchun {{ teacher_status.cost }} coin kerak</span>{% endif %}
+        </p>
+      {% endif %}
+      {% if student_status %}
+        <p style="font-size:13px;color:#a1a1c0;">
+          O'quvchi limiti: {{ student_status.reason }}
+          {% if student_status.cost %}<span class="badge warn">keyingisi uchun {{ student_status.cost }} coin kerak</span>{% endif %}
+        </p>
+      {% endif %}
+      {% if org['is_active'] and org['connect_code'] %}
+        <p>Markaz ulanish kodi:<br>
+          <code style="font-size:1.2em;">{{ org['connect_code'] }}</code></p>
+        <p>O'qituvchi uchun havola:<br>
+          <code>{{ request.host_url.rstrip('/') }}{{ url_for('edu_orgs.register_teacher_page', org_id=org['id'], code=org['connect_code']) }}</code></p>
+        <p>O'quvchi uchun havola:<br>
+          <code>{{ request.host_url.rstrip('/') }}{{ url_for('edu_orgs.register_student_page', org_id=org['id'], code=org['connect_code']) }}</code></p>
+      {% else %}
+        <p class="badge warn">
+          Ulanish kodi hali yo'q — avval tarif sotib oling va faollashtiring,
+          shundan keyingina kod paydo bo'ladi va o'qituvchi/o'quvchilar ulana oladi.
+        </p>
+        <a href="{{ url_for('edu_orgs.tariffs_page') }}" class="btn secondary">Tariflar sahifasi</a>
+      {% endif %}
+    </div>
+  </div>
+
+
+  <div class="grid-2">
+    <div class="card">
+      <h2>O'qituvchilar ({{ teachers|length }})</h2>
+      <div class="table-wrap">
+<table>
+        <tr><th>ID</th><th>F.I.</th><th>Login</th><th>Coin</th></tr>
+        {% for t in teachers %}
+        <tr><td>{{ t['teacher_number'] }}</td><td>{{ t['familiya'] }} {{ t['ism'] }}</td>
+            <td>{{ t['full_login'] }}</td><td>{{ t['coin_balance'] }}</td></tr>
+        {% endfor %}
+      </table>
+</div>
+    </div>
+    <div class="card">
+      <h2>O'quvchilar ({{ students|length }})</h2>
+      <div class="table-wrap">
+<table>
+        <tr><th>ID</th><th>F.I.</th><th>Login</th><th>Coin</th></tr>
+        {% for s in students %}
+        <tr><td>{{ s['student_number'] }}</td><td>{{ s['familiya'] }} {{ s['ism'] }}</td>
+            <td>{{ s['full_login'] }}</td><td>{{ s['coin_balance'] }}</td></tr>
+        {% endfor %}
+      </table>
+</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>Pro Laboratoriyalar</h2>
+    {% if labs %}
+      <div class="table-wrap">
+<table>
+        <tr><th>Nomi</th><th>Kategoriya</th><th>Qiyinlik</th></tr>
+        {% for l in labs %}
+        <tr><td>{{ l['title'] }}</td><td>{{ l['category'] }}</td><td>{{ l['difficulty'] }}</td></tr>
+        {% endfor %}
+      </table>
+</div>
+    {% else %}
+      <p style="color:#a1a1c0;">{{ labs_reason }}</p>
+    {% endif %}
+  </div>
+</div>
+</body></html>

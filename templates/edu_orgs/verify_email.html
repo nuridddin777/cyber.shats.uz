@@ -1,0 +1,39 @@
+{% import "edu_orgs/_shared.html" as shared %}
+<!DOCTYPE html>
+<html lang="uz"><head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Emailni tasdiqlash — SHATS CYBER EDU</title>
+</head><body>
+{% include "edu_orgs/_shared.html" %}
+<div class="container" style="max-width:520px;">
+  <div class="top-nav">
+    <div class="brand">SHATS CYBER <span>EDU</span></div>
+    <form method="POST" action="{{ url_for('edu_orgs.logout') }}"><input type="hidden" name="csrf_token" value="{{ csrf_token }}"><button class="btn secondary">Chiqish</button></form>
+  </div>
+
+  <div class="card">
+    <h1>Emailni tasdiqlang</h1>
+    <p style="color:#a1a1c0;">
+      <b>{{ org['email'] }}</b> manziliga 6 xonali tasdiqlash kodi yuborildi.
+      Davom etish uchun kodni quyida kiriting. (Agar SMTP sozlanmagan bo'lsa,
+      kod server konsoliga chiqariladi.)
+    </p>
+
+    {{ shared.flashes() }}
+    {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+
+    <form method="POST" action="{{ url_for('edu_orgs.verify_email_page') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <label>Tasdiqlash kodi <span style="color:#ff4444;">*</span></label>
+      <input type="text" name="code" placeholder="masalan: 123456" pattern="[0-9]{6}" maxlength="6"
+             inputmode="numeric" autofocus required>
+      <button type="submit" class="btn">Tasdiqlash</button>
+    </form>
+
+    <form method="POST" action="{{ url_for('edu_orgs.verify_email_resend') }}" style="margin-top:10px;">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token }}">
+      <button type="submit" class="btn secondary">Kodni qayta yuborish</button>
+    </form>
+  </div>
+</div>
+</body></html>

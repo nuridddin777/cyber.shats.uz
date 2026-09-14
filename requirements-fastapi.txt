@@ -1,0 +1,8 @@
+# CYBER SHATS — Phase 1 (FastAPI + clean architecture migration)
+# Not yet used in production; needed only to run fastapi_app/main.py locally.
+# Install alongside requirements.txt:  pip install -r requirements.txt -r requirements-fastapi.txt
+
+fastapi==0.141.1
+uvicorn==0.52.4
+a2wsgi==1.10.10
+httpx==0.28.1

@@ -1,0 +1,138 @@
+/* ============================================================
+   CYBER SHATS — APP SHELL (sidebar + topbar), barcha ichki sahifalar
+   ============================================================ */
+/* DIQQAT: bu yerda AVVAL "z-index: 1;" bor edi — bu .app-shell'ni YANGI
+   "stacking context" qilib qo'yardi, natijada ichidagi .cs-sidebar (fixed,
+   z-index:200) chindan ham FAQAT .app-shell ICHIDA 200-o'ринда turardi,
+   lekin body::after qorong'i parda (z-index:199) <body> ga TO'G'RIDAN-TO'G'RI
+   biriktirilgani uchun ROOT darajada edi va .app-shell'ning o'zi (root
+   darajada atigi z-index:1) ustidan chiqib, BUTUN sidebar'ni (tugmalari
+   bilan birga) yopib qo'yardi — shuning uchun mobilda menyu tugmalari
+   "bosilmas" edi (aslida bosilardi, lekin parda ostida ko'rinmas edi).
+   z-index olib tashlandi — endi .cs-sidebar to'g'ridan-to'g'ri ROOT
+   darajada raqobatlashadi va pardadan yuqorida chiqadi. */
+.app-shell { display: flex; min-height: 100vh; position: relative; }
+
+.cs-sidebar {
+    width: var(--cs-sidebar-w); min-height: 100vh; background: var(--cs-grad-sidebar);
+    display: flex; flex-direction: column; position: fixed; top: 0; left: 0; height: 100vh; z-index: 200;
+    border-right: 1px solid var(--cs-border); overflow-y: auto;
+}
+.cs-sidebar .logo { padding: 10px 14px; border-bottom: 1px solid var(--cs-border); font-family: var(--cs-font-display); font-size:16px; color: var(--cs-text-primary); display:flex; align-items:center; gap:8px;}
+.cs-sidebar .logo .logo-mark { width:22px; height:22px; flex-shrink:0;}
+.cs-sidebar .logo span { color: var(--cs-text-cyan); display:block; font-size:8.5px; letter-spacing:2px; font-family: var(--cs-font-mono); text-transform: none;}
+
+.cs-nav { flex: 1; padding: 4px 0; overflow-y: auto; overflow-x: hidden; }
+.cs-nav-item {
+    display:flex; align-items:center; gap:6px; padding: 5px 12px; color: var(--cs-text-muted);
+    cursor:pointer; transition: all .2s; font-size: 10.5px; letter-spacing: 0.5px; text-transform: uppercase;
+    text-decoration:none; border-left: 2px solid transparent;
+}
+.cs-nav-item svg { width:14px; height:14px; flex-shrink:0; }
+.cs-nav-item:hover, .cs-nav-item.active { color: var(--cs-text-primary); background: rgba(255,59,59,0.06); border-left-color: var(--cs-text-primary); }
+.cs-nav-item.logout { color: var(--cs-text-red); border-top: 1px solid var(--cs-border); margin-top: 6px; }
+.cs-nav-item.logout:hover { background: rgba(255,0,0,0.06); border-left-color: var(--cs-text-red); }
+.cs-nav-foot { padding: 8px 14px; border-top: 1px solid var(--cs-border); display:flex; align-items:center; gap:10px;}
+.cs-nav-foot img, .cs-nav-foot .avatar-fallback { width:34px; height:34px; border-radius:50%; object-fit:cover; border:1px solid var(--cs-border-active);}
+.cs-nav-foot .who { font-size:12px; color: var(--cs-text-white); line-height:1.3;}
+.cs-nav-foot .who small { color: var(--cs-text-muted); font-size:10px; text-transform:uppercase;}
+
+.app-main { flex:1; margin-left: var(--cs-sidebar-w); min-height:100vh; padding: 0 0 60px 0; position:relative; z-index:1;}
+
+.app-topbar { display:flex; align-items:center; justify-content: space-between; padding: 16px 28px; border-bottom: 1px solid var(--cs-border); gap:16px; flex-wrap:wrap;}
+.app-topbar .search-box { flex:1; max-width: 360px; position:relative;}
+.app-topbar .search-box input { width:100%; background: var(--cs-bg-input); border:1px solid var(--cs-border); color: var(--cs-text-white); padding:9px 14px 9px 34px; border-radius: var(--cs-radius); font-family: var(--cs-font-mono); font-size:12px;}
+.app-topbar .search-box svg { position:absolute; left:11px; top:50%; transform:translateY(-50%); width:14px; height:14px; color: var(--cs-text-muted);}
+.app-topbar .icon-btn { width:34px; height:34px; border:1px solid var(--cs-border); border-radius: var(--cs-radius); display:flex; align-items:center; justify-content:center; color: var(--cs-text-muted); cursor:pointer; position:relative; background:transparent;}
+.app-topbar .icon-btn:hover { color: var(--cs-text-primary); border-color: var(--cs-border-active);}
+.app-topbar .icon-btn .badge-dot { position:absolute; top:-4px; right:-4px; background: var(--cs-text-red); color:#fff; font-size:9px; width:15px; height:15px; border-radius:50%; display:flex; align-items:center; justify-content:center; }
+.app-topbar .user-chip { display:flex; align-items:center; gap:8px; }
+.app-topbar .user-chip img, .app-topbar .user-chip .avatar-fallback { width:32px; height:32px; border-radius:50%; border:1px solid var(--cs-border-active); object-fit:cover;}
+.app-content { padding: 24px 28px; }
+
+.mobile-topbar { display:none; align-items:center; justify-content:space-between; padding: 14px 16px; border-bottom:1px solid var(--cs-border); position:sticky; top:0; background: var(--cs-bg-primary); z-index:150;}
+.mobile-topbar .logo { font-family: var(--cs-font-display); color: var(--cs-text-primary); font-size:15px;}
+.mobile-toggle { background:none; border:1px solid var(--cs-border); color: var(--cs-text-primary); width:34px; height:34px; border-radius:4px; }
+
+@media (max-width: 900px) {
+    .cs-sidebar { transform: translateX(-100%); transition: transform .3s ease; box-shadow: 0 0 40px rgba(0,0,0,0.8); }
+    .cs-sidebar.open { transform: translateX(0); }
+    .app-main { margin-left: 0; }
+    .mobile-topbar { display:flex; }
+    .app-topbar .search-box { display:none; }
+    .app-content { padding: 18px 14px; }
+    body.sidebar-open::after { content:''; position:fixed; inset:0; background: rgba(0,0,0,0.6); z-index:190; }
+}
+
+/* Mobil qurilmalarda sidebar — kuchaytirilgan */
+@media (max-width: 900px) {
+    .cs-sidebar {
+        position: fixed !important;
+        top: 0; left: 0; bottom: 0;
+        z-index: 200 !important;
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+        width: var(--cs-sidebar-w) !important;
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+    .cs-sidebar.open {
+        transform: translateX(0) !important;
+        box-shadow: 4px 0 30px rgba(0,0,0,0.8);
+    }
+    .app-main { margin-left: 0 !important; }
+
+    /* Overlay */
+    body.sidebar-open::after {
+        content: '';
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.65);
+        z-index: 199;
+        backdrop-filter: blur(2px);
+    }
+
+    /* Topbar tugmasi doimo ko'rinsin */
+    .mobile-topbar {
+        display: flex !important;
+        position: sticky;
+        top: 0;
+        z-index: 150;
+        background: var(--cs-bg-primary);
+    }
+
+    /* App content full width */
+    .app-content {
+        padding: 12px 10px !important;
+        min-height: calc(100vh - 60px);
+    }
+
+    /* Grid'lar mobilga moslashish */
+    .grid.grid-4 { grid-template-columns: 1fr 1fr !important; }
+    .grid.grid-3 { grid-template-columns: 1fr !important; }
+}
+
+@media (max-width: 480px) {
+    .grid.grid-4 { grid-template-columns: 1fr 1fr !important; }
+    .grid.grid-3, .grid.grid-2 { grid-template-columns: 1fr !important; }
+
+    /* Trading paneli mobilda */
+    .grid[style*="1fr 295px"],
+    .grid[style*="1fr 300px"],
+    .grid[style*="1fr 280px"] {
+        grid-template-columns: 1fr !important;
+    }
+}
+
+/* ============================================================
+   MOBIL — TZ 6-bosqich: qulay bosish maydoni va accordion moslashuvi
+   ============================================================ */
+@media (max-width: 900px) {
+    /* Amaliy bosish maydoni sal kattaroq, lekin baribir ekranga sig'ishi kerak */
+    .cs-nav-item { padding-top: 7px; padding-bottom: 7px; font-size: 11px; }
+    .nav-group-summary { padding: 8px 14px; font-size: 11.5px; }
+    .nav-group-body .cs-nav-item { padding-top: 6px; padding-bottom: 6px; }
+
+    /* Profil bo'limi va footer ham mos ravishda kattalashadi */
+    .cs-nav-profile-group .cs-nav-item { padding-top: 7px; padding-bottom: 7px; }
+}
